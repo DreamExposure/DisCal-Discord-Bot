@@ -8,15 +8,14 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.AnnouncementCache
 import org.dreamexposure.discal.AnnouncementWizardStateCache
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.AnnouncementData
 import org.dreamexposure.discal.core.database.AnnouncementRepository
-import org.dreamexposure.discal.core.entities.Calendar
-import org.dreamexposure.discal.core.entities.Event
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.messageContentSafe
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Announcement
 import org.dreamexposure.discal.core.`object`.new.AnnouncementWizardState
+import org.dreamexposure.discal.core.`object`.new.Event
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
@@ -31,11 +30,14 @@ class AnnouncementService(
     private val announcementCache: AnnouncementCache,
     private val announcementWizardStateCache: AnnouncementWizardStateCache,
     private val embedService: EmbedService,
+    private val calendarService: CalendarService,
     private val metricService: MetricService,
     private val beanFactory: BeanFactory,
 ) {
     private val discordClient: DiscordClient
         get() = beanFactory.getBean()
+
+    private val PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT = Config.ANNOUNCEMENT_PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT.getInt()
 
     suspend fun createAnnouncement(announcement: Announcement): Announcement {
         val saved = announcementRepository.save(AnnouncementData(
@@ -203,49 +205,39 @@ class AnnouncementService(
         val taskTimer = StopWatch()
         taskTimer.start()
 
-        val guild = discordClient.getGuildById(guildId)
-        val calendars: MutableSet<Calendar> = mutableSetOf()
+        // Since we currently can't look up upcoming events from cache cuz I dunno how, we just hold in very temporary and scoped memory at least
         val events: MutableMap<Int, List<Event>> = mutableMapOf()
 
         // TODO: Need to break this out to add handling for modifiers
         getAllAnnouncements(guildId, returnDisabled = false).forEach { announcement ->
-            // Get the calendar
-            var calendar = calendars.firstOrNull { it.calendarNumber == announcement.calendarNumber }
-            if (calendar == null) {
-                calendar = guild.getCalendar(announcement.calendarNumber).awaitSingleOrNull() ?: return@forEach
-                calendars.add(calendar)
-            }
-
             // Handle specific type first, since we don't need to fetch all events for this
             if (announcement.type == Announcement.Type.SPECIFIC) {
-                val event = calendar.getEvent(announcement.eventId!!).awaitSingleOrNull() ?: return@forEach
+                val event = calendarService.getEvent(guildId, announcement.calendarNumber, announcement.eventId!!) ?: return@forEach
                 if (isInRange(announcement, event, maxDifference)) {
                     sendAnnouncement(announcement, event)
                 }
             }
 
             // Get the events to filter through
-            var filteredEvents = events[calendar.calendarNumber]
+            var filteredEvents = events[announcement.calendarNumber]
             if (filteredEvents == null) {
-                filteredEvents = calendar.getUpcomingEvents(20)
-                    .collectList()
-                    .awaitSingle()
-                events[calendar.calendarNumber] = filteredEvents
+                filteredEvents = calendarService.getUpcomingEvents(guildId, announcement.calendarNumber, PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT)
+                events[announcement.calendarNumber] = filteredEvents
             }
 
             // Handle filtering out events based on this announcement's types
             if (announcement.type == Announcement.Type.COLOR) {
-                filteredEvents = filteredEvents?.filter { it.color == announcement.eventColor }
+                filteredEvents = filteredEvents.filter { it.color == announcement.eventColor }
             } else if (announcement.type == Announcement.Type.RECUR) {
                 filteredEvents = filteredEvents
-                    ?.filter { it.eventId.contains("_") }
-                    ?.filter { it.eventId.split("_")[0] == announcement.eventId }
+                    .filter { it.id.contains("_") }
+                    .filter { it.id.split("_")[0] == announcement.eventId }
             }
 
             // Loop through filtered events and post any announcements in range
             filteredEvents
-                ?.filter { isInRange(announcement, it, maxDifference) }
-                ?.forEach { sendAnnouncement(announcement, it) }
+                .filter { isInRange(announcement, it, maxDifference) }
+                .forEach { sendAnnouncement(announcement, it) }
 
         }
 

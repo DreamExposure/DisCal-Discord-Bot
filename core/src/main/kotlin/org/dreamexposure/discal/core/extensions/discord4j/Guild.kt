@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono
 //Calendars
 
 
+
 fun Guild.determineNextCalendarNumber(): Mono<Int> = getRestGuild().determineNextCalendarNumber()
 
 /**
@@ -19,6 +20,7 @@ fun Guild.determineNextCalendarNumber(): Mono<Int> = getRestGuild().determineNex
  * @return A [Mono] containing the [Calendar] with the supplied index, if it does not exist, [empty][Mono.empty] is
  * returned.
  */
+@Deprecated("Prefer to use new CalendarService")
 fun Guild.getCalendar(calNumber: Int): Mono<Calendar> = getRestGuild().getCalendar(calNumber)
 
 /**
@@ -28,6 +30,7 @@ fun Guild.getCalendar(calNumber: Int): Mono<Calendar> = getRestGuild().getCalend
  * @param spec The instructions for creating the [Calendar]
  * @return A [Mono] containing the newly created [Calendar]
  */
+@Deprecated("Prefer to use new CalendarService")
 fun Guild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> = getRestGuild().createCalendar(spec)
 
 fun Guild.getRestGuild(): RestGuild {

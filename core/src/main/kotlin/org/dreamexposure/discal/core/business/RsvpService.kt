@@ -22,6 +22,7 @@ class RsvpService(
     private val rsvpRepository: RsvpRepository,
     private val rsvpCache: RsvpCache,
     private val embedService: EmbedService,
+    private val calendarService: CalendarService,
     private val beanFactory: BeanFactory,
 ) {
     private val discordClient: DiscordClient
@@ -78,11 +79,11 @@ class RsvpService(
 
         // Validate that role exists if changed
         if (new.role != null && old.role != new.role) {
-            val exists = discordClient.getRoleById(new.guildId, new.role!!).data
+            val exists = discordClient.getRoleById(new.guildId, new.role).data
                 .transform(ClientException.emptyOnStatus(GlobalVal.STATUS_NOT_FOUND))
                 .hasElement()
                 .awaitSingle()
-            if (!exists) throw NotFoundException("Role not found for guild:${new.guildId.asString()} role:${new.role!!.asString()}")
+            if (!exists) throw NotFoundException("Role not found for guild:${new.guildId.asString()} role:${new.role.asString()}")
         }
 
         // Handle role change (remove roles, store to-add in list for later)
@@ -170,8 +171,10 @@ class RsvpService(
         }
 
         // Send out DMs
+        val event = calendarService.getEvent(rsvp.guildId, rsvp.calendarNumber, rsvp.eventId) ?: throw RuntimeException("This really should just not be possible lmao")
+
         toDm.forEach { userId ->
-            val embed = embedService.rsvpDmFollowupEmbed(new, userId)
+            val embed = embedService.rsvpDmFollowupEmbed(new, event, userId)
 
             discordClient.getUserById(userId).privateChannel.flatMap { channelData ->
                 discordClient.getChannelById(Snowflake.of(channelData.id()))

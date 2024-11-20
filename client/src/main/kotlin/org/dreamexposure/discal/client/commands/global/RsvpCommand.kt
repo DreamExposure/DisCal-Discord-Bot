@@ -5,12 +5,11 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
+import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
 import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.business.RsvpService
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
@@ -22,6 +21,7 @@ class RsvpCommand(
     private val rsvpService: RsvpService,
     private val embedService: EmbedService,
     private val permissionService: PermissionService,
+    private val calendarService: CalendarService,
 ) : SlashCommand {
     override val name = "rsvp"
     override val hasSubcommands = true
@@ -54,9 +54,8 @@ class RsvpCommand(
             .get()
 
         val userId = event.interaction.user.id
-        val guild = event.interaction.guild.awaitSingle()
-        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
-        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
         if (calendar == null)
@@ -72,7 +71,7 @@ class RsvpCommand(
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
-        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+        var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
         return if (rsvp.hasRoom(userId)) {
             rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, goingOnTime = rsvp.goingOnTime + userId))
@@ -103,9 +102,8 @@ class RsvpCommand(
             .get()
 
         val userId = event.interaction.user.id
-        val guild = event.interaction.guild.awaitSingle()
-        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
-        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
         if (calendar == null)
@@ -121,7 +119,7 @@ class RsvpCommand(
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
-        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+        var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
         return if (rsvp.hasRoom(userId)) {
             rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, goingLate = rsvp.goingLate + userId))
@@ -152,9 +150,8 @@ class RsvpCommand(
             .get()
 
         val userId = event.interaction.user.id
-        val guild = event.interaction.guild.awaitSingle()
-        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
-        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
         if (calendar == null)
@@ -170,7 +167,7 @@ class RsvpCommand(
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
-        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+        var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
         rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, undecided = rsvp.undecided + userId))
 
@@ -192,9 +189,8 @@ class RsvpCommand(
             .get()
 
         val userId = event.interaction.user.id
-        val guild = event.interaction.guild.awaitSingle()
-        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
-        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
         if (calendar == null)
@@ -210,7 +206,7 @@ class RsvpCommand(
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
-        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+        var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
         rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, notGoing = rsvp.notGoing + userId))
 
@@ -232,9 +228,8 @@ class RsvpCommand(
             .get()
 
         val userId = event.interaction.user.id
-        val guild = event.interaction.guild.awaitSingle()
-        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
-        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
         if (calendar == null)
@@ -250,7 +245,7 @@ class RsvpCommand(
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
-        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+        var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
         rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId))
 
@@ -271,9 +266,8 @@ class RsvpCommand(
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        val guild = event.interaction.guild.awaitSingle()
-        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
-        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
         if (calendar == null)
@@ -285,7 +279,7 @@ class RsvpCommand(
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
-        val rsvp = rsvpService.getRsvp(guild.id, eventId)
+        val rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
         return event.createFollowup()
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
@@ -319,9 +313,8 @@ class RsvpCommand(
                 .awaitSingle()
 
 
-        val guild = event.interaction.guild.awaitSingle()
-        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
-        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
         if (calendar == null)
@@ -337,7 +330,7 @@ class RsvpCommand(
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
-        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+        var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
         rsvp = rsvpService.upsertRsvp(rsvp.copy(limit = limit))
 
 
@@ -374,9 +367,8 @@ class RsvpCommand(
                 .withEphemeral(ephemeral)
                 .awaitSingle()
 
-        val guild = event.interaction.guild.awaitSingle()
-        val calendar = guild.getCalendar(calendarNumber).awaitSingleOrNull()
-        val calendarEvent = calendar?.getEvent(eventId)?.awaitSingleOrNull()
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
         if (calendar == null)
@@ -393,7 +385,7 @@ class RsvpCommand(
                 .awaitSingle()
 
 
-        var rsvp = rsvpService.getRsvp(guild.id, eventId)
+        var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
         rsvp = rsvpService.upsertRsvp(rsvp.copy(role = if (role.isEveryone) null else role.id))
 
         val embed = embedService.rsvpListEmbed(calendarEvent, rsvp, settings)

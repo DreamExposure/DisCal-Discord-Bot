@@ -40,7 +40,7 @@ class GoogleCalendarProviderService(
         return Calendar(
             metadata = metadata,
             name = response.entity.summary.orEmpty(),
-            description = response.entity.description,
+            description = response.entity.description.orEmpty(),
             timezone = ZoneId.of(response.entity.timeZone),
             hostLink = "https://calendar.google.com/calendar/embed?src=${metadata.id}"
         )
@@ -87,7 +87,7 @@ class GoogleCalendarProviderService(
         return Calendar(
             metadata = metadata,
             name = response.entity.summary.orEmpty(),
-            description = response.entity.description,
+            description = response.entity.description.orEmpty(),
             timezone = ZoneId.of(response.entity.timeZone),
             hostLink = "https://calendar.google.com/calendar/embed?src=${response.entity.id}",
         )

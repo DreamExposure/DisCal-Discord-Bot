@@ -16,6 +16,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
+@Deprecated("Prefer to use new.Event via the new CalendarService")
 interface Event {
     /**
      * The ID of the event.

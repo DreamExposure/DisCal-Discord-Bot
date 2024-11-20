@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.core.extensions
 
-import org.dreamexposure.discal.core.entities.Event
+import org.dreamexposure.discal.core.`object`.new.Event
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
@@ -23,7 +23,7 @@ fun MutableList<String>.setFromString(strList: String) {
     this += strList.split(",").filter(String::isNotBlank)
 }
 
-fun MutableList<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
+fun List<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
     if (this.isEmpty()) return emptyMap()
 
     // Get a list of all distinct days events take place on (the first start date and the last end date)
@@ -41,33 +41,6 @@ fun MutableList<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
         current = current.plusDays(1)
         days.add(current)
     }
-
-    /*
-    // First get a list of distinct dates each event starts on
-    var rawDates = this.map {
-        ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
-            .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
-    }.toList()
-
-    // Add days for multi-day events including end dates
-    rawDates = rawDates.plus(this.asSequence().filter {
-        it.isMultiDay()
-    }.map {
-        val start = ZonedDateTime.ofInstant(it.start, it.timezone).truncatedTo(ChronoUnit.DAYS)
-            .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
-        val end = ZonedDateTime.ofInstant(it.end, it.timezone).truncatedTo(ChronoUnit.DAYS)
-            .with(TemporalAdjusters.ofDateAdjuster { identity -> identity })
-
-        val days = listOf<ZonedDateTime>()
-        var current = start
-        while (current.isBefore(end)) {
-            current = current.plusDays(1)
-            days.plus(current)
-        }
-
-        days
-    }.flatten())
-     */
 
     // Sort dates
     val sortedDates = days.distinct().sorted().toList()

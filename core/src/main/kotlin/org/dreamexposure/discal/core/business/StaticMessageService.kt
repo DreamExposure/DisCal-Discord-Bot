@@ -8,10 +8,10 @@ import discord4j.rest.http.client.ClientException
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.StaticMessageCache
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.StaticMessageData
 import org.dreamexposure.discal.core.database.StaticMessageRepository
 import org.dreamexposure.discal.core.exceptions.NotFoundException
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.`object`.new.StaticMessage
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
@@ -26,7 +26,7 @@ import java.time.temporal.ChronoUnit
 class StaticMessageService(
     private val staticMessageRepository: StaticMessageRepository,
     private val staticMessageCache: StaticMessageCache,
-    private val settingsService: GuildSettingsService,
+    private val calendarService: CalendarService,
     private val embedService: EmbedService,
     private val componentService: ComponentService,
     private val metricService: MetricService,
@@ -34,6 +34,7 @@ class StaticMessageService(
 ) {
     private val discordClient: DiscordClient
         get() = beanFactory.getBean()
+    private val OVERVIEW_EVENT_COUNT = Config.CALENDAR_OVERVIEW_DEFAULT_EVENT_COUNT.getInt()
 
     suspend fun getStaticMessageCount() = staticMessageRepository.count().awaitSingle()
 
@@ -75,11 +76,10 @@ class StaticMessageService(
     ): StaticMessage {
 
         // Gather everything we need
-        val calendar = discordClient.getGuildById(guildId)
-            .getCalendar(calendarNumber)
-            .awaitSingleOrNull() ?: throw NotFoundException("Calendar not found")
+        val calendar = calendarService.getCalendar(guildId, calendarNumber) ?: throw NotFoundException("Calendar not found")
+        val events = calendarService.getUpcomingEvents(guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
         val channel = discordClient.getChannelById(channelId)
-        val embed = embedService.calendarOverviewEmbed(calendar, showUpdate = true)
+        val embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
         val nextUpdate = ZonedDateTime.now(calendar.timezone)
             .truncatedTo(ChronoUnit.DAYS)
             .plusHours(updateHour + 24)
@@ -126,12 +126,11 @@ class StaticMessageService(
             return
         }
 
-        val calendar = discordClient.getGuildById(guildId)
-            .getCalendar(old.calendarNumber)
-            .awaitSingleOrNull() ?: throw NotFoundException("Calendar not found")
+        val calendar = calendarService.getCalendar(guildId, old.calendarNumber) ?: throw NotFoundException("Calendar not found")
+        val events = calendarService.getUpcomingEvents(guildId, old.calendarNumber, OVERVIEW_EVENT_COUNT)
 
         // Finally update the message
-        val embed = embedService.calendarOverviewEmbed(calendar, showUpdate = true)
+        val embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
 
         discordClient.getMessageById(old.channelId, old.messageId).edit(
             MessageEditRequest.builder()
@@ -166,10 +165,9 @@ class StaticMessageService(
         taskTimer.start()
 
         val oldVersions = getStaticMessagesForCalendar(guildId, calendarNumber)
-        val calendar = discordClient.getGuildById(guildId)
-            .getCalendar(calendarNumber)
-            .awaitSingleOrNull() ?: throw NotFoundException("Calendar not found")
-        val embed = embedService.calendarOverviewEmbed(calendar, showUpdate = true)
+        val calendar = calendarService.getCalendar(guildId, calendarNumber) ?: throw NotFoundException("Calendar not found")
+        val events = calendarService.getUpcomingEvents(guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
+        val embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
 
         oldVersions.forEach { old ->
             val existingData = discordClient.getMessageById(old.channelId, old.messageId)

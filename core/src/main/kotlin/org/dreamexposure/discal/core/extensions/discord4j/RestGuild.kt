@@ -9,7 +9,6 @@ import org.dreamexposure.discal.core.entities.Calendar
 import org.dreamexposure.discal.core.entities.google.GoogleCalendar
 import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
-import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.calendar.CalendarData
 import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper
 import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
@@ -17,7 +16,6 @@ import org.dreamexposure.discal.core.wrapper.google.GoogleAuthWrapper
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.Duration
-import java.util.*
 import com.google.api.services.calendar.model.Calendar as GoogleCalendarModel
 
 //Calendars
@@ -34,6 +32,7 @@ fun RestGuild.determineNextCalendarNumber(): Mono<Int> {
  *
  * @return A [Mono] containing this [Guild]'s main [Calendar], if it does not exist, [empty][Mono.empty] is returned.
  */
+@Deprecated("Prefer to use new CalendarService")
 fun RestGuild.getMainCalendar(): Mono<Calendar> = this.getCalendar(1)
 
 /**
@@ -44,6 +43,7 @@ fun RestGuild.getMainCalendar(): Mono<Calendar> = this.getCalendar(1)
  * @return A [Mono] containing the [Calendar] with the supplied index, if it does not exist, [empty][Mono.empty] is
  * returned.
  */
+@Deprecated("Prefer to use new CalendarService")
 fun RestGuild.getCalendar(calNumber: Int): Mono<Calendar> {
     //Check cache first
     val cal = DiscalCache.getCalendar(id, calNumber)
@@ -60,6 +60,7 @@ fun RestGuild.getCalendar(calNumber: Int): Mono<Calendar> {
  *
  * @return A [Flux] containing all the [calendars][Calendar] belonging to this [Guild].
  */
+@Deprecated("Prefer to use new CalendarService")
 fun RestGuild.getAllCalendars(): Flux<Calendar> {
     //check cache first
     val cals = DiscalCache.getAllCalendars(id)
@@ -78,6 +79,7 @@ fun RestGuild.getAllCalendars(): Flux<Calendar> {
  * @param spec The instructions for creating the [Calendar]
  * @return A [Mono] containing the newly created [Calendar]
  */
+@Deprecated("Prefer to use new CalendarService")
 fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
     return Mono.defer {
         when (spec.host) {

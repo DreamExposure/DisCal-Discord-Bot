@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.config
 
+import org.dreamexposure.discal.core.config.Config.entries
 import java.io.FileReader
 import java.util.*
 
@@ -66,6 +67,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
 
     // UI and UX
     EMBED_RSVP_WAITLIST_DISPLAY_LENGTH("bot.ui.embed.rsvp.waitlist.length", 3),
+    CALENDAR_OVERVIEW_DEFAULT_EVENT_COUNT("bot.ui.embed.calendar.overview.event-count", 15),
 
     // Everything else
     SHARD_COUNT("bot.sharding.count"),
@@ -80,6 +82,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
 
     INTEGRATIONS_UPDATE_BOT_LIST_SITES("bot.integrations.update-bot-sites", false),
 
+    ANNOUNCEMENT_PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT("bot.announcement.process-global-default-upcoming-events", 30),
 
     ;
 

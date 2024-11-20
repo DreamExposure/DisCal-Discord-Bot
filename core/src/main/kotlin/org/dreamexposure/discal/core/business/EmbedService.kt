@@ -7,17 +7,11 @@ import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.entities.Calendar
-import org.dreamexposure.discal.core.entities.Event
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
 import org.dreamexposure.discal.core.extensions.*
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
-import org.dreamexposure.discal.core.`object`.new.Announcement
-import org.dreamexposure.discal.core.`object`.new.GuildSettings
+import org.dreamexposure.discal.core.`object`.new.*
 import org.dreamexposure.discal.core.`object`.new.GuildSettings.AnnouncementStyle.*
-import org.dreamexposure.discal.core.`object`.new.Rsvp
-import org.dreamexposure.discal.core.`object`.new.WizardState
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.dreamexposure.discal.core.utils.getEmbedMessage
@@ -108,15 +102,12 @@ class EmbedService(
     /////////////////////////////
     ////// Calendar Embeds //////
     /////////////////////////////
-    suspend fun calendarOverviewEmbed(calendar: Calendar, showUpdate: Boolean): EmbedCreateSpec {
-        val settings = settingsService.getSettings(calendar.guildId)
+    suspend fun calendarOverviewEmbed(calendar: Calendar, events: List<Event>, showUpdate: Boolean): EmbedCreateSpec {
+        val settings = settingsService.getSettings(calendar.metadata.guildId)
         val builder = defaultEmbedBuilder(settings)
 
-        // Get the events to build the overview
-        val events = calendar.getUpcomingEvents(15)
-            .collectList()
-            .map { it.groupByDate() }
-            .awaitSingle()
+        // Get events sorted and grouped
+        val groupedEvents = events.groupByDate()
 
         //Handle optional fields
         if (calendar.name.isNotBlank())
@@ -126,7 +117,7 @@ class EmbedService(
 
         // Truncate dates to 23 due to discord enforcing the field limit
         val truncatedEvents = mutableMapOf<ZonedDateTime, List<Event>>()
-        for (event in events) {
+        for (event in groupedEvents) {
             if (truncatedEvents.size < 23) {
                 truncatedEvents[event.key] = event.value
             } else break
@@ -171,7 +162,7 @@ class EmbedService(
                 }
                 // Display name or ID if not set
                 if (it.name.isNotBlank()) content.append(it.name)
-                else content.append(getEmbedMessage("calendar", "link.field.id", settings.locale)).append(" ${it.eventId}")
+                else content.append(getEmbedMessage("calendar", "link.field.id", settings.locale)).append(" ${it.id}")
                 content.append("\n")
                 if (it.location.isNotBlank()) content.append("    Location: ")
                     .append(it.location.embedFieldSafe())
@@ -193,22 +184,20 @@ class EmbedService(
         } else builder.footer(getEmbedMessage("calendar", "link.footer.default", settings.locale), null)
 
         // finish and return
-        return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings.locale), calendar.zoneName, true)
-            .addField(getEmbedMessage("calendar", "link.field.number", settings.locale), "${calendar.calendarNumber}", true)
+        return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings.locale), calendar.timezone.id, true)
+            .addField(getEmbedMessage("calendar", "link.field.number", settings.locale), "${calendar.metadata.number}", true)
             .url(calendar.link)
             .color(GlobalVal.discalColor)
             .build()
     }
 
-    suspend fun linkCalendarEmbed(guildId: Snowflake, calendarNumber: Int, overview: Boolean): EmbedCreateSpec {
-        val settings = settingsService.getSettings(guildId)
-        val calendar = discordClient.getGuildById(settings.guildId).getCalendar(calendarNumber).awaitSingle()
-        return if (overview) calendarOverviewEmbed(calendar, showUpdate = false)
+    suspend fun linkCalendarEmbed(calendar: Calendar, events: List<Event>?): EmbedCreateSpec {
+        return if (events != null) calendarOverviewEmbed(calendar, events, showUpdate = false)
         else linkCalendarEmbed(calendar)
     }
 
     suspend fun linkCalendarEmbed(calendar: Calendar): EmbedCreateSpec {
-        val settings = settingsService.getSettings(calendar.guildId)
+        val settings = settingsService.getSettings(calendar.metadata.guildId)
         val builder = defaultEmbedBuilder(settings)
 
         //Handle optional fields
@@ -217,10 +206,10 @@ class EmbedService(
         if (calendar.description.isNotBlank())
             builder.description(calendar.description.toMarkdown().embedDescriptionSafe())
 
-        return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings.locale), calendar.zoneName, false)
-            .addField(getEmbedMessage("calendar", "link.field.host", settings.locale), calendar.calendarData.host.name, true)
-            .addField(getEmbedMessage("calendar", "link.field.number", settings.locale), "${calendar.calendarNumber}", true)
-            .addField(getEmbedMessage("calendar", "link.field.id", settings.locale), calendar.calendarId, false)
+        return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings.locale), calendar.timezone.id, false)
+            .addField(getEmbedMessage("calendar", "link.field.host", settings.locale), calendar.metadata.host.name, true)
+            .addField(getEmbedMessage("calendar", "link.field.number", settings.locale), "${calendar.metadata.number}", true)
+            .addField(getEmbedMessage("calendar", "link.field.id", settings.locale), calendar.metadata.id, false)
             .url(calendar.link)
             .footer(getEmbedMessage("calendar", "link.footer.default", settings.locale), null)
             .color(GlobalVal.discalColor)
@@ -234,7 +223,7 @@ class EmbedService(
         return defaultEmbedBuilder(settings)
             .title(getEmbedMessage("time", "embed.title", settings.locale))
             .addField(getEmbedMessage("time", "embed.field.current", settings.locale), formattedTime, true)
-            .addField(getEmbedMessage("time", "embed.field.timezone", settings.locale), calendar.zoneName, true)
+            .addField(getEmbedMessage("time", "embed.field.timezone", settings.locale), calendar.timezone.id, true)
             .addField(getEmbedMessage("time", "embed.field.local", settings.locale), formattedLocal, false)
             .footer(getEmbedMessage("time", "embed.footer", settings.locale), null)
             .url(calendar.link)
@@ -245,12 +234,10 @@ class EmbedService(
     /////////////////////////
     ////// RSVP Embeds //////
     /////////////////////////
-    suspend fun rsvpDmFollowupEmbed(rsvp: Rsvp, userId: Snowflake): EmbedCreateSpec {
+    suspend fun rsvpDmFollowupEmbed(rsvp: Rsvp, event: Event, userId: Snowflake): EmbedCreateSpec {
         val restGuild = discordClient.getGuildById(rsvp.guildId)
         val guildData = restGuild.data.awaitSingle()
         val settings = settingsService.getSettings(rsvp.guildId)
-        val event = restGuild.getCalendar(rsvp.calendarNumber)
-            .flatMap { it.getEvent(rsvp.eventId) }.awaitSingle()
 
 
         val iconUrl = if (guildData.icon().isPresent)
@@ -270,7 +257,7 @@ class EmbedService(
                 getEmbedMessage("rsvp", "waitlist.field.end", settings.locale),
                 event.end.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
                 true
-            ).footer(getEmbedMessage("rsvp", "waitlist.footer", settings.locale, event.eventId), null)
+            ).footer(getEmbedMessage("rsvp", "waitlist.footer", settings.locale, event.id), null)
 
         if (event.location.isNotBlank()) builder.addField(
             getEmbedMessage("rsvp", "waitlist.field.location", settings.locale),
@@ -401,10 +388,10 @@ class EmbedService(
 
         builder.addField(
             getEmbedMessage("announcement", "full.field.calendar", settings.locale),
-            "${event.calendar.calendarNumber}",
+            "${event.calendarNumber}",
             true
         )
-        builder.addField(getEmbedMessage("announcement", "full.field.event", settings.locale), event.eventId, true)
+        builder.addField(getEmbedMessage("announcement", "full.field.event", settings.locale), event.id, true)
 
         if (event.image.isNotBlank())
             builder.image(event.image)
@@ -491,10 +478,10 @@ class EmbedService(
 
         builder.addField(
             getEmbedMessage("announcement", "event.field.calendar", settings.locale),
-            "${event.calendar.calendarNumber}",
+            "${event.calendarNumber}",
             true
         )
-        builder.addField(getEmbedMessage("announcement", "event.field.event", settings.locale), event.eventId, true)
+        builder.addField(getEmbedMessage("announcement", "event.field.event", settings.locale), event.id, true)
 
         if (!announcement.info.isNullOrBlank()) builder.addField(
             getEmbedMessage("announcement", "event.field.info", settings.locale),

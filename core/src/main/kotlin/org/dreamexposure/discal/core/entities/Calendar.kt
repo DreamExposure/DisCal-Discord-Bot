@@ -17,6 +17,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
+@Deprecated("Prefer to use new.Event via the new CalendarService")
 interface Calendar {
     /**
      * The ID of the [Guild] this calendar belongs to.

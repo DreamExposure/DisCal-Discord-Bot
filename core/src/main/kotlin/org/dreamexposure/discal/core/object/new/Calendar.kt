@@ -6,7 +6,7 @@ import java.time.ZoneId
 data class Calendar(
     val metadata: CalendarMetadata,
     val name: String,
-    val description: String?,
+    val description: String,
     val timezone: ZoneId,
     val hostLink: String,
 ) {
