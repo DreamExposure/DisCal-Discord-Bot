@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.core.`object`.new
 
 import discord4j.common.util.Snowflake
-import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarMetadataData
@@ -25,11 +24,17 @@ data class CalendarMetadata(
         suspend operator fun invoke(data: CalendarMetadataData): CalendarMetadata {
             val aes = AESEncryption(data.privateKey)
             val accessToken =
-                if (!data.expiresAt.asInstantMilli().isExpiredTtl()) aes.decrypt(data.accessToken)
+                if (!data.expiresAt.asInstantMilli().isExpiredTtl() && data.external) aes.decrypt(data.accessToken)
                     .onErrorResume(IllegalBlockSizeException::class.java) {
                         Mono.empty()
                     }.awaitSingleOrNull()
                 else null // No point in trying to decrypt if it's expired
+            val refreshToken =
+                if (data.external) aes.decrypt(data.refreshToken)
+                    .onErrorResume(IllegalBlockSizeException::class.java) {
+                        Mono.empty()
+                    }.awaitSingleOrNull()
+                else null // No point in trying to decrypt if calendar is not external, we don't use these internally
 
             return CalendarMetadata(
                 guildId = data.guildId.asSnowflake(),
@@ -42,7 +47,7 @@ data class CalendarMetadata(
                     credentialId = data.credentialId,
                     privateKey = data.privateKey,
                     expiresAt = if (accessToken != null) data.expiresAt.asInstantMilli() else Instant.EPOCH,
-                    refreshToken = aes.decrypt(data.refreshToken).awaitSingle(),
+                    refreshToken = refreshToken ?: "",
                     accessToken = accessToken ?: "",
                 )
             )
