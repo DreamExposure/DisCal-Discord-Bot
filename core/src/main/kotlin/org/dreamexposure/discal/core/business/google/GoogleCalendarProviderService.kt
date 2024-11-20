@@ -291,7 +291,7 @@ class GoogleCalendarProviderService(
             description = baseEvent.description.orEmpty(),
             location = baseEvent.location.orEmpty(),
             link = baseEvent.htmlLink.orEmpty(),
-            color = if (baseEvent.colorId.isNullOrBlank()) {
+            color = if (!baseEvent.colorId.isNullOrBlank()) {
                 EventColor.fromNameOrHexOrId(baseEvent.colorId)
             } else EventColor.NONE,
             start = if (baseEvent.start.dateTime != null) {
