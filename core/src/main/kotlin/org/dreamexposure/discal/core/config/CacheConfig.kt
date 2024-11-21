@@ -83,6 +83,18 @@ class CacheConfig {
     @Bean
     @Primary
     @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun eventWizardRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): EventWizardStateCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "EventWizards", wizardTtl)
+
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun calendarWizardRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): CalendarWizardStateCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "CalendarWizards", wizardTtl)
+
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
     fun eventRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): EventCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "Events", eventTtl)
 
@@ -114,6 +126,12 @@ class CacheConfig {
 
     @Bean
     fun announcementWizardFallbackCache(): AnnouncementWizardStateCache = JdkCacheRepository(wizardTtl)
+
+    @Bean
+    fun eventWizardFallbackCache(): EventWizardStateCache = JdkCacheRepository(wizardTtl)
+
+    @Bean
+    fun calendarWizardFallbackCache(): CalendarWizardStateCache = JdkCacheRepository(wizardTtl)
 
     @Bean
     fun calendarTokenFallbackCache(): CalendarTokenCache = JdkCacheRepository(calendarTokenTtl)

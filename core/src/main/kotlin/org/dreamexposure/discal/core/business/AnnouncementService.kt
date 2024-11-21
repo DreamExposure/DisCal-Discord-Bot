@@ -7,6 +7,7 @@ import discord4j.rest.http.client.ClientException
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.AnnouncementCache
+import org.dreamexposure.discal.AnnouncementWizardState
 import org.dreamexposure.discal.AnnouncementWizardStateCache
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.AnnouncementData
@@ -14,7 +15,6 @@ import org.dreamexposure.discal.core.database.AnnouncementRepository
 import org.dreamexposure.discal.core.extensions.messageContentSafe
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Announcement
-import org.dreamexposure.discal.core.`object`.new.AnnouncementWizardState
 import org.dreamexposure.discal.core.`object`.new.Event
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
