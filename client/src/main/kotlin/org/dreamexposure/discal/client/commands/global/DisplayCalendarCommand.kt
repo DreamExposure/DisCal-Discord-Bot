@@ -5,10 +5,9 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
+import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.StaticMessageService
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Component
 @Component
 class DisplayCalendarCommand(
     private val staticMessageService: StaticMessageService,
+    private val calendarService: CalendarService,
 ) : SlashCommand {
     override val name = "displaycal"
     override val hasSubcommands = true
@@ -49,7 +49,7 @@ class DisplayCalendarCommand(
                 .awaitSingle()
 
         // Validate calendar exists
-        val calendar = event.interaction.guild.flatMap { it.getCalendar(calendarNumber) }.awaitSingleOrNull()
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
         if (calendar == null)
             return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)

@@ -6,14 +6,13 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
 import discord4j.rest.util.AllowedMentions
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.AnnouncementService
+import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
 import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
 import org.dreamexposure.discal.core.`object`.new.Announcement
 import org.dreamexposure.discal.core.`object`.new.AnnouncementWizardState
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
@@ -26,6 +25,7 @@ class AnnouncementCommand(
     private val announcementService: AnnouncementService,
     private val permissionService: PermissionService,
     private val embedService: EmbedService,
+    private val calendarService: CalendarService,
 ) : SlashCommand {
     override val name = "announcement"
     override val hasSubcommands = true
@@ -182,10 +182,7 @@ class AnnouncementCommand(
         }
 
         // Validate event actually exists
-        val calendarEvent = event.interaction.guild
-            .flatMap { it.getCalendar(announcement.calendarNumber) }
-            .flatMap { it.getEvent(eventId) }
-            .awaitSingleOrNull()
+        val calendarEvent = calendarService.getEvent(announcement.guildId, announcement.calendarNumber, eventId)
         if (calendarEvent == null) {
             return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
@@ -194,7 +191,7 @@ class AnnouncementCommand(
         }
 
         // Handle what format the ID is actually saved in
-        val idToSet = if (announcement.type == Announcement.Type.RECUR) calendarEvent.eventId.split("_")[0]
+        val idToSet = if (announcement.type == Announcement.Type.RECUR) calendarEvent.id.split("_")[0]
         else eventId
 
         val alteredWizard = existingWizard.copy(entity = announcement.copy(eventId = idToSet))
