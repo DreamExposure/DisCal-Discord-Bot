@@ -5,7 +5,7 @@ import org.dreamexposure.discal.core.database.GuildSettingsData
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.asLocale
 import org.dreamexposure.discal.core.extensions.asSnowflake
-import java.util.*
+import java.util.Locale
 
 data class GuildSettings(
     val guildId: Snowflake,

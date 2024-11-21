@@ -18,6 +18,7 @@ import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @Component
 class   CalendarService(
@@ -176,7 +177,7 @@ class   CalendarService(
 
         /*
         This is a set of calls to replicate the behavior of the old monolith db call
-        that would go through all tables to handle deleting (as cascade delete constraints have not yet been added,
+        that would go through all tables to handle deleting (as cascade delete constraints have not yet been added),
         and to update the calendar number references down-stream. This is again for user-convenience, or so I tell myself
         as a cope for how badly designed this project originally was and I just, can't let go of it,
          so I keep trying to fix it bit by bit <3
@@ -236,6 +237,18 @@ class   CalendarService(
         events.forEach { event -> eventCache.put(guildId, event.id, event) }
 
         return events
+    }
+
+    suspend fun getEventsInNext24HourPeriod(guildId: Snowflake, calendarNumber: Int, start: Instant): List<Event> {
+        return getEventsInTimeRange(guildId, calendarNumber, start, start.plus(1, ChronoUnit.DAYS))
+    }
+
+    suspend fun getEventsInMonth(guildId: Snowflake, calendarNumber: Int, start: Instant, daysInMonth: Int): List<Event> {
+        return getEventsInTimeRange(guildId, calendarNumber, start, start.plus(daysInMonth.toLong(), ChronoUnit.DAYS))
+    }
+
+    suspend fun getEventsInNextNDays(guildId: Snowflake, calendarNumber: Int, days: Int): List<Event> {
+        return getEventsInTimeRange(guildId, calendarNumber, Instant.now(), Instant.now().plus(days.toLong(), ChronoUnit.DAYS))
     }
 
     suspend fun createEvent(guildId: Snowflake, calendarNumber: Int, spec: Event.CreateSpec): Event {

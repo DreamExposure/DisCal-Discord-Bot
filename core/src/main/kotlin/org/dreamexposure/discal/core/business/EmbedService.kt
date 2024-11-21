@@ -9,6 +9,7 @@ import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
+import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat.LONG_DATETIME
 import org.dreamexposure.discal.core.extensions.*
 import org.dreamexposure.discal.core.`object`.new.*
 import org.dreamexposure.discal.core.`object`.new.GuildSettings.AnnouncementStyle.*
@@ -231,6 +232,69 @@ class EmbedService(
             .build()
     }
 
+    //////////////////////////
+    ////// Event Embeds //////
+    //////////////////////////
+    suspend fun fullEventEmbed(event: Event, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .footer(getEmbedMessage("event", "full.footer", settings.locale, event.id), null)
+            .color(event.color.asColor())
+
+        if (event.name.isNotBlank())
+            builder.title(event.name.toMarkdown().embedTitleSafe())
+        if (event.description.isNotBlank())
+            builder.description(event.description.toMarkdown().embedDescriptionSafe())
+
+        builder.addField(
+            getEmbedMessage("event", "full.field.start", settings.locale),
+            event.start.asDiscordTimestamp(LONG_DATETIME),
+            true)
+        builder.addField(
+            getEmbedMessage("event", "full.field.end", settings.locale),
+            event.end.asDiscordTimestamp(LONG_DATETIME),
+            true
+        )
+
+        if (event.location.isNotBlank()) builder.addField(
+            getEmbedMessage("event", "full.field.location", settings.locale),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        builder.addField(getEmbedMessage("event", "full.field.cal", settings.locale), "${event.calendarNumber}", false)
+
+        if (event.image.isNotEmpty())
+            builder.image(event.image)
+
+        return builder.build()
+    }
+
+    suspend fun condensedEventEmbed(event: Event, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .footer(getEmbedMessage("event", "con.footer", settings.locale, event.id), null)
+            .color(event.color.asColor())
+
+        if (event.name.isNotBlank())
+            builder.title(event.name.toMarkdown().embedTitleSafe())
+
+        builder.addField(
+            getEmbedMessage("event", "con.field.start", settings.locale),
+            event.start.asDiscordTimestamp(LONG_DATETIME),
+            true
+        )
+
+        if (event.location.isNotBlank()) builder.addField(
+            getEmbedMessage("event", "con.field.location", settings.locale),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (event.image.isNotBlank())
+            builder.thumbnail(event.image)
+
+        return builder.build()
+    }
+
     /////////////////////////
     ////// RSVP Embeds //////
     /////////////////////////
@@ -251,11 +315,11 @@ class EmbedService(
             .description(getEmbedMessage("rsvp", "waitlist.desc", settings.locale, userId.asString(), event.name))
             .addField(
                 getEmbedMessage("rsvp", "waitlist.field.start", settings.locale),
-                event.start.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+                event.start.asDiscordTimestamp(LONG_DATETIME),
                 true
             ).addField(
                 getEmbedMessage("rsvp", "waitlist.field.end", settings.locale),
-                event.end.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+                event.end.asDiscordTimestamp(LONG_DATETIME),
                 true
             ).footer(getEmbedMessage("rsvp", "waitlist.footer", settings.locale, event.id), null)
 
@@ -365,12 +429,12 @@ class EmbedService(
 
         builder.addField(
             getEmbedMessage("announcement", "full.field.start", settings.locale),
-            event.start.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+            event.start.asDiscordTimestamp(LONG_DATETIME),
             true
         )
         builder.addField(
             getEmbedMessage("announcement", "full.field.end", settings.locale),
-            event.end.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+            event.end.asDiscordTimestamp(LONG_DATETIME),
             true
         )
 
@@ -419,7 +483,7 @@ class EmbedService(
 
         builder.addField(
             getEmbedMessage("announcement", "simple.field.start", settings.locale),
-            event.start.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+            event.start.asDiscordTimestamp(LONG_DATETIME),
             true
         )
 
@@ -461,12 +525,12 @@ class EmbedService(
 
         builder.addField(
             getEmbedMessage("announcement", "event.field.start", settings.locale),
-            event.start.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+            event.start.asDiscordTimestamp(LONG_DATETIME),
             true
         )
         builder.addField(
             getEmbedMessage("announcement", "event.field.end", settings.locale),
-            event.end.asDiscordTimestamp(DiscordTimestampFormat.LONG_DATETIME),
+            event.end.asDiscordTimestamp(LONG_DATETIME),
             true
         )
 
