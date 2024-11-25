@@ -4,9 +4,7 @@ import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import kotlinx.coroutines.reactor.mono
-import org.dreamexposure.discal.CalendarCache
-import org.dreamexposure.discal.CalendarMetadataCache
-import org.dreamexposure.discal.EventCache
+import org.dreamexposure.discal.*
 import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarMetadataData
 import org.dreamexposure.discal.core.database.CalendarMetadataRepository
@@ -27,6 +25,8 @@ class   CalendarService(
     private val eventCache: EventCache,
     private val calendarProviders: List<CalendarProvider>,
     private val calendarCache: CalendarCache,
+    private val calendarWizardStateCache: CalendarWizardStateCache,
+    private val eventWizardStateCache: EventWizardStateCache,
     private val settingsService: GuildSettingsService,
     private val eventMetadataService: EventMetadataService,
     private val beanFactory: BeanFactory,
@@ -158,6 +158,10 @@ class   CalendarService(
             .updateCalendar(guildId, metadata, spec)
 
         calendarCache.put(guildId, calendar.metadata.number, calendar)
+
+        // Cancel wizards
+        cancelCalendarWizard(guildId, number)
+
         return calendar
     }
 
@@ -166,6 +170,10 @@ class   CalendarService(
 
         // Delete from 3rd party locations
         calendarProviders.first { it.host == metadata.host }.deleteCalendar(guildId, metadata)
+
+        // Cancel any wizards
+        cancelCalendarWizard(guildId, number)
+        cancelEventWizard(guildId, number)
 
         // Delete from db and handle "re-indexing" all calendar resources (because calendars are sequential for user-convenience)
         calendarMetadataRepository.deleteAllByGuildIdAndCalendarNumber(guildId.asLong(), number).awaitSingleOrNull()
@@ -270,6 +278,9 @@ class   CalendarService(
             .updateEvent(calendar, spec)
 
         eventCache.put(guildId, event.id, event)
+
+        cancelEventWizard(guildId, event.id)
+
         return event
     }
 
@@ -284,6 +295,54 @@ class   CalendarService(
         eventMetadataService.deleteEventMetadata(guildId, id)
         announcementService.deleteAnnouncements(guildId, id)
 
+        cancelEventWizard(guildId, id)
+
+    }
+
+
+    /////////
+    /// Wizards
+    /////////
+    suspend fun getCalendarWizard(guildId: Snowflake, userId: Snowflake): CalendarWizardState? {
+        return calendarWizardStateCache.get(guildId, userId)
+    }
+
+    suspend fun putCalendarWizard(state: CalendarWizardState) {
+        calendarWizardStateCache.put(state.guildId, state.userId, state)
+    }
+
+    suspend fun cancelCalendarWizard(guildId: Snowflake, userId: Snowflake) {
+        calendarWizardStateCache.evict(guildId, userId)
+    }
+
+    suspend fun cancelCalendarWizard(guildId: Snowflake, calendarNumber: Int) {
+        calendarWizardStateCache.getAll(guildId)
+            .filter { it.entity.metadata.number == calendarNumber }
+            .forEach { calendarWizardStateCache.evict(guildId, it.userId) }
+    }
+
+    suspend fun getEventWizard(guildId: Snowflake, userId: Snowflake): EventWizardState? {
+        return eventWizardStateCache.get(guildId, userId)
+    }
+
+    suspend fun putEventWizard(state: EventWizardState) {
+        eventWizardStateCache.put(state.guildId, state.userId, state)
+    }
+
+    suspend fun cancelEventWizard(guildId: Snowflake, userId: Snowflake) {
+        eventWizardStateCache.evict(guildId, userId)
+    }
+
+    suspend fun cancelEventWizard(guildId: Snowflake, calendarNumber: Int) {
+        eventWizardStateCache.getAll(guildId)
+            .filter { it.entity.calendarNumber == calendarNumber }
+            .forEach { eventWizardStateCache.evict(guildId, it.userId) }
+    }
+
+    suspend fun cancelEventWizard(guildId: Snowflake, eventId: String) {
+        eventWizardStateCache.getAll(guildId)
+            .filter { it.entity.id == eventId }
+            .forEach { eventWizardStateCache.evict(guildId, it.userId) }
     }
 
 

@@ -589,8 +589,6 @@ class AnnouncementCommand(
             .withEphemeral(ephemeral)
             .awaitSingle()
 
-        // If announcement is being edited, cancel the editor
-        announcementService.cancelWizard(settings.guildId, announcementId)
         announcementService.deleteAnnouncement(settings.guildId, announcementId)
 
         return event.createFollowup(getMessage("delete.success", settings))

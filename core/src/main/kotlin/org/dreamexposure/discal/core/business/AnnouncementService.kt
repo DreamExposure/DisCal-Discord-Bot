@@ -123,9 +123,13 @@ class AnnouncementService(
                 .toTypedArray()
             announcementCache.put(key = announcement.guildId, value = new)
         }
+
+        // Cancel any existing wizards
+        cancelWizard(announcement.guildId, announcement.id)
     }
 
     suspend fun deleteAnnouncement(guildId: Snowflake, id: String) {
+        cancelWizard(guildId, id)
         announcementRepository.deleteByAnnouncementId(id).awaitSingleOrNull()
 
         val cached = announcementCache.get(key = guildId)
@@ -135,6 +139,7 @@ class AnnouncementService(
     }
 
     suspend fun deleteAnnouncements(guildId: Snowflake, eventId: String) {
+        cancelWizardByEvent(guildId, eventId)
         announcementRepository.deleteAllByGuildIdAndEventId(guildId.asLong(), eventId).awaitSingleOrNull()
 
         val cached = announcementCache.get(key = guildId)
@@ -144,6 +149,7 @@ class AnnouncementService(
     }
 
     suspend fun deleteAnnouncementsForCalendarDeletion(guildId: Snowflake, calendarNumber: Int) {
+        cancelWizard(guildId, calendarNumber)
         announcementRepository.deleteAllByGuildIdAndCalendarNumber(guildId.asLong(), calendarNumber).awaitSingleOrNull()
         announcementRepository.decrementCalendarsByGuildIdAndCalendarNumber(guildId.asLong(), calendarNumber).awaitSingleOrNull()
         announcementCache.evict(key = guildId)
@@ -260,6 +266,18 @@ class AnnouncementService(
     suspend fun cancelWizard(guildId: Snowflake, announcementId: String) {
         announcementWizardStateCache.getAll(guildId)
             .filter { it.entity.id == announcementId }
+            .forEach { announcementWizardStateCache.evict(guildId, it.userId) }
+    }
+
+    suspend fun cancelWizard(guildId: Snowflake, calendarNumber: Int) {
+        announcementWizardStateCache.getAll(guildId)
+            .filter { it.entity.calendarNumber == calendarNumber }
+            .forEach { announcementWizardStateCache.evict(guildId, it.userId) }
+    }
+
+    suspend fun cancelWizardByEvent(guildId: Snowflake, eventId: String) {
+        announcementWizardStateCache.getAll(guildId)
+            .filter { it.entity.eventId == eventId }
             .forEach { announcementWizardStateCache.evict(guildId, it.userId) }
     }
 }

@@ -33,6 +33,7 @@ object CalendarEmbed : EmbedMaker {
             .build()
     }
 
+    @Deprecated("Prefer to use replacement in EmbedService")
     fun pre(guild: Guild, settings: GuildSettings, preCal: PreCalendar): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
             .title(getMessage("calendar", "wizard.title", settings))

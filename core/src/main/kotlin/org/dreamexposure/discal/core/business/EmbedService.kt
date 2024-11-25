@@ -4,7 +4,9 @@ import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.core.spec.EmbedCreateSpec
 import kotlinx.coroutines.reactor.awaitSingle
+import org.dreamexposure.discal.AnnouncementWizardState
 import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.CalendarWizardState
 import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.enums.event.EventColor
@@ -230,6 +232,37 @@ class EmbedService(
             .url(calendar.link)
             .color(GlobalVal.discalColor)
             .build()
+    }
+
+    suspend fun calendarWizardEmbed(wizard: CalendarWizardState, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .title(getEmbedMessage("calendar", "wizard.title", settings.locale))
+            .footer(getEmbedMessage("calendar", "wizard.footer", settings.locale), null)
+            .addField(
+                getEmbedMessage("calendar", "wizard.field.name", settings.locale),
+                wizard.entity.name.toMarkdown().embedFieldSafe(),
+                false
+            ).addField(
+                getEmbedMessage("calendar", "wizard.field.description", settings.locale),
+                wizard.entity.description.ifEmpty { getCommonMsg("embed.unset", settings.locale) }.toMarkdown().embedFieldSafe(),
+                false
+            ).addField(
+                getEmbedMessage("calendar", "wizard.field.timezone", settings.locale),
+                wizard.entity.timezone.id,
+                true
+            ).addField(
+                getEmbedMessage("calendar", "wizard.field.host", settings.locale),
+                wizard.entity.metadata.host.name,
+                true
+            )
+
+        if (wizard.editing) builder.addField(
+            getEmbedMessage("calendar", "wizard.field.id", settings.locale),
+            wizard.entity.metadata.id,
+            false
+        )
+
+        return builder.build()
     }
 
     //////////////////////////
@@ -604,7 +637,7 @@ class EmbedService(
         return builder.build()
     }
 
-    suspend fun announcementWizardEmbed(wizard: WizardState<Announcement>, settings: GuildSettings): EmbedCreateSpec {
+    suspend fun announcementWizardEmbed(wizard: AnnouncementWizardState, settings: GuildSettings): EmbedCreateSpec {
         val announcement = wizard.entity
 
         val builder = defaultEmbedBuilder(settings)
