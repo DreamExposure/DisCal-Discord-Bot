@@ -4,7 +4,7 @@ import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.`object`.new.Calendar
-import org.dreamexposure.discal.core.`object`.new.model.discal.cam.CalendarV3Model
+import org.dreamexposure.discal.core.`object`.new.model.discal.CalendarV3Model
 import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.springframework.web.bind.annotation.*
 
@@ -19,7 +19,7 @@ class CalendarController(
 
     @SecurityRequirement(scopes = [Scope.CALENDAR_READ])
     @GetMapping(produces = ["application/json"])
-    suspend fun getAllCalendars(@PathVariable("guildId") guildId: Snowflake): List<CalendarV3Model> {
+    suspend fun getAllCalendars(@PathVariable guildId: Snowflake): List<CalendarV3Model> {
         return calendarService.getAllCalendars(guildId).map(::CalendarV3Model)
     }
 

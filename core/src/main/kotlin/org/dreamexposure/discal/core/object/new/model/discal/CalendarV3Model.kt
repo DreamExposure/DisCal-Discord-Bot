@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.core.`object`.new.model.discal.cam
+package org.dreamexposure.discal.core.`object`.new.model.discal
 
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.`object`.new.Calendar

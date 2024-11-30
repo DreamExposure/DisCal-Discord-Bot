@@ -277,6 +277,10 @@ class   CalendarService(
             .createEvent(calendar, spec)
 
         eventCache.put(guildId, event.id, event)
+
+        // Update static messages in case event is visible
+        staticMessageService.updateStaticMessages(guildId, event.calendarNumber)
+
         return event
     }
 
@@ -291,6 +295,9 @@ class   CalendarService(
 
         cancelEventWizard(guildId, event.id)
 
+        // Update static messages in case event is visible
+        staticMessageService.updateStaticMessages(guildId, event.calendarNumber)
+
         return event
     }
 
@@ -304,6 +311,7 @@ class   CalendarService(
 
         eventMetadataService.deleteEventMetadata(guildId, id)
         announcementService.deleteAnnouncements(guildId, id)
+        staticMessageService.updateStaticMessages(guildId, calendarNumber)
 
         cancelEventWizard(guildId, id)
 
