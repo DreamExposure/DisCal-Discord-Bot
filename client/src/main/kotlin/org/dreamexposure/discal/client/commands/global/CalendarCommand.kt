@@ -3,42 +3,34 @@ package org.dreamexposure.discal.client.commands.global
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
-import discord4j.core.`object`.entity.Member
 import discord4j.core.`object`.entity.Message
-import kotlinx.coroutines.reactor.mono
+import kotlinx.coroutines.reactor.awaitSingle
+import org.dreamexposure.discal.CalendarWizardState
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.client.message.embed.CalendarEmbed
 import org.dreamexposure.discal.core.business.CalendarService
-import org.dreamexposure.discal.core.business.StaticMessageService
-import org.dreamexposure.discal.core.entities.response.UpdateCalendarResponse
-import org.dreamexposure.discal.core.enums.calendar.CalendarHost
-import org.dreamexposure.discal.core.extensions.discord4j.createCalendar
-import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
-import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
-import org.dreamexposure.discal.core.extensions.isValidTimezone
+import org.dreamexposure.discal.core.business.EmbedService
+import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.extensions.toZoneId
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.Wizard
-import org.dreamexposure.discal.core.`object`.calendar.PreCalendar
+import org.dreamexposure.discal.core.`object`.new.Calendar
+import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Mono
+import java.time.Instant
 import java.time.ZoneId
 
 @Component
 class CalendarCommand(
-    private val wizard: Wizard<PreCalendar>,
     private val calendarService: CalendarService,
-    private val staticMessageService: StaticMessageService
+    private val permissionService: PermissionService,
+    private val embedService: EmbedService,
 ) : SlashCommand {
     override val name = "calendar"
     override val hasSubcommands = true
     override val ephemeral = true
 
-    @Deprecated("Use new handleSuspend for K-coroutines")
-    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return when (event.options[0].name) {
             "create" -> create(event, settings)
             "name" -> name(event, settings)
@@ -49,232 +41,317 @@ class CalendarCommand(
             "cancel" -> cancel(event, settings)
             "delete" -> delete(event, settings)
             "edit" -> edit(event, settings)
-            else -> Mono.empty() //Never can reach this, makes compiler happy.
+            else -> throw IllegalStateException("Invalid subcommand specified")
         }
     }
 
-    private fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val name = event.options[0].getOption("name")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
-
         val description = event.options[0].getOption("description")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .orElse("")
-
         val timezone = event.options[0].getOption("timezone")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
-            .orElse("")
-
+            .orElse("UTC")
+            .toZoneId() ?: ZoneId.of("UTC")
         val host = event.options[0].getOption("host")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
-            .map(CalendarHost::valueOf)
-            .orElse(CalendarHost.GOOGLE)
+            .map(CalendarMetadata.Host::valueOf)
+            .orElse(CalendarMetadata.Host.GOOGLE)
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
-            if (wizard.get(settings.guildId) == null) {
-                //Start calendar wizard
-                val pre = PreCalendar.new(settings.guildId, host, name)
-                pre.description = description
-                pre.timezone = timezone.toZoneId() // Extension method auto-checks if the timezone is valid
+        // Validate permissions
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
+        if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
-                // Message content for wizard start so that if a bad optional timezone is given, we can provide better feedback.
-                val msg = if (timezone.isNotEmpty() && !timezone.isValidTimezone()) {
-                    // Invalid timezone specified
-                    getMessage("create.success.badTimezone", settings)
-                } else {
-                    getMessage("create.success", settings)
-                }
+        // Check if wizard already started
+        val existingWizard = calendarService.getCalendarWizard(settings.guildId, event.interaction.user.id)
+        if (existingWizard != null) return event.createFollowup(getMessage("error.wizard.started", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.calendarWizardEmbed(existingWizard, settings))
+            .awaitSingle()
 
-                event.interaction.guild
-                    .filterWhen { mono { calendarService.canAddNewCalendar(it.id) } }
-                    .doOnNext { wizard.start(pre) } //only start wizard if another calendar can be added
-                    .map { CalendarEmbed.pre(it, settings, pre) }
-                    .flatMap { event.followupEphemeral(msg, it) }
-                    .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.calendar.max", settings.locale)))
-            } else {
-                event.interaction.guild
-                    .map { CalendarEmbed.pre(it, settings, wizard.get(settings.guildId)!!) }
-                    .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings), it) }
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings.locale)))
+        // Check if new calendar can be added
+        if (!calendarService.canAddNewCalendar(settings.guildId))
+            return event.createFollowup(getCommonMsg("error.calendar.max", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+        val newWizard = CalendarWizardState(
+            guildId = settings.guildId,
+            userId = event.interaction.user.id,
+            editing = false,
+            entity = Calendar(
+                metadata = CalendarMetadata(
+                    guildId = settings.guildId,
+                    number = calendarService.getNextCalendarNumber(settings.guildId),
+                    host = host,
+                    id = "NOT_YET_GENERATED",
+                    address = "NOT_YET_GENERATED",
+                    external = false,
+                    secrets = CalendarMetadata.Secrets(
+                        credentialId = 0,
+                        privateKey = "NOT_YET_GENERATED",
+                        expiresAt = Instant.now(),
+                        refreshToken = "NOT_YET_GENERATED",
+                        accessToken = "NOT_YET_GENERATED",
+                    ),
+                ),
+                name = name,
+                description = description,
+                timezone = timezone,
+                hostLink = "NOT_YET_GENERATED",
+            )
+        )
+        calendarService.putCalendarWizard(newWizard)
+
+        return event.createFollowup(getMessage("create.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.calendarWizardEmbed(newWizard, settings))
+            .awaitSingle()
     }
 
-    private fun name(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun name(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val name = event.options[0].getOption("name")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
-            val pre = wizard.get(settings.guildId)
-            if (pre != null) {
-                pre.name = name
-                event.interaction.guild
-                    .map { CalendarEmbed.pre(it, settings, pre) }
-                    .flatMap { event.followupEphemeral(getMessage("name.success", settings), it) }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings.locale)))
+        // Validate permissions
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
+        if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = calendarService.getCalendarWizard(settings.guildId, event.interaction.user.id)
+        if (existingWizard == null) return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        val alteredWizard = existingWizard.copy(entity = existingWizard.entity.copy(name = name))
+        calendarService.putCalendarWizard(alteredWizard)
+
+
+        return event.createFollowup(getMessage("name.success", settings))
+            .withEmbeds(embedService.calendarWizardEmbed(alteredWizard, settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun description(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun description(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val desc = event.options[0].getOption("description")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
-            val pre = wizard.get(settings.guildId)
-            if (pre != null) {
-                pre.description = desc
-                event.interaction.guild
-                    .map { CalendarEmbed.pre(it, settings, pre) }
-                    .flatMap { event.followupEphemeral(getMessage("description.success", settings), it) }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings.locale)))
+        // Validate permissions
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
+        if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = calendarService.getCalendarWizard(settings.guildId, event.interaction.user.id)
+        if (existingWizard == null) return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        val alteredWizard = existingWizard.copy(entity = existingWizard.entity.copy(description = desc))
+        calendarService.putCalendarWizard(alteredWizard)
+
+        return event.createFollowup(getMessage("description.success", settings))
+            .withEmbeds(embedService.calendarWizardEmbed(alteredWizard, settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun timezone(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun timezone(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val timezone = event.options[0].getOption("timezone")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
-            .get()
+            .get().toZoneId()
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
-            val pre = wizard.get(settings.guildId)
-            if (pre != null) {
-                if (timezone.isValidTimezone()) {
-                    pre.timezone = ZoneId.of(timezone)
+        // Validate permissions
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
+        if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
-                    event.interaction.guild
-                        .map { CalendarEmbed.pre(it, settings, pre) }
-                        .flatMap { event.followupEphemeral(getMessage("timezone.success", settings), it) }
-                } else {
-                    event.followupEphemeral(getMessage("timezone.failure.invalid", settings))
-                }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings.locale)))
+        // Check if wizard not started
+        val existingWizard = calendarService.getCalendarWizard(settings.guildId, event.interaction.user.id)
+        if (existingWizard == null) return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        // Timezone will be null if not a valid tz
+        if (timezone == null) return event.createFollowup(getMessage("timezone.failure.invalid", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.calendarWizardEmbed(existingWizard, settings))
+            .awaitSingle()
+
+
+        val alteredWizard = existingWizard.copy(entity = existingWizard.entity.copy(timezone = timezone))
+        calendarService.putCalendarWizard(alteredWizard)
+
+        return event.createFollowup(getMessage("timezone.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.calendarWizardEmbed(alteredWizard, settings))
+            .awaitSingle()
     }
 
-    private fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
-            val pre = wizard.get(settings.guildId)
-            if (pre != null) {
-                event.interaction.guild.flatMap {
-                    event.followupEphemeral(CalendarEmbed.pre(it, settings, pre))
-                }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings.locale)))
+    private suspend fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        // Validate permissions
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
+        if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = calendarService.getCalendarWizard(settings.guildId, event.interaction.user.id)
+        if (existingWizard == null) return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        return event.createFollowup()
+            .withEmbeds(embedService.calendarWizardEmbed(existingWizard, settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
-            val pre = wizard.get(settings.guildId)
-            if (pre != null) {
-                if (!pre.hasRequiredValues()) {
-                    return@flatMap event.followupEphemeral(getMessage("confirm.failure.missing", settings))
-                }
+    private suspend fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        // Validate permissions
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
+        if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
-                event.interaction.guild.flatMap { guild ->
-                    if (!pre.editing) {
-                        // New calendar
-                        pre.createSpec(guild)
-                            .flatMap(guild::createCalendar)
-                            .doOnNext { wizard.remove(settings.guildId) }
-                            .flatMap {
-                                event.followupEphemeral(
-                                    getMessage("confirm.success.create", settings),
-                                    CalendarEmbed.link(guild, settings, it)
-                                )
-                            }.doOnError {
-                                LOGGER.error("Create calendar with command failure", it)
-                            }.onErrorResume {
-                                event.followupEphemeral(getMessage("confirm.failure.create", settings))
-                            }
-                    } else {
-                        // Editing
-                        pre.calendar!!.update(pre.updateSpec())
-                            .filter(UpdateCalendarResponse::success)
-                            .doOnNext { wizard.remove(settings.guildId) }
-                            .flatMap { ucr ->
-                                val updateMessages = mono {
-                                    staticMessageService.updateStaticMessages(settings.guildId, ucr.new!!.calendarNumber)
-                                }
-                                 event.followupEphemeral(
-                                        getMessage("confirm.success.edit", settings),
-                                        CalendarEmbed.link(guild, settings, ucr.new!!)
-                                ).flatMap { updateMessages.thenReturn(it) }
-                            }.switchIfEmpty(event.followupEphemeral(getMessage("confirm.failure.edit", settings)))
-                    }
-                }
-            } else {
-                event.followupEphemeral(getMessage("error.wizard.notStarted", settings))
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings.locale)))
+        // Check if wizard not started
+        val existingWizard = calendarService.getCalendarWizard(settings.guildId, event.interaction.user.id)
+        if (existingWizard == null) return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        // Would add checks for required values here, but I think I've basically hand-waved that away now
+        try {
+            val calendar = if (existingWizard.editing) calendarService.updateCalendar(
+                settings.guildId,
+                existingWizard.entity.metadata.number,
+                Calendar.UpdateSpec(
+                    name = existingWizard.entity.name,
+                    description = existingWizard.entity.description,
+                    timezone = existingWizard.entity.timezone,
+                )
+            ) else calendarService.createCalendar(
+                settings.guildId,
+                Calendar.CreateSpec(
+                    host = existingWizard.entity.metadata.host,
+                    number = existingWizard.entity.metadata.number,
+                    name = existingWizard.entity.name,
+                    description = existingWizard.entity.description,
+                    timezone = existingWizard.entity.timezone,
+                )
+            )
+            calendarService.cancelCalendarWizard(settings.guildId, calendar.metadata.number)
+
+            val message = if (existingWizard.editing) getMessage("confirm.success.edit", settings)
+            else getMessage("confirm.success.create", settings)
+
+            return event.createFollowup(message)
+                .withEmbeds(embedService.linkCalendarEmbed(calendar))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+        } catch (ex: Exception) {
+            LOGGER.error("Failed to create calendar via command interaction", ex)
+
+            val message = if (existingWizard.editing) getMessage("confirm.failure.edit", settings)
+            else getMessage("confirm.failure.create", settings)
+
+            return event.createFollowup(message)
+                .withEmbeds(embedService.calendarWizardEmbed(existingWizard, settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        }
     }
 
-    private fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
-            wizard.remove(settings.guildId)
+    private suspend fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        // Validate permissions
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
+        if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
-            event.followupEphemeral(getMessage("cancel.success", settings))
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings.locale)))
+        calendarService.cancelCalendarWizard(settings.guildId, event.interaction.user.id)
+
+        return event.createFollowup(getMessage("cancel.success", settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun delete(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
-            // Before we delete the calendar, if the wizard is editing that calendar we need to cancel the wizard
-            val pre = wizard.get(settings.guildId)
-            if (pre != null && pre.calendar?.calendarNumber == calendarNumber) wizard.remove(settings.guildId)
+        // Validate permissions
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
+        if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
-            event.interaction.guild
-                .flatMap { it.getCalendar(calendarNumber) }
-                .flatMap { it.delete() }
-                .flatMap { event.followupEphemeral(getMessage("delete.success", settings)) }
-                .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings.locale)))
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings.locale)))
+        calendarService.deleteCalendar(settings.guildId, calendarNumber)
+
+        return event.createFollowup(getMessage("delete.success", settings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
-    private fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun edit(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
 
-        return Mono.justOrEmpty(event.interaction.member).filterWhen(Member::hasElevatedPermissions).flatMap {
-            if (wizard.get(settings.guildId) == null) {
-                event.interaction.guild.flatMap { guild ->
-                    guild.getCalendar(calendarNumber)
-                        .map { PreCalendar.edit(it) }
-                        .doOnNext { wizard.start(it) }
-                        .map { CalendarEmbed.pre(guild, settings, it) }
-                        .flatMap { event.followupEphemeral(getMessage("edit.success", settings), it) }
-                        .switchIfEmpty(event.followupEphemeral(getCommonMsg("error.notFound.calendar", settings.locale)))
-                }
-            } else {
-                event.interaction.guild
-                    .map { CalendarEmbed.pre(it, settings, wizard.get(settings.guildId)!!) }
-                    .flatMap { event.followupEphemeral(getMessage("error.wizard.started", settings), it) }
-            }
-        }.switchIfEmpty(event.followupEphemeral(getCommonMsg("error.perms.elevated", settings.locale)))
+        // Validate permissions
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
+        if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        // Check if wizard already started
+        val existingWizard = calendarService.getCalendarWizard(settings.guildId, event.interaction.user.id)
+        if (existingWizard != null) return event.createFollowup(getMessage("error.wizard.started", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.calendarWizardEmbed(existingWizard, settings))
+            .awaitSingle()
+
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        if (calendar == null) return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        val newWizard = CalendarWizardState(
+            guildId = settings.guildId,
+            userId = event.interaction.user.id,
+            editing = true,
+            entity = calendar
+        )
+        calendarService.putCalendarWizard(newWizard)
+
+        return event.createFollowup(getMessage("edit.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.calendarWizardEmbed(newWizard, settings))
+            .awaitSingle()
     }
 }

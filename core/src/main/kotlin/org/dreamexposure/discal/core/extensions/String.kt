@@ -24,7 +24,7 @@ fun String.unescapeNewLines(): String = this.replace(Regex("([\\\\\\n]+)(n)"), "
 fun String.isValidTimezone(): Boolean {
     return try {
         ZoneId.getAvailableZoneIds().contains(this) && !BadTimezone.isBad(this)
-    } catch (ignore: Exception) {
+    } catch (_: Exception) {
         false
     }
 }
@@ -32,7 +32,7 @@ fun String.isValidTimezone(): Boolean {
 fun String.toZoneId(): ZoneId? {
     return try {
         if (!BadTimezone.isBad(this)) ZoneId.of(this) else null
-    } catch (ignore: Exception) {
+    } catch (_: Exception) {
         null
     }
 }

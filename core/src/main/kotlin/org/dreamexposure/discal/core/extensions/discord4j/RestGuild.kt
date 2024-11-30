@@ -1,30 +1,14 @@
 package org.dreamexposure.discal.core.extensions.discord4j
 
-import com.google.api.services.calendar.model.AclRule
 import discord4j.core.`object`.entity.Guild
 import discord4j.rest.entity.RestGuild
 import org.dreamexposure.discal.core.cache.DiscalCache
 import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.entities.Calendar
-import org.dreamexposure.discal.core.entities.google.GoogleCalendar
-import org.dreamexposure.discal.core.entities.spec.create.CreateCalendarSpec
-import org.dreamexposure.discal.core.enums.calendar.CalendarHost
-import org.dreamexposure.discal.core.`object`.calendar.CalendarData
-import org.dreamexposure.discal.core.wrapper.google.AclRuleWrapper
-import org.dreamexposure.discal.core.wrapper.google.CalendarWrapper
-import org.dreamexposure.discal.core.wrapper.google.GoogleAuthWrapper
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import java.time.Duration
-import com.google.api.services.calendar.model.Calendar as GoogleCalendarModel
 
 //Calendars
-
-fun RestGuild.determineNextCalendarNumber(): Mono<Int> {
-    return DatabaseManager.getAllCalendars(this.id)
-            .map(List<CalendarData>::size)
-            .map { it + 1 }
-}
 
 /**
  * Attempts to retrieve this [Guild]'s main [Calendar] (calendar 1, this guild's first/primary calendar)
@@ -70,51 +54,4 @@ fun RestGuild.getAllCalendars(): Flux<Calendar> {
             .flatMapMany { Flux.fromIterable(it) }
             .flatMap(Calendar.Companion::from)
             .doOnNext(DiscalCache::putCalendar)
-}
-
-/**
- * Attempts to create a [Calendar] with the supplied information on a 3rd party host.
- * If an error occurs, it is emitted through the [Mono].
- *
- * @param spec The instructions for creating the [Calendar]
- * @return A [Mono] containing the newly created [Calendar]
- */
-@Deprecated("Prefer to use new CalendarService")
-fun RestGuild.createCalendar(spec: CreateCalendarSpec): Mono<Calendar> {
-    return Mono.defer {
-        when (spec.host) {
-            CalendarHost.GOOGLE -> {
-                val credId = GoogleAuthWrapper.randomCredentialId()
-                val googleCal = GoogleCalendarModel()
-
-                googleCal.summary = spec.name
-                spec.description?.let { googleCal.description = it }
-                googleCal.timeZone = spec.timezone.id
-
-                //Call google to create it
-                CalendarWrapper.createCalendar(googleCal, credId, this.id)
-                        .timeout(Duration.ofSeconds(30))
-                        .flatMap { confirmed ->
-                            val data = CalendarData(
-                                    guildId = this.id,
-                                    calendarNumber = spec.calNumber,
-                                    host = CalendarHost.GOOGLE,
-                                    calendarId = confirmed.id,
-                                    calendarAddress = confirmed.id,
-                                    credentialId = credId
-                            )
-
-                            val rule = AclRule()
-                                    .setScope(AclRule.Scope().setType("default"))
-                                    .setRole("reader")
-
-                            Mono.`when`(
-                                    DatabaseManager.updateCalendar(data),
-                                    AclRuleWrapper.insertRule(rule, data)
-                            ).thenReturn(GoogleCalendar(data, confirmed))
-                                    .doOnNext(DiscalCache::putCalendar)
-                        }
-            }
-        }
-    }
 }

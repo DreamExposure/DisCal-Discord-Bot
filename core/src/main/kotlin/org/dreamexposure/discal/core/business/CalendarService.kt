@@ -122,6 +122,8 @@ class   CalendarService(
         if (cachedFullCalendar != null) calendarCache.put(calendar.guildId, calendar.number, cachedFullCalendar.copy(metadata = calendar))
     }
 
+    suspend fun getNextCalendarNumber(guildId: Snowflake): Int = getAllCalendarMetadata(guildId).size + 1
+
     /////////
     /// Calendar
     /////////
@@ -161,6 +163,9 @@ class   CalendarService(
 
         // Cancel wizards
         cancelCalendarWizard(guildId, number)
+
+        // Make sure static messages get updated
+        staticMessageService.updateStaticMessages(guildId, number)
 
         return calendar
     }

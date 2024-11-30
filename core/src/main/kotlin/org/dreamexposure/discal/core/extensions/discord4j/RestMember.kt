@@ -8,6 +8,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.util.function.Predicate
 
+@Deprecated("Prefer to use PermissionService implementation")
 fun RestMember.hasPermissions(pred: Predicate<PermissionSet>): Mono<Boolean> {
     return this.guild().data.flatMap { guildData ->
         if (guildData.ownerId().asLong() == this.id.asLong()) {
@@ -25,6 +26,7 @@ fun RestMember.hasPermissions(pred: Predicate<PermissionSet>): Mono<Boolean> {
     }
 }
 
+@Deprecated("Prefer to use PermissionService implementation")
 fun RestMember.hasElevatedPermissions(): Mono<Boolean> {
     return hasPermissions() {
         it.contains(Permission.MANAGE_GUILD) || it.contains(Permission.ADMINISTRATOR)
