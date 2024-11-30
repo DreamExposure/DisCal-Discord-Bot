@@ -9,7 +9,6 @@ import org.dreamexposure.discal.core.business.GuildSettingsService
 import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
-import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.web.WebGuild
@@ -71,7 +70,7 @@ class GetWebGuildEndpoint(
             settingsMono.flatMap { WebGuild.fromGuild(g, it) }.flatMap { wg ->
                 val member = g.member(userId)
 
-                val elevatedMono = member.hasElevatedPermissions()
+                val elevatedMono = mono { permissionService.hasElevatedPermissions(guildId, userId) }
                 val discalRoleMono = mono { permissionService.hasControlRole(guildId, userId) }
 
                 Mono.zip(elevatedMono, discalRoleMono)

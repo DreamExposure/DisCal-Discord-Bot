@@ -10,7 +10,6 @@ import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
 import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.business.RsvpService
-import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
@@ -361,7 +360,7 @@ class RsvpCommand(
 
 
         // Validate control role first to reduce work
-        val hasElevatedPerms = event.interaction.member.get().hasElevatedPermissions().awaitSingle()
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
         if (!hasElevatedPerms)
             return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
                 .withEphemeral(ephemeral)

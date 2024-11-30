@@ -10,6 +10,7 @@ import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import java.time.Instant
 
 @Serializable
+@Deprecated("Use new CalendarMetadata implementation instead")
 data class CalendarData(
     @Serializable(with = SnowflakeAsStringSerializer::class)
         @SerialName("guild_id")

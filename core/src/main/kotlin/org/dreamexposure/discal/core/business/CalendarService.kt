@@ -141,6 +141,11 @@ class   CalendarService(
         return calendar
     }
 
+    suspend fun getAllCalendars(guildId: Snowflake): List<Calendar> {
+        return getAllCalendarMetadata(guildId).map { getCalendar(guildId, it.number)!! }
+
+    }
+
     suspend fun createCalendar(guildId: Snowflake, spec: Calendar.CreateSpec): Calendar {
         val calendar = calendarProviders
             .first { it.host == spec.host }

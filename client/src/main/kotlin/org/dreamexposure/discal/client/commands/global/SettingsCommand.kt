@@ -8,8 +8,8 @@ import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.EmbedService
 import org.dreamexposure.discal.core.business.GuildSettingsService
+import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.enums.time.TimeFormat
-import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
@@ -19,6 +19,7 @@ import java.util.*
 class SettingsCommand(
     private val settingsService: GuildSettingsService,
     private val embedService: EmbedService,
+    private val permissionService: PermissionService,
 ) : SlashCommand {
     override val name = "settings"
     override val hasSubcommands = true
@@ -26,7 +27,7 @@ class SettingsCommand(
 
     override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         // Validate permissions
-        val hasElevatedPerms = event.interaction.member.get().hasElevatedPermissions().awaitSingle()
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
         if (!hasElevatedPerms) return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
