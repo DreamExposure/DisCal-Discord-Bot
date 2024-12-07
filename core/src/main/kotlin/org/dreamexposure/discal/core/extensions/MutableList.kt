@@ -19,10 +19,6 @@ fun List<String>.asStringList(): String {
     return builder.toString()
 }
 
-fun MutableList<String>.setFromString(strList: String) {
-    this += strList.split(",").filter(String::isNotBlank)
-}
-
 fun List<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
     if (this.isEmpty()) return emptyMap()
 

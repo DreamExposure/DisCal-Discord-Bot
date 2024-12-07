@@ -2,7 +2,6 @@ package org.dreamexposure.discal.core.extensions
 
 import org.dreamexposure.discal.core.enums.time.BadTimezone
 import org.dreamexposure.discal.core.utils.GlobalVal
-import org.dreamexposure.discal.core.utils.ImageValidator
 import org.jsoup.Jsoup
 import java.time.ZoneId
 import java.util.*
@@ -21,14 +20,6 @@ fun String.toMarkdown(): String = GlobalVal.MARKDOWN_CONVERTER.convert(this.sani
 
 fun String.unescapeNewLines(): String = this.replace(Regex("([\\\\\\n]+)(n)"), "\n").replace("=0D=0A", "\n")
 
-fun String.isValidTimezone(): Boolean {
-    return try {
-        ZoneId.getAvailableZoneIds().contains(this) && !BadTimezone.isBad(this)
-    } catch (_: Exception) {
-        false
-    }
-}
-
 fun String.toZoneId(): ZoneId? {
     return try {
         if (!BadTimezone.isBad(this)) ZoneId.of(this) else null
@@ -36,8 +27,6 @@ fun String.toZoneId(): ZoneId? {
         null
     }
 }
-
-fun String.isValidImage(allowGif: Boolean) = ImageValidator.validate(this, allowGif)
 
 fun String.padCenter(length: Int, padChar: Char = ' '): String {
     if (this.length >= length) return this

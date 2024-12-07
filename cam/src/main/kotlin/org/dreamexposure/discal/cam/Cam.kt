@@ -27,7 +27,7 @@ class Cam {
                         .run(*args)
                 LOGGER.info(GlobalVal.STATUS, "CAM is now online")
             } catch (e: Exception) {
-                LOGGER.error(GlobalVal.DEFAULT, "'Spring error' by PANIC! at the CAM")
+                LOGGER.error(GlobalVal.DEFAULT, "'Spring error' by PANIC! at the CAM", e)
                 exitProcess(4)
             }
         }
