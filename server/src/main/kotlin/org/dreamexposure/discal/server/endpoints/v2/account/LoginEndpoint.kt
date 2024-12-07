@@ -18,11 +18,13 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/v2/account")
-class LoginEndpoint {
+class LoginEndpoint(
+    private val authentication: Authentication,
+) {
     @SecurityRequirement(disableSecurity = true, scopes = [])
     @PostMapping("/login", produces = ["application/json"])
     fun loginForKey(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
-        return Authentication.authenticate(swe).flatMap { authState ->
+        return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
@@ -34,7 +36,7 @@ class LoginEndpoint {
             //Handle request
             val key = KeyGenerator.csRandomAlphaNumericString(64)
 
-            Authentication.saveTempKey(key)
+            authentication.saveTempKey(key)
 
             //Return key
             val json = JSONObject()

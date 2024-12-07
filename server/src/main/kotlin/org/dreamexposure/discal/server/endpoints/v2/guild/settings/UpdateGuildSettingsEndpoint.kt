@@ -26,11 +26,12 @@ import java.util.*
 @RequestMapping("/v2/guild/settings")
 class UpdateGuildSettingsEndpoint(
     private val settingsService: GuildSettingsService,
+    private val authentication: Authentication,
 ) {
     @PostMapping(value = ["/update"], produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
     fun updateSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
-        return Authentication.authenticate(swe).flatMap { authState ->
+        return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))

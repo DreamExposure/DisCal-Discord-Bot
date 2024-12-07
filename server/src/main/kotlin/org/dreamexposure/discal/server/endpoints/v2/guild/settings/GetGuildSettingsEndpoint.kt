@@ -25,12 +25,13 @@ import reactor.core.publisher.Mono
 @RequestMapping("/v2/guild/settings")
 class GetGuildSettingsEndpoint(
     private val settingsService: GuildSettingsService,
+    private val authentication: Authentication,
 ) {
 
     @PostMapping(value = ["/get"], produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
     fun getSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
-        return Authentication.authenticate(swe).flatMap<String?> { authState ->
+        return authentication.authenticate(swe).flatMap<String?> { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))

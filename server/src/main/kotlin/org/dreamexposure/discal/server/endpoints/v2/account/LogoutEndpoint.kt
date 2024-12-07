@@ -16,11 +16,13 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/v2/account")
-class LogoutEndpoint {
+class LogoutEndpoint(
+    private val authentication: Authentication,
+) {
     @SecurityRequirement(disableSecurity = true, scopes = [])
     @GetMapping("/logout", produces = ["application/json"])
     fun logoutOfAccount(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
-        return Authentication.authenticate(swe).flatMap { authState ->
+        return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
@@ -30,7 +32,7 @@ class LogoutEndpoint {
             }
 
             //Handle request
-            Authentication.removeTempKey(authState.keyUsed)
+            authentication.removeTempKey(authState.keyUsed)
 
             response.rawStatusCode = GlobalVal.STATUS_SUCCESS
             return@flatMap responseMessage("Logged out")

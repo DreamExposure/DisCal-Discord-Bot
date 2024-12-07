@@ -30,11 +30,12 @@ import reactor.core.publisher.Mono
 @Deprecated("Prefer using v3 implementation, this needs to go at some point")
 class GetWebGuildEndpoint(
     private val webGuildService: WebGuildService,
+    private val authentication: Authentication,
 ) {
     @PostMapping(value = ["/get"], produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
     fun getSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
-        return Authentication.authenticate(swe).flatMap { authState ->
+        return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
