@@ -4,10 +4,7 @@ import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.core.spec.EmbedCreateSpec
 import kotlinx.coroutines.reactor.awaitSingle
-import org.dreamexposure.discal.AnnouncementWizardState
-import org.dreamexposure.discal.Application
-import org.dreamexposure.discal.CalendarWizardState
-import org.dreamexposure.discal.GitProperty
+import org.dreamexposure.discal.*
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
@@ -324,6 +321,109 @@ class EmbedService(
 
         if (event.image.isNotBlank())
             builder.thumbnail(event.image)
+
+        return builder.build()
+    }
+
+    suspend fun eventWizardEmbed(wizard: EventWizardState, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .title(getEmbedMessage("event", "wizard.title", settings.locale))
+            .footer(getEmbedMessage("event", "wizard.footer", settings.locale), null)
+            .color(wizard.entity.color.asColor())
+
+        if (!wizard.entity.name.isNullOrBlank()) builder.addField(
+            getEmbedMessage("event", "wizard.field.name", settings.locale),
+            wizard.entity.name.toMarkdown().embedFieldSafe(),
+            false
+        ) else builder.addField(
+            getEmbedMessage("event", "wizard.field.name", settings.locale),
+            getCommonMsg("embed.unset", settings.locale),
+            false
+        )
+
+        if (!wizard.entity.description.isNullOrBlank()) builder.addField(
+            getEmbedMessage("event", "wizard.field.desc", settings.locale),
+            wizard.entity.description.toMarkdown().embedFieldSafe(),
+            false
+        ) else builder.addField(
+            getEmbedMessage("event", "wizard.field.desc", settings.locale),
+            getCommonMsg("embed.unset", settings.locale),
+            false
+        )
+
+        if (!wizard.entity.location.isNullOrBlank()) builder.addField(
+            getEmbedMessage("event", "wizard.field.location", settings.locale),
+            wizard.entity.location.toMarkdown().embedFieldSafe(),
+            false
+        ) else builder.addField(
+            getEmbedMessage("event", "wizard.field.location", settings.locale),
+            getCommonMsg("embed.unset", settings.locale),
+            false
+        )
+
+        if (wizard.entity.start != null) builder.addField(
+            getEmbedMessage("event", "wizard.field.start", settings.locale),
+            wizard.entity.start.humanReadableFull(wizard.entity.timezone, settings.interfaceStyle.timeFormat),
+            true
+        ) else builder.addField(
+            getEmbedMessage("event", "wizard.field.start", settings.locale),
+            getCommonMsg("embed.unset", settings.locale),
+            true
+        )
+
+        if (wizard.entity.end != null) builder.addField(
+            getEmbedMessage("event", "wizard.field.end", settings.locale),
+            wizard.entity.end.humanReadableFull(wizard.entity.timezone, settings.interfaceStyle.timeFormat),
+            true
+        ) else builder.addField(
+            getEmbedMessage("event", "wizard.field.end", settings.locale),
+            getCommonMsg("embed.unset", settings.locale),
+            true
+        )
+
+        if (wizard.entity.recurrence != null) builder.addField(
+            getEmbedMessage("event", "wizard.field.recurrence", settings.locale),
+            wizard.entity.recurrence.toHumanReadable(),
+            true
+        ) else if (wizard.editing && wizard.entity.id != null && wizard.entity.id.contains("_")) builder.addField(
+            getEmbedMessage("event", "wizard.field.recurrence", settings.locale),
+            getEmbedMessage("event", "wizard.field.recurrence.child", settings.locale, wizard.entity.id.split("_")[0]),
+            false,
+        ) else builder.addField(
+            getEmbedMessage("event", "wizard.field.recurrence", settings.locale),
+            getCommonMsg("embed.unset", settings.locale),
+            true
+        )
+
+        builder.addField(getEmbedMessage("event", "wizard.field.timezone", settings.locale), wizard.entity.timezone.id, false)
+
+        if (wizard.editing)
+            builder.addField(getEmbedMessage("event", "wizard.field.id", settings.locale), wizard.entity.id!!, true)
+        builder.addField(getEmbedMessage("event", "wizard.field.calendar", settings.locale), wizard.entity.calendarNumber.toString(), true)
+
+        if (wizard.entity.image != null)
+            builder.image(wizard.entity.image)
+
+        // Handle displaying warnings
+        val warnings = mutableListOf<String>()
+
+        if (wizard.entity.name.isNullOrBlank()) {
+            warnings.add(getEmbedMessage("event", "warning.wizard.noName", settings.locale))
+        }
+        // Checking end time is not needed
+        if (wizard.entity.start != null && wizard.entity.start.isBefore(Instant.now())) {
+            warnings.add(getEmbedMessage("event", "warning.wizard.past", settings.locale))
+        }
+        if (wizard.entity.start != null && wizard.entity.end != null) {
+            if (Duration.between(wizard.entity.start, wizard.entity.end).toDays() > 30) {
+                warnings.add(getEmbedMessage("event", "warning.wizard.veryLong", settings.locale))
+            }
+
+        }
+        if (warnings.isNotEmpty()) {
+            val warnText = "```fix\n${warnings.joinToString("\n")}\n```"
+            builder.addField(getEmbedMessage("event", "wizard.field.warnings", settings.locale), warnText, false)
+        }
 
         return builder.build()
     }

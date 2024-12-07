@@ -6,7 +6,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
 import java.net.MalformedURLException
-import java.net.URL
+import java.net.URI
 import java.time.Duration
 import javax.imageio.ImageIO
 import javax.imageio.ImageReader
@@ -14,7 +14,7 @@ import javax.imageio.ImageReader
 object ImageValidator {
     fun validate(url: String, allowGif: Boolean): Mono<Boolean> {
         return Mono.fromCallable {
-            val image = ImageIO.read(URL(url))
+            val image = ImageIO.read(URI.create(url).toURL())
             image != null
         }.subscribeOn(Schedulers.boundedElastic())
                 .onErrorResume(IOException::class.java) {
@@ -26,7 +26,7 @@ object ImageValidator {
 
     private fun validateGif(url: String): Mono<Boolean> {
         return Mono.fromCallable {
-            val connection = URL(url).openConnection()
+            val connection = URI.create(url).toURL().openConnection()
             connection.connectTimeout = Duration.ofSeconds(3).toMillis().toInt()
             connection.readTimeout = Duration.ofSeconds(3).toMillis().toInt()
 
@@ -49,7 +49,7 @@ object ImageValidator {
 
                 reader.setInput(stream, true, true)
                 reader.read(0, reader.defaultReadParam)
-            } catch (ignore: Exception) {
+            } catch (_: Exception) {
 
             } finally {
                 reader?.dispose()

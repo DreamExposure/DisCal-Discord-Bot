@@ -56,6 +56,22 @@ data class Event(
     ////////////////////////////
     ////// Nested classes //////
     ////////////////////////////
+    data class PartialEvent(
+        val id: String?,
+        val guildId: Snowflake,
+        val calendarNumber: Int,
+        val name: String?,
+        val description: String?,
+        val location: String?,
+        val color: EventColor,
+        val start: Instant?,
+        val end: Instant?,
+        val recur: Boolean,
+        val recurrence: Recurrence?,
+        val image: String?,
+        val timezone: ZoneId,
+    )
+
     data class CreateSpec(
         val name: String?,
         val description: String?,

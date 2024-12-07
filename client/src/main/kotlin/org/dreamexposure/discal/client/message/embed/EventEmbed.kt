@@ -45,6 +45,7 @@ object EventEmbed : EmbedMaker {
         return builder.build()
     }
 
+    @Deprecated("Prefer to use EmbedService impl")
     fun pre(guild: Guild, settings: GuildSettings, event: PreEvent): EmbedCreateSpec {
         val builder = defaultBuilder(guild, settings)
             .title(getMessage("event", "wizard.title", settings))
