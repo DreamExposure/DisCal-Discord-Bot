@@ -6,7 +6,6 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.dreamexposure.discal.EventWizardState
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
@@ -15,6 +14,7 @@ import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.event.EventFrequency
 import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.`object`.new.Event
+import org.dreamexposure.discal.core.`object`.new.EventWizardState
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.ImageValidator
 import org.dreamexposure.discal.core.utils.getCommonMsg

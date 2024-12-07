@@ -9,9 +9,7 @@ import org.dreamexposure.discal.core.crypto.AESEncryption
 import org.dreamexposure.discal.core.database.CalendarMetadataData
 import org.dreamexposure.discal.core.database.CalendarMetadataRepository
 import org.dreamexposure.discal.core.exceptions.NotFoundException
-import org.dreamexposure.discal.core.`object`.new.Calendar
-import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
-import org.dreamexposure.discal.core.`object`.new.Event
+import org.dreamexposure.discal.core.`object`.new.*
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component

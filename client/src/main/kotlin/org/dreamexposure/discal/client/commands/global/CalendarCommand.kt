@@ -5,7 +5,6 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
-import org.dreamexposure.discal.CalendarWizardState
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
@@ -14,6 +13,7 @@ import org.dreamexposure.discal.core.extensions.toZoneId
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
+import org.dreamexposure.discal.core.`object`.new.CalendarWizardState
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component

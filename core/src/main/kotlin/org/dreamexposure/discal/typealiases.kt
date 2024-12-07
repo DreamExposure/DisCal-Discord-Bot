@@ -5,11 +5,6 @@ import org.dreamexposure.discal.core.cache.CacheRepository
 import org.dreamexposure.discal.core.`object`.new.*
 import org.dreamexposure.discal.core.`object`.new.model.discal.cam.TokenV1Model
 
-// Wizards
-typealias AnnouncementWizardState = WizardState<Announcement>
-typealias EventWizardState = WizardState<Event.PartialEvent>
-typealias CalendarWizardState = WizardState<Calendar>
-
 // Cache
 typealias GuildSettingsCache = CacheRepository<Snowflake, GuildSettings>
 typealias CredentialsCache = CacheRepository<Int, Credential>
