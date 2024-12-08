@@ -587,8 +587,7 @@ class EventCommand(
             getMessage("confirm.success.edit", settings)
         else getMessage("confirm.success.create", settings)
 
-        // TODO: This needs tested.
-        //  Basically, since the first followup is just editing the original, what if I delete the original defer message and then create a non-ephemeral followup???
+        // Basically, since the first followup is just editing the original, what if I delete the original defer message and then create a non-ephemeral followup???
         event.interactionResponse.deleteInitialResponse().awaitSingleOrNull()
 
         return event.createFollowup(message)
@@ -760,8 +759,7 @@ class EventCommand(
 
         val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
         return if (calendarEvent != null) {
-            // TODO: This needs tested.
-            //  Basically, since the first followup is just editing the original, what if I delete the original defer message and then create a non-ephemeral followup???
+            // Basically, since the first followup is just editing the original, what if I delete the original defer message and then create a non-ephemeral followup???
             event.interactionResponse.deleteInitialResponse().awaitSingleOrNull()
 
             event.createFollowup()
