@@ -289,6 +289,10 @@ class   CalendarService(
             .first { it.host == calendar.metadata.host }
             .updateEvent(calendar, spec)
 
+        // This should make sure that any recurring children are removed from cache if this was a recurring parent being updated
+        eventCache.getAll(guildId)
+            .filter { it.id.startsWith(event.id) }
+            .forEach { eventCache.evict(guildId, it.id) }
         eventCache.put(guildId, event.id, event)
 
         cancelEventWizard(guildId, event.id)
@@ -305,7 +309,11 @@ class   CalendarService(
         calendarProviders
             .first { it.host == calendar.metadata.host }
             .deleteEvent(calendar, id)
-        eventCache.evict(guildId, id)
+
+        // Make sure if this is a recurring parent, we delete all children from cache
+        eventCache.getAll(guildId)
+            .filter { it.id.startsWith(id) }
+            .forEach { eventCache.evict(guildId, it.id) }
 
         eventMetadataService.deleteEventMetadata(guildId, id)
         announcementService.deleteAnnouncements(guildId, id)
