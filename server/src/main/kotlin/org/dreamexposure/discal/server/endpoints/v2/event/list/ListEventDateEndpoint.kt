@@ -26,7 +26,7 @@ import java.time.Instant
 
 @RestController
 @RequestMapping("/v2/events/list")
-class ListEventMonthEndpoint(
+class ListEventDateEndpoint(
     private val authentication: Authentication,
     private val calendarService: CalendarService,
     private val objectMapper: ObjectMapper
