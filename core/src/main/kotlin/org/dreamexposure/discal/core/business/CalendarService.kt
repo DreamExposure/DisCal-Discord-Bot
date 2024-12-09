@@ -219,6 +219,9 @@ class   CalendarService(
             .getEvent(calendar, id)
         if (event != null) eventCache.put(guildId, id, event)
 
+        // Since the underlying implementation will emit an error on a non 200/404 condition, we can safely do this
+        if (event == null) announcementService.deleteAnnouncements(guildId, id)
+
         return event
     }
 

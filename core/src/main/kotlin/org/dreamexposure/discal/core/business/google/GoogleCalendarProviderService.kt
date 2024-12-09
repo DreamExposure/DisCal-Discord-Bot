@@ -132,6 +132,7 @@ class GoogleCalendarProviderService(
     /////////
     override suspend fun getEvent(calendar: Calendar, id: String): Event? {
         val response = googleCalendarApiWrapper.getEvent(calendar.metadata, id)
+        if (response.code != 404 && response.code != 200) throw ApiException(response.error?.error, response.error?.exception)
         if (response.entity == null) return null
         val baseEvent = response.entity
 
