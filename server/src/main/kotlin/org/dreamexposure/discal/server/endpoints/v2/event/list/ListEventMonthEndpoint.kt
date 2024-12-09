@@ -1,15 +1,17 @@
-package org.dreamexposure.discal.server.endpoints.v2.calendar
+package org.dreamexposure.discal.server.endpoints.v2.event.list
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.mono
-import org.dreamexposure.discal.core.logger.LOGGER
+import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.business.CalendarService
+import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.new.model.discal.v2.EventListV2Model
+import org.dreamexposure.discal.core.`object`.new.model.discal.v2.EventV2Model
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.springframework.http.server.reactive.ServerHttpResponse
@@ -20,9 +22,6 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
 import java.time.Instant
-import kotlinx.serialization.encodeToString
-import org.dreamexposure.discal.core.`object`.new.model.discal.v2.EventV2Model
-
 
 @RestController
 @RequestMapping("/v2/events/list")
@@ -50,12 +49,14 @@ class ListEventMonthEndpoint(
 
             mono { calendarService.getCalendar(guildId, calendarNumber) }.flatMap { calendar ->
                 mono { calendarService.getEventsInMonth(guildId, calendarNumber, start, daysInMonth) }.map { events ->
-                    events.map { objectMapper.writeValueAsString(EventV2Model(it, calendar)) }
+                    events.map { EventV2Model(it, calendar) }
                 }
-            }.map(::JSONArray)
-                .map { JSONObject().put("events", it).put("message", "Success").toString() }
+            }
+                .map { EventListV2Model(it, "Success") }
+                .map { objectMapper.writeValueAsString(it) }
                 .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
-                .switchIfEmpty(responseMessage("Calendar not found")
+                .switchIfEmpty(
+                    responseMessage("Calendar not found")
                     .doOnNext { response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND }
                 )
         }.onErrorResume(JSONException::class.java) {

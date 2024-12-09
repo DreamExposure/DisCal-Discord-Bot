@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server.endpoints.v2.event.list
 
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.mono
@@ -25,14 +26,14 @@ import java.time.Instant
 
 @RestController
 @RequestMapping("/v2/events/list")
-class ListEventRangeEndpoint(
+class ListEventMonthEndpoint(
     private val authentication: Authentication,
     private val calendarService: CalendarService,
-    private val objectMapper: ObjectMapper,
+    private val objectMapper: ObjectMapper
 ) {
-    @PostMapping("/range", produces = ["application/json"])
+    @PostMapping("/date", produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
-    fun listByRange(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
+    fun listByMonth(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
@@ -63,7 +64,7 @@ class ListEventRangeEndpoint(
             response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
             return@onErrorResume responseMessage("Bad Request")
         }.onErrorResume {
-            LOGGER.error(GlobalVal.DEFAULT, "[API-v2] list events by range error", it)
+            LOGGER.error(GlobalVal.DEFAULT, "[API-v2] list events by date error", it)
 
             response.rawStatusCode = GlobalVal.STATUS_INTERNAL_ERROR
             return@onErrorResume responseMessage("Internal Server Error")
