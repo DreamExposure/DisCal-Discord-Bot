@@ -9,6 +9,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
+import org.dreamexposure.discal.core.business.ImageValidationService
 import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.event.EventFrequency
@@ -16,7 +17,6 @@ import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.`object`.new.Event
 import org.dreamexposure.discal.core.`object`.new.EventWizardState
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
-import org.dreamexposure.discal.core.utils.ImageValidator
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import java.time.*
@@ -28,6 +28,7 @@ class EventCommand(
     private val permissionService: PermissionService,
     private val calendarService: CalendarService,
     private val embedService: EmbedService,
+    private val imageValidationService: ImageValidationService,
 ) : SlashCommand {
     override val name = "event"
     override val hasSubcommands = true
@@ -447,7 +448,7 @@ class EventCommand(
             .awaitSingle()
 
         // Check if provided link is actually an image we can consume
-        val isValidImage = ImageValidator.validate(image, settings.patronGuild || settings.devGuild).awaitSingle()
+        val isValidImage = imageValidationService.validate(image, settings.patronGuild || settings.devGuild)
         if (!isValidImage) return event.createFollowup(getMessage("image.failure", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
