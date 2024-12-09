@@ -9,6 +9,7 @@ import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
 import org.dreamexposure.discal.core.business.PermissionService
+import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.extensions.toZoneId
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Calendar
@@ -29,9 +30,11 @@ class CalendarCommand(
     override val name = "calendar"
     override val hasSubcommands = true
     override val ephemeral = true
+    private val OVERVIEW_EVENT_COUNT = Config.CALENDAR_OVERVIEW_DEFAULT_EVENT_COUNT.getInt()
 
     override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return when (event.options[0].name) {
+            "view" -> view(event, settings)
             "create" -> create(event, settings)
             "name" -> name(event, settings)
             "description" -> description(event, settings)
@@ -43,6 +46,34 @@ class CalendarCommand(
             "edit" -> edit(event, settings)
             else -> throw IllegalStateException("Invalid subcommand specified")
         }
+    }
+
+    private suspend fun view(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val showOverview = event.options[0].getOption("overview")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asBoolean)
+            .orElse(true)
+        val calendarNumber = event.options[0].getOption("calendar")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
+
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        if (calendar == null) {
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        }
+
+        val events = if (showOverview)
+            calendarService.getUpcomingEvents(settings.guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
+        else null
+
+        return event.createFollowup()
+            .withEmbeds(embedService.linkCalendarEmbed(calendar, events))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 
     private suspend fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
