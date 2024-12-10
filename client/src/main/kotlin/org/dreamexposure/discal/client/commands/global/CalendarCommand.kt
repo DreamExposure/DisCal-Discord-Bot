@@ -35,6 +35,7 @@ class CalendarCommand(
     override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return when (event.options[0].name) {
             "view" -> view(event, settings)
+            "list" -> list(event, settings)
             "create" -> create(event, settings)
             "name" -> name(event, settings)
             "description" -> description(event, settings)
@@ -74,6 +75,34 @@ class CalendarCommand(
             .withEmbeds(embedService.linkCalendarEmbed(calendar, events))
             .withEphemeral(ephemeral)
             .awaitSingle()
+    }
+
+    private suspend fun list(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val calendars = calendarService.getAllCalendars(settings.guildId)
+
+        if (calendars.isEmpty()) {
+            return event.createFollowup(getMessage("list.success.none", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        } else if (calendars.size == 1) {
+            return event.createFollowup(getMessage("list.success.one", settings))
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.linkCalendarEmbed(calendars[0]))
+                .awaitSingle()
+        } else {
+            val response = event.createFollowup(getMessage("list.success.many", settings, "${calendars.size}"))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+            calendars.forEach {
+                event.createFollowup()
+                    .withEmbeds(embedService.linkCalendarEmbed(it))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
+            }
+
+            return response
+        }
     }
 
     private suspend fun create(event: ChatInputInteractionEvent, settings: GuildSettings): Message {

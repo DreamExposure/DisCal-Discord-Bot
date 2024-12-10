@@ -24,6 +24,12 @@
       ]
     },
     {
+      "name": "list",
+      "type": 1,
+      "description": "Lists all calendars owned by the guild",
+      "required": false
+    },
+    {
       "name": "create",
       "type": 1,
       "description": "Starts the calendar creation wizard",
