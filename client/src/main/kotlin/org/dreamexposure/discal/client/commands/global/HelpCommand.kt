@@ -14,7 +14,7 @@ class HelpCommand : SlashCommand {
     override val hasSubcommands = false
     override val ephemeral = true
 
-    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return event.createFollowup(
             getMessage("error.workInProgress", settings, "${Config.URL_BASE.getString()}/commands")
         ).withEphemeral(ephemeral).awaitSingle()

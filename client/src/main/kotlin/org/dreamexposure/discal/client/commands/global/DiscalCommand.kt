@@ -20,7 +20,7 @@ class DiscalCommand(
     override val hasSubcommands = false
     override val ephemeral = false
 
-    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val announcementCount = announcementService.getAnnouncementCount()
         val calendarCount = calendarService.getCalendarCount()
         val guildCount = event.client.guilds.count().awaitSingle()

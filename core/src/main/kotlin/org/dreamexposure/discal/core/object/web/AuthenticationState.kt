@@ -4,7 +4,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
+@ConsistentCopyVisibility
 @Serializable
+@Deprecated("Prefer to use new authentication implementations.")
 data class AuthenticationState private constructor(
         @Transient
         val success: Boolean = true,

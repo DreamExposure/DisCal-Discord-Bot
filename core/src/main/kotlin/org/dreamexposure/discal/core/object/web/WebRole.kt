@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.LongAsStringSerializer
 import org.dreamexposure.discal.core.`object`.new.model.discal.WebRoleV3Model
 
-@Suppress("DataClassPrivateConstructor")
+@ConsistentCopyVisibility
 @Serializable
 @Deprecated("Prefer to use WebRoleV3Model instead")
 data class WebRole private constructor(

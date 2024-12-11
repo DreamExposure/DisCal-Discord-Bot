@@ -24,7 +24,7 @@ class DisplayCalendarCommand(
     override val ephemeral = true
 
 
-    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return when (event.options[0].name) {
             "new" -> new(event, settings)
             else -> throw IllegalStateException("Invalid subcommand specified")

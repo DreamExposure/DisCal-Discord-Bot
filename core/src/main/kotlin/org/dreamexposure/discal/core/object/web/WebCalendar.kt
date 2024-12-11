@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.`object`.new.model.discal.CalendarV3Model
 
+@ConsistentCopyVisibility
 @Serializable
 @Deprecated("Prefer to use the CalendarV3Model impl")
 data class WebCalendar internal constructor(

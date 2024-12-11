@@ -26,7 +26,7 @@ class EventsCommand(
     override val ephemeral = false
 
 
-    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return when (event.options[0].name) {
             "upcoming" -> upcomingEvents(event, settings)
             "ongoing" -> ongoingEvents(event, settings)

@@ -27,7 +27,7 @@ class RsvpCommand(
     override val ephemeral = true
 
 
-    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return when (event.options[0].name) {
             "ontime" -> onTime(event, settings)
             "late" -> late(event, settings)

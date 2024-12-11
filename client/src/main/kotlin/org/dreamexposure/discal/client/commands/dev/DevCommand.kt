@@ -22,7 +22,7 @@ class DevCommand(
     override val hasSubcommands = true
     override val ephemeral = true
 
-    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         // Validate this user is actually a dev
         if (!GlobalVal.devUserIds.contains(event.interaction.user.id))
             return event.createFollowup(getMessage("error.notDeveloper", settings))

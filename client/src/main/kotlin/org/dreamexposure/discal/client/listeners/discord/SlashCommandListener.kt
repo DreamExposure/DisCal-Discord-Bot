@@ -38,7 +38,7 @@ class SlashCommandListener(
 
                 val settings = settingsService.getSettings(event.interaction.guildId.get())
 
-                command.suspendHandle(event, settings)
+                command.handle(event, settings)
             } catch (e: Exception) {
                 LOGGER.error(DEFAULT, "Error handling slash command | $event", e)
 

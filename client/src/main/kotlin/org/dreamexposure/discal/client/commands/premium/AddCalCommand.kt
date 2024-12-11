@@ -20,7 +20,7 @@ class AddCalCommand(
     override val hasSubcommands = false
     override val ephemeral = true
 
-    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         //TODO: Remove dev-only and switch to patron-only once this is completed
         if (!settings.devGuild) return event.createFollowup(getCommonMsg("error.disabled", settings.locale))
             .withEphemeral(ephemeral)
