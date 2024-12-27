@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -138,11 +139,9 @@ allprojects {
 subprojects {
     tasks {
         withType<KotlinCompile> {
-            @Suppress("DEPRECATION")
-            // FIXME: This is marked as deprecated but the related link does not seem to work, and no quick fix is available
-            kotlinOptions {
-                freeCompilerArgs = listOf("-Xjsr305=strict")
-                jvmTarget = java.targetCompatibility.majorVersion
+            compilerOptions {
+                freeCompilerArgs.set(listOf("-Xjsr305=strict"))
+                jvmTarget.set(JvmTarget.fromTarget(java.targetCompatibility.majorVersion))
             }
         }
     }
