@@ -37,16 +37,16 @@ class StatusUpdateCronJob(
         "Version {version}",
         "{calendar_count} calendars managed!",
         "Now has interactions!",
+        "Delay, Deny, Defend",
         "Proudly written in Kotlin using Discord4J",
         "Free Palestine!",
         "https://discalbot.com",
-        "I swear DisCal isn't abandoned",
         "Powered by Discord4J v{d4j_version}",
         "{shards} total shards!",
         "Slava Ukraini!",
         "Support DisCal on Patreon",
         "{announcement_count} announcements running!",
-        "Finally fixing the annoying stuff"
+        "Now the real improvements begin"
     )
 
     override fun run(args: ApplicationArguments?) {
