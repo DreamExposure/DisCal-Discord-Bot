@@ -13,6 +13,7 @@ import org.dreamexposure.discal.core.business.ImageValidationService
 import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.event.EventFrequency
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.`object`.new.Event
 import org.dreamexposure.discal.core.`object`.new.EventWizardState
@@ -552,37 +553,53 @@ class EventCommand(
                 .awaitSingle()
         }
 
-        // TODO: Should probably wrap this in a try/catch
-        val confirmedEvent = if (existingWizard.editing) calendarService.updateEvent(
-            guildId = existingWizard.guildId,
-            existingWizard.entity.calendarNumber,
-            spec = Event.UpdateSpec(
-                id = existingWizard.entity.id!!,
-                name = existingWizard.entity.name,
-                description = existingWizard.entity.description,
-                start = existingWizard.entity.start!!,
-                end = existingWizard.entity.end!!,
-                color = existingWizard.entity.color,
-                location = existingWizard.entity.location,
-                image = existingWizard.entity.image,
-                recur = existingWizard.entity.recur,
-                recurrence = existingWizard.entity.recurrence,
+        // Attempt to confirm event
+        val confirmedEvent = try {
+            if (existingWizard.editing) calendarService.updateEvent(
+                guildId = existingWizard.guildId,
+                existingWizard.entity.calendarNumber,
+                spec = Event.UpdateSpec(
+                    id = existingWizard.entity.id!!,
+                    name = existingWizard.entity.name,
+                    description = existingWizard.entity.description,
+                    start = existingWizard.entity.start!!,
+                    end = existingWizard.entity.end!!,
+                    color = existingWizard.entity.color,
+                    location = existingWizard.entity.location,
+                    image = existingWizard.entity.image,
+                    recur = existingWizard.entity.recur,
+                    recurrence = existingWizard.entity.recurrence,
+                )
+            ) else calendarService.createEvent(
+                guildId = existingWizard.guildId,
+                existingWizard.entity.calendarNumber,
+                spec = Event.CreateSpec(
+                    name = existingWizard.entity.name,
+                    description = existingWizard.entity.description,
+                    start = existingWizard.entity.start!!,
+                    end = existingWizard.entity.end!!,
+                    color = existingWizard.entity.color,
+                    location = existingWizard.entity.location,
+                    image = existingWizard.entity.image,
+                    recur = existingWizard.entity.recur,
+                    recurrence = existingWizard.entity.recurrence,
+                )
             )
-        ) else calendarService.createEvent(
-            guildId = existingWizard.guildId,
-            existingWizard.entity.calendarNumber,
-            spec = Event.CreateSpec(
-                name = existingWizard.entity.name,
-                description = existingWizard.entity.description,
-                start = existingWizard.entity.start!!,
-                end = existingWizard.entity.end!!,
-                color = existingWizard.entity.color,
-                location = existingWizard.entity.location,
-                image = existingWizard.entity.image,
-                recur = existingWizard.entity.recur,
-                recurrence = existingWizard.entity.recurrence,
-            )
-        )
+        } catch (exception: Exception) {
+            LOGGER.error("Failed to confirm event with unexpected exception in UI level", exception)
+            null
+        }
+
+        if (confirmedEvent == null) {
+            val message = if (existingWizard.editing)
+                getMessage("confirm.failure.edit", settings)
+            else getMessage("confirm.failure.create", settings)
+
+            return event.createFollowup(message)
+                .withEphemeral(ephemeral)
+                .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
+                .awaitSingle()
+        }
 
         val message = if (existingWizard.editing)
             getMessage("confirm.success.edit", settings)
