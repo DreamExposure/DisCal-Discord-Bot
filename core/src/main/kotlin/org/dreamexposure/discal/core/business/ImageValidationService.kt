@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.springframework.stereotype.Component
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -24,6 +25,9 @@ class ImageValidationService {
         } catch (_: MalformedURLException) {
             false
         } catch (_: FileNotFoundException) {
+            false
+        } catch (ex: Exception) {
+            LOGGER.error("Image validation failed with unexpected exception", ex)
             false
         }
     }
