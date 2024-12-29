@@ -81,6 +81,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     LOGGING_WEBHOOKS_ALL_ERRORS("bot.logging.webhooks.all-error", false),
 
     INTEGRATIONS_UPDATE_BOT_LIST_SITES("bot.integrations.update-bot-sites", false),
+    INTEGRATIONS_REACTOR_METRICS("bot.integrations.reactor.metrics", false),
 
     ANNOUNCEMENT_PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT("bot.announcement.process-global-default-upcoming-events", 30),
 

@@ -13,7 +13,7 @@ class DiscordConfig {
     fun discordClient(): DiscordClient {
         return DiscordClientBuilder.create(Config.SECRET_BOT_TOKEN.getString())
             .setReactorResources(ReactorResources.builder()
-                .httpClient(ReactorResources.DEFAULT_HTTP_CLIENT.get().metrics(true) { s -> s })
+                .httpClient(ReactorResources.DEFAULT_HTTP_CLIENT.get().metrics(Config.INTEGRATIONS_REACTOR_METRICS.getBoolean()) { s -> s })
                 .build()
             ).build()
     }
