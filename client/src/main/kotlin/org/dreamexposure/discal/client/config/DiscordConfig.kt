@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.client.config
 
+import discord4j.common.ReactorResources
 import discord4j.common.store.Store
 import discord4j.common.store.legacy.LegacyStoreLayout
 import discord4j.core.DiscordClient
@@ -12,7 +13,6 @@ import discord4j.core.shard.MemberRequestFilter
 import discord4j.core.shard.ShardingStrategy
 import discord4j.discordjson.json.GuildData
 import discord4j.discordjson.json.MessageData
-import discord4j.gateway.GatewayReactorResources
 import discord4j.gateway.intent.Intent
 import discord4j.gateway.intent.IntentSet
 import discord4j.store.api.mapping.MappingStoreService
@@ -41,13 +41,10 @@ class DiscordConfig {
         stores: StoreService
     ): GatewayDiscordClient {
         return DiscordClientBuilder.create(Config.SECRET_BOT_TOKEN.getString())
-            .build().gateway()
-            .setGatewayReactorResources { resources ->
-                GatewayReactorResources
-                    .builder(resources)
-                    .httpClient(resources.httpClient.metrics(true) { s -> s })
-                    .build()
-            }
+            .setReactorResources(ReactorResources.builder()
+                .httpClient(ReactorResources.DEFAULT_HTTP_CLIENT.get().metrics(true) { s -> s })
+                .build()
+            ).build().gateway()
             .setEnabledIntents(getIntents())
             .setSharding(getStrategy())
             .setStore(Store.fromLayout(LegacyStoreLayout.of(stores)))
