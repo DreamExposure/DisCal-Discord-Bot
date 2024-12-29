@@ -12,6 +12,7 @@ import discord4j.core.shard.MemberRequestFilter
 import discord4j.core.shard.ShardingStrategy
 import discord4j.discordjson.json.GuildData
 import discord4j.discordjson.json.MessageData
+import discord4j.gateway.GatewayReactorResources
 import discord4j.gateway.intent.Intent
 import discord4j.gateway.intent.IntentSet
 import discord4j.store.api.mapping.MappingStoreService
@@ -41,6 +42,12 @@ class DiscordConfig {
     ): GatewayDiscordClient {
         return DiscordClientBuilder.create(Config.SECRET_BOT_TOKEN.getString())
             .build().gateway()
+            .setGatewayReactorResources { resources ->
+                GatewayReactorResources
+                    .builder(resources)
+                    .httpClient(resources.httpClient.metrics(true) { s -> s })
+                    .build()
+            }
             .setEnabledIntents(getIntents())
             .setSharding(getStrategy())
             .setStore(Store.fromLayout(LegacyStoreLayout.of(stores)))
