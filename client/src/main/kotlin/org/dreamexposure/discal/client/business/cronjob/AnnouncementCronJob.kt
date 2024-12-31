@@ -35,19 +35,23 @@ class AnnouncementCronJob(
     }
 
     private fun doAction() = mono {
-        val taskTimer = StopWatch()
-        taskTimer.start()
+        try {
+            val taskTimer = StopWatch()
+            taskTimer.start()
 
-        val guilds = discordClient.guilds.collectList().awaitSingle()
+            val guilds = discordClient.guilds.collectList().awaitSingle()
 
-        guilds.forEach { guild ->
-            try {
-                announcementService.processAnnouncementsForGuild(guild.id, maxDifference)
-            } catch (ex: Exception) {
-                LOGGER.error("Failed to process announcements for guild | guildId:${guild.id.asLong()}", ex)
+            guilds.forEach { guild ->
+                try {
+                    announcementService.processAnnouncementsForGuild(guild.id, maxDifference)
+                } catch (ex: Exception) {
+                    LOGGER.error("Failed to process announcements for guild | guildId:${guild.id.asLong()}", ex)
+                }
             }
+            taskTimer.stop()
+            metricService.recordAnnouncementTaskDuration("cronjob", taskTimer.totalTimeMillis)
+        } catch (ex: Exception) {
+            LOGGER.error(DEFAULT, "Announcement task failed for all guilds", ex)
         }
-        taskTimer.stop()
-        metricService.recordAnnouncementTaskDuration("cronjob", taskTimer.totalTimeMillis)
     }
 }

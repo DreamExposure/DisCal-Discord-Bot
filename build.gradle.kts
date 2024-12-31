@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -27,7 +28,7 @@ buildscript {
 allprojects {
     //Project props
     group = "org.dreamexposure.discal"
-    version = "4.2.6"
+    version = "4.2.7"
     description = "DisCal"
 
     //Plugins
@@ -50,6 +51,7 @@ allprojects {
     val googleServicesCalendarVersion: String by properties
     val googleOauthClientVersion: String by properties
     // Various libs
+    val okhttpVersion: String by properties
     val copyDownVersion: String by properties
     val jsoupVersion: String by properties
 
@@ -88,7 +90,7 @@ allprojects {
         implementation("org.springframework.boot:spring-boot-starter-actuator")
 
         // Database
-        implementation("io.asyncer:r2dbc-mysql")
+        implementation("io.asyncer:r2dbc-mysql:1.3.0") // TODO: Remove hard coded version once spring includes this in bom as it is a breaking change
         implementation("com.mysql:mysql-connector-j")
 
         // Serialization
@@ -101,6 +103,7 @@ allprojects {
         implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
         implementation("ch.qos.logback.contrib:logback-jackson:$logbackContribVersion")
         implementation("io.micrometer:micrometer-registry-prometheus")
+        implementation("io.projectreactor:reactor-core-micrometer")
 
         // Google libs
         implementation("com.google.api-client:google-api-client:$googleApiClientVersion")
@@ -111,6 +114,7 @@ allprojects {
 
         // Various Libs
         implementation("com.squareup.okhttp3:okhttp")
+        implementation("com.squareup.okhttp3:okhttp-coroutines:$okhttpVersion")
         implementation("io.github.furstenheim:copy_down:$copyDownVersion")
         implementation("org.jsoup:jsoup:$jsoupVersion")
     }
@@ -135,9 +139,9 @@ allprojects {
 subprojects {
     tasks {
         withType<KotlinCompile> {
-            kotlinOptions {
-                freeCompilerArgs = listOf("-Xjsr305=strict")
-                jvmTarget = java.targetCompatibility.majorVersion
+            compilerOptions {
+                freeCompilerArgs.set(listOf("-Xjsr305=strict"))
+                jvmTarget.set(JvmTarget.fromTarget(java.targetCompatibility.majorVersion))
             }
         }
     }
@@ -146,7 +150,7 @@ subprojects {
 tasks {
     wrapper {
         distributionType = ALL
-        gradleVersion = "8.2.1"
+        gradleVersion = "8.10.2"
     }
 
     bootJar {

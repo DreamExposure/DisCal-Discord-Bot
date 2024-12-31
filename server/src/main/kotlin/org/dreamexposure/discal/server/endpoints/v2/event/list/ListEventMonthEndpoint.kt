@@ -1,16 +1,17 @@
 package org.dreamexposure.discal.server.endpoints.v2.event.list
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import discord4j.common.util.Snowflake
-import discord4j.core.DiscordClient
+import kotlinx.coroutines.reactor.mono
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
-import org.dreamexposure.discal.core.entities.Event
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.new.model.discal.v2.EventListV2Model
+import org.dreamexposure.discal.core.`object`.new.model.discal.v2.EventV2Model
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
-import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import org.springframework.http.server.reactive.ServerHttpResponse
@@ -24,11 +25,15 @@ import java.time.Instant
 
 @RestController
 @RequestMapping("/v2/events/list")
-class ListEventMonthEndpoint(val client: DiscordClient) {
+class ListEventMonthEndpoint(
+    private val authentication: Authentication,
+    private val calendarService: CalendarService,
+    private val objectMapper: ObjectMapper,
+) {
     @PostMapping("/month", produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
     fun listByMonth(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
-        return Authentication.authenticate(swe).flatMap { authState ->
+        return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
@@ -41,16 +46,19 @@ class ListEventMonthEndpoint(val client: DiscordClient) {
             val start = Instant.ofEpochMilli(body.getLong("epoch_start"))
             val daysInMonth = body.getInt("days_in_month")
 
-            return@flatMap client.getGuildById(guildId).getCalendar(calendarNumber)
-                    .flatMapMany { it.getEventsInMonth(start, daysInMonth) }
-                    .map(Event::toJson)
-                    .collectList()
-                    .map(::JSONArray)
-                    .map { JSONObject().put("events", it).put("message", "Success").toString() }
-                    .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
-                    .switchIfEmpty(responseMessage("Calendar not found")
-                            .doOnNext { response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND }
-                    )
+
+            mono { calendarService.getCalendar(guildId, calendarNumber) }.flatMap { calendar ->
+                mono { calendarService.getEventsInMonth(guildId, calendarNumber, start, daysInMonth) }.map { events ->
+                    events.map { EventV2Model(it, calendar) }
+                }
+            }
+                .map { EventListV2Model(it, "Success") }
+                .map { objectMapper.writeValueAsString(it) }
+                .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
+                .switchIfEmpty(
+                    responseMessage("Calendar not found")
+                    .doOnNext { response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND }
+                )
         }.onErrorResume(JSONException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 

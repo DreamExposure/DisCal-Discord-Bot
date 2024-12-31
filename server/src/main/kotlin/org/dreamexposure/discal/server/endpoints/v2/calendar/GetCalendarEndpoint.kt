@@ -1,12 +1,13 @@
 package org.dreamexposure.discal.server.endpoints.v2.calendar
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import discord4j.common.util.Snowflake
-import discord4j.core.DiscordClient
+import kotlinx.coroutines.reactor.mono
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
-import org.dreamexposure.discal.core.entities.Calendar
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.new.model.discal.v2.CalendarV2Model
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
@@ -22,11 +23,15 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/v2/calendar")
-class GetCalendarEndpoint(val client: DiscordClient) {
+class GetCalendarEndpoint(
+    private val authentication: Authentication,
+    private val calendarService: CalendarService,
+    private val objectMapper: ObjectMapper,
+) {
     @PostMapping("/get", produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
     fun getCalendar(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
-        return Authentication.authenticate(swe).flatMap { authState ->
+        return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
@@ -37,12 +42,12 @@ class GetCalendarEndpoint(val client: DiscordClient) {
             val guildId = Snowflake.of(body.getString("guild_id"))
             val calNumber = body.getInt("calendar_number")
 
-            return@flatMap client.getGuildById(guildId).getCalendar(calNumber)
-                    .map(Calendar::toJson)
-                    .map(JSONObject::toString)
-                    .switchIfEmpty(responseMessage("Calendar not found")
-                            .doOnNext { response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND }
-                    )
+            return@flatMap mono {calendarService.getCalendar(guildId, calNumber) }
+                .map(::CalendarV2Model)
+                .map { objectMapper.writeValueAsString(it) }
+                .switchIfEmpty(responseMessage("Calendar not found")
+                    .doOnNext { response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND }
+                )
         }.onErrorResume(JSONException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 

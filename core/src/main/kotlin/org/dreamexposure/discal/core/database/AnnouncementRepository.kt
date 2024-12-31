@@ -7,6 +7,9 @@ import reactor.core.publisher.Mono
 
 interface AnnouncementRepository: R2dbcRepository<AnnouncementData, String> {
 
+    @Query("SELECT COUNT(*) FROM announcements")
+    fun countAll(): Mono<Long>
+
     fun findByGuildIdAndAnnouncementId(guildId: Long, announcementId: String): Mono<AnnouncementData>
 
     fun findAllByGuildId(guildId: Long): Flux<AnnouncementData>
@@ -77,4 +80,13 @@ interface AnnouncementRepository: R2dbcRepository<AnnouncementData, String> {
     fun deleteByAnnouncementId(announcementId: String): Mono<Void>
 
     fun deleteAllByGuildIdAndEventId(guildId: Long, eventId: String): Mono<Void>
+
+    fun deleteAllByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<Void>
+
+    @Query("""
+        UPDATE announcements
+        SET calendar_number = calendar_number - 1
+        WHERE calendar_number >= :calendarNumber AND guild_id = :guildId
+    """)
+    fun decrementCalendarsByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<Long>
 }

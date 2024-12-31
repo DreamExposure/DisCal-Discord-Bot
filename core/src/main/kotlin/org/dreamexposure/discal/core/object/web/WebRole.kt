@@ -1,14 +1,13 @@
 package org.dreamexposure.discal.core.`object`.web
 
-import discord4j.core.`object`.entity.Role
-import discord4j.discordjson.json.RoleData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.LongAsStringSerializer
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.new.model.discal.WebRoleV3Model
 
-@Suppress("DataClassPrivateConstructor")
+@ConsistentCopyVisibility
 @Serializable
+@Deprecated("Prefer to use WebRoleV3Model instead")
 data class WebRole private constructor(
         @Serializable(with = LongAsStringSerializer::class)
         val id: Long,
@@ -20,22 +19,11 @@ data class WebRole private constructor(
 
         val everyone: Boolean,
 ) {
-    companion object {
-        fun fromRole(r: Role, settings: GuildSettings): WebRole {
-            val controlRole =
-                    if (r.isEveryone && settings.controlRole.equals("everyone", true)) true
-                    else settings.controlRole == r.id.asString()
-
-            return WebRole(r.id.asLong(), r.name, r.isManaged, controlRole, r.isEveryone)
-        }
-
-        fun fromRole(r: RoleData, settings: GuildSettings): WebRole {
-            val everyone = r.id().asString() == settings.guildID.asString()
-            val controlRole =
-                    if (everyone && settings.controlRole.equals("everyone", true)) true
-                    else settings.controlRole == r.id().asString()
-
-            return WebRole(r.id().asLong(), r.name(), r.managed(), controlRole, everyone)
-        }
-    }
+    constructor(newModel: WebRoleV3Model): this(
+        id = newModel.id.asLong(),
+        name = newModel.name,
+        managed = newModel.managed,
+        controlRole = newModel.controlRole,
+        everyone = newModel.everyone
+    )
 }

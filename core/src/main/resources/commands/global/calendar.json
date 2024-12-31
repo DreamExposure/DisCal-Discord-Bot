@@ -3,6 +3,33 @@
   "description": "Commands for creating and modifying calendars",
   "options": [
     {
+      "name": "view",
+      "type": 1,
+      "description": "Provides info and a link to the Guild's calendar",
+      "required": false,
+      "options": [
+        {
+          "name": "overview",
+          "type": 5,
+          "description": "Whether to display the next 15 upcoming events in the response (default true)",
+          "required": false
+        },
+        {
+          "name": "calendar",
+          "type": 4,
+          "description": "The calendar to display. Defaults to 1",
+          "required": false,
+          "min_value": 1
+        }
+      ]
+    },
+    {
+      "name": "list",
+      "type": 1,
+      "description": "Lists all calendars owned by the guild",
+      "required": false
+    },
+    {
       "name": "create",
       "type": 1,
       "description": "Starts the calendar creation wizard",

@@ -3,16 +3,11 @@ package org.dreamexposure.discal.core.spring
 import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
-import org.dreamexposure.discal.core.config.Config
+import org.dreamexposure.discal.core.business.api.CamApiWrapper
 import org.dreamexposure.discal.core.extensions.spring.writeJsonString
+import org.dreamexposure.discal.core.`object`.new.model.discal.cam.SecurityValidateV1Request
 import org.dreamexposure.discal.core.`object`.rest.ErrorResponse
-import org.dreamexposure.discal.core.`object`.rest.v1.security.ValidateRequest
-import org.dreamexposure.discal.core.`object`.rest.v1.security.ValidateResponse
-import org.dreamexposure.discal.core.utils.GlobalVal.JSON
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -26,8 +21,8 @@ import reactor.core.publisher.Mono
 @Component
 @ConditionalOnProperty(name = ["discal.security.enabled"], havingValue = "true")
 class SecurityWebFilter(
+    private val camApiWrapper: CamApiWrapper,
     private val handlerMapping: RequestMappingHandlerMapping,
-    private val httpClient: OkHttpClient,
     private val objectMapper: ObjectMapper,
 ) : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
@@ -68,30 +63,20 @@ class SecurityWebFilter(
         }
 
         // Use CAM to validate token
-        val requestBody = ValidateRequest(authHeader, authAnnotation.schemas.toList(), authAnnotation.scopes.toList())
-        val request = Request.Builder()
-            .url("${Config.URL_CAM.getString()}/v1/security/validate")
-            .post(objectMapper.writeValueAsString(requestBody).toRequestBody(JSON))
-            .header("Authorization", "Int ${Config.SECRET_DISCAL_API_KEY.getString()}")
-            .header("Content-Type", "application/json")
-            .build()
+        val requestBody = SecurityValidateV1Request(authHeader, authAnnotation.schemas.toList(), authAnnotation.scopes.toList())
 
-        val response = httpClient.newCall(request).execute()
-        if (response.isSuccessful) {
-            val responseBody = objectMapper.readValue(response.body!!.string(), ValidateResponse::class.java)
-            response.close()
+        val response = camApiWrapper.validateToken(requestBody)
 
-            if (!responseBody.valid) {
-                exchange.response.statusCode = responseBody.code
-                exchange.response.writeJsonString(
-                    objectMapper.writeValueAsString(ErrorResponse(responseBody.message))
-                ).awaitFirstOrNull()
-                return
-            }
-        } else {
-            val responseBody = objectMapper.readValue(response.body!!.string(), ErrorResponse::class.java)
-            response.close()
-            throw IllegalStateException("Failed to validate token | ${response.code} | ${responseBody.message}")
+        if (response.code != 200) {
+            throw IllegalStateException("Failed to validate token | ${response.code} | ${response.error?.error}")
+        }
+
+        if (!response.entity!!.valid) {
+            exchange.response.statusCode = response.entity.code
+            exchange.response.writeJsonString(
+                objectMapper.writeValueAsString(ErrorResponse(response.entity.message))
+            ).awaitFirstOrNull()
+            return
         }
 
         // If we made it here, everything is good to go.

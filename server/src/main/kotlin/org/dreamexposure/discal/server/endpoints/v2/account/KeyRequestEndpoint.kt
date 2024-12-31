@@ -18,11 +18,13 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/v2/account/key")
-class KeyRequestEndpoint {
+class KeyRequestEndpoint(
+    private val authentication: Authentication,
+) {
     @SecurityRequirement(disableSecurity = true, scopes = [])
     @PostMapping("/readonly/get", produces = ["application/json"])
     fun getReadOnlyKey(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
-        return Authentication.authenticate(swe).flatMap { authState ->
+        return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
@@ -34,7 +36,7 @@ class KeyRequestEndpoint {
             //Handle request
             val key = KeyGenerator.csRandomAlphaNumericString(64)
 
-            Authentication.saveReadOnlyKey(key)
+            authentication.saveReadOnlyKey(key)
 
             //Return key
             val json = JSONObject()

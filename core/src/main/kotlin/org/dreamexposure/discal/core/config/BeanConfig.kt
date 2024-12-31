@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import discord4j.common.JacksonResources
+import io.micrometer.core.instrument.binder.okhttp3.OkHttpObservationInterceptor
+import io.micrometer.observation.ObservationRegistry
 import okhttp3.OkHttpClient
 import org.dreamexposure.discal.core.serializers.DurationMapper
 import org.dreamexposure.discal.core.serializers.SnowflakeMapper
@@ -31,7 +33,14 @@ class BeanConfig {
     }
 
     @Bean
-    fun httpClient(): OkHttpClient {
-        return OkHttpClient()
+    fun httpClient(registry: ObservationRegistry): OkHttpClient {
+        val interceptor = OkHttpObservationInterceptor.builder(registry, "okhttp.requests")
+            // This can lead to tag cardinality explosion as it doesn't use uri patterns, should investigate options for that one day
+            .uriMapper { it.url.encodedPath }
+            .build()
+
+        return OkHttpClient.Builder()
+            .addInterceptor(interceptor)
+            .build()
     }
 }

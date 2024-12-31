@@ -1,12 +1,13 @@
 package org.dreamexposure.discal.server.endpoints.v2.guild.settings
 
 import discord4j.common.util.Snowflake
+import kotlinx.coroutines.reactor.mono
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
-import org.dreamexposure.discal.core.database.DatabaseManager
-import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
+import org.dreamexposure.discal.core.business.GuildSettingsService
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
@@ -19,14 +20,18 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
+import java.util.*
 
 @RestController
 @RequestMapping("/v2/guild/settings")
-class UpdateGuildSettingsEndpoint {
+class UpdateGuildSettingsEndpoint(
+    private val settingsService: GuildSettingsService,
+    private val authentication: Authentication,
+) {
     @PostMapping(value = ["/update"], produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
     fun updateSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
-        return Authentication.authenticate(swe).flatMap { authState ->
+        return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
@@ -39,16 +44,15 @@ class UpdateGuildSettingsEndpoint {
             val body = JSONObject(rBody)
             val guildId = Snowflake.of(body.getString("guild_id"))
 
-            DatabaseManager.getSettings(guildId).flatMap { settings ->
+            mono { settingsService.getSettings(guildId) }.flatMap { settings ->
                 //Handle various things that are allowed to change
-                val conRole = body.optString("control_role", settings.controlRole)
-                val aStyle = body.optInt("announcement_style", settings.announcementStyle.value)
-                val lang = body.optString("lang", settings.lang)
-                val prefix = body.optString("prefix", settings.prefix)
-                val timeFormat = body.optInt("time_format", settings.timeFormat.value)
+                val conRole = body.optString("control_role", settings.controlRole?.asString() ?: "everyone")
+                val aStyle = body.optInt("announcement_style", settings.interfaceStyle.announcementStyle.value)
+                val lang = body.optString("lang", settings.locale.toLanguageTag())
+                val timeFormat = body.optInt("time_format", settings.interfaceStyle.timeFormat.value)
                 var patronGuild = settings.patronGuild
                 var devGuild = settings.devGuild
-                var branded = settings.branded
+                var branded = settings.interfaceStyle.branded
                 var maxCals = settings.maxCalendars
 
                 //Allow official DisCal shards to change some extra stuff
@@ -59,20 +63,24 @@ class UpdateGuildSettingsEndpoint {
                     maxCals = body.optInt("max_calendars", maxCals)
                 }
 
-                val newSettings = settings.copy(controlRole = conRole,
-                      announcementStyle = AnnouncementStyle.fromValue(aStyle),
-                      timeFormat = TimeFormat.fromValue(timeFormat),
-                      lang = lang,
-                      prefix = prefix, patronGuild = patronGuild,
-                      devGuild = devGuild, maxCalendars = maxCals,
-                      branded = branded
+                val newSettings = settings.copy(
+                    controlRole = if (conRole.equals("everyone", true)) null else Snowflake.of(conRole),
+                    interfaceStyle = settings.interfaceStyle.copy(
+                        announcementStyle = GuildSettings.AnnouncementStyle.entries.first { it.value == aStyle },
+                        timeFormat = TimeFormat.fromValue(timeFormat),
+                        branded = branded,
+                    ),
+                    locale = Locale.forLanguageTag(lang),
+                    patronGuild = patronGuild,
+                    devGuild = devGuild,
+                    maxCalendars = maxCals,
                 )
 
-                DatabaseManager.updateSettings(newSettings)
-                      .then(responseMessage("Success"))
-                      .doOnNext {
-                          response.rawStatusCode = GlobalVal.STATUS_SUCCESS
-                      }
+                mono { settingsService.upsertSettings(newSettings) }
+                    .then(responseMessage("Success"))
+                    .doOnNext {
+                        response.rawStatusCode = GlobalVal.STATUS_SUCCESS
+                    }
             }
         }.onErrorResume(JSONException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)

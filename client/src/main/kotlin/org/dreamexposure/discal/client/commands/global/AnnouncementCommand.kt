@@ -6,19 +6,16 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
 import discord4j.rest.util.AllowedMentions
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.AnnouncementService
+import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
+import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.extensions.discord4j.followup
-import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
-import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
-import org.dreamexposure.discal.core.`object`.GuildSettings
 import org.dreamexposure.discal.core.`object`.new.Announcement
 import org.dreamexposure.discal.core.`object`.new.AnnouncementWizardState
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import kotlin.jvm.optionals.getOrNull
@@ -26,13 +23,15 @@ import kotlin.jvm.optionals.getOrNull
 @Component
 class AnnouncementCommand(
     private val announcementService: AnnouncementService,
+    private val permissionService: PermissionService,
     private val embedService: EmbedService,
+    private val calendarService: CalendarService,
 ) : SlashCommand {
     override val name = "announcement"
     override val hasSubcommands = true
     override val ephemeral = true
 
-    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return when (event.options[0].name) {
             "create" -> create(event, settings)
             "type" -> type(event, settings)
@@ -86,11 +85,13 @@ class AnnouncementCommand(
             .orElse(1)
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard already started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
         if (existingWizard != null) {
             return event.createFollowup(getMessage("error.wizard.started", settings))
                 .withEphemeral(ephemeral)
@@ -99,11 +100,11 @@ class AnnouncementCommand(
         }
 
         val newWizard = AnnouncementWizardState(
-            guildId = settings.guildID,
+            guildId = settings.guildId,
             userId = event.interaction.user.id,
             editing = false,
             entity = Announcement(
-                guildId = settings.guildID,
+                guildId = settings.guildId,
                 calendarNumber = calendar,
                 type = type,
                 channelId = channelId,
@@ -127,14 +128,17 @@ class AnnouncementCommand(
             .get()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+
 
         val altered = existingWizard.copy(
             entity = existingWizard.entity.copy(
@@ -158,11 +162,13 @@ class AnnouncementCommand(
             .get()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
@@ -177,19 +183,16 @@ class AnnouncementCommand(
         }
 
         // Validate event actually exists
-        val calendarEvent = event.interaction.guild
-            .flatMap { it.getCalendar(announcement.calendarNumber) }
-            .flatMap { it.getEvent(eventId) }
-            .awaitSingleOrNull()
+        val calendarEvent = calendarService.getEvent(announcement.guildId, announcement.calendarNumber, eventId)
         if (calendarEvent == null) {
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings))
+            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
                 .awaitSingle()
         }
 
         // Handle what format the ID is actually saved in
-        val idToSet = if (announcement.type == Announcement.Type.RECUR) calendarEvent.eventId.split("_")[0]
+        val idToSet = if (announcement.type == Announcement.Type.RECUR) calendarEvent.id.split("_")[0]
         else eventId
 
         val alteredWizard = existingWizard.copy(entity = announcement.copy(eventId = idToSet))
@@ -210,11 +213,13 @@ class AnnouncementCommand(
             .get()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
@@ -243,11 +248,13 @@ class AnnouncementCommand(
             .orElse(event.interaction.channelId)
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
@@ -270,11 +277,13 @@ class AnnouncementCommand(
             .get()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
@@ -297,11 +306,13 @@ class AnnouncementCommand(
             .orElse(0)
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
@@ -324,11 +335,13 @@ class AnnouncementCommand(
             .getOrNull()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
@@ -351,11 +364,13 @@ class AnnouncementCommand(
             .get()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
@@ -377,11 +392,13 @@ class AnnouncementCommand(
             .get()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
@@ -389,7 +406,7 @@ class AnnouncementCommand(
 
         // Confirm guild has access to feature
         if (!settings.patronGuild) {
-            return event.createFollowup(getCommonMsg("error.patronOnly", settings))
+            return event.createFollowup(getCommonMsg("error.patronOnly", settings.locale))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
                 .awaitSingle()
@@ -406,11 +423,13 @@ class AnnouncementCommand(
 
     private suspend fun review(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
@@ -423,11 +442,13 @@ class AnnouncementCommand(
 
     private suspend fun confirm(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard not started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
             ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
@@ -451,7 +472,7 @@ class AnnouncementCommand(
 
         if (existingWizard.editing) announcementService.updateAnnouncement(announcement)
         else announcementService.createAnnouncement(announcement)
-        announcementService.cancelWizard(settings.guildID, event.interaction.user.id)
+        announcementService.cancelWizard(settings.guildId, event.interaction.user.id)
 
         val message = if (existingWizard.editing) getMessage("confirm.success.edit", settings)
         else getMessage("confirm.success.create", settings)
@@ -464,10 +485,12 @@ class AnnouncementCommand(
 
     private suspend fun cancel(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
-        announcementService.cancelWizard(settings.guildID, event.interaction.user.id)
+        announcementService.cancelWizard(settings.guildId, event.interaction.user.id)
 
         return event.createFollowup(getMessage("cancel.success", settings))
             .withEphemeral(ephemeral)
@@ -481,11 +504,13 @@ class AnnouncementCommand(
             .get()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard already started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
         if (existingWizard != null) {
             return event.createFollowup(getMessage("error.wizard.started", settings))
                 .withEphemeral(ephemeral)
@@ -493,11 +518,13 @@ class AnnouncementCommand(
                 .awaitSingle()
         }
 
-        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
-            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
+        val announcement = announcementService.getAnnouncement(settings.guildId, announcementId)
+            ?: return event.createFollowup(getCommonMsg("error.notFound.announcement", settings.locale))
+                .withEphemeral(true)
+                .awaitSingle()
 
         val newWizard = AnnouncementWizardState(
-            guildId = settings.guildID,
+            guildId = settings.guildId,
             userId = event.interaction.user.id,
             editing = true,
             entity = announcement
@@ -517,11 +544,13 @@ class AnnouncementCommand(
             .get()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
         // Check if wizard already started
-        val existingWizard = announcementService.getWizard(settings.guildID, event.interaction.user.id)
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
         if (existingWizard != null) {
             return event.createFollowup(getMessage("error.wizard.started", settings))
                 .withEphemeral(ephemeral)
@@ -529,11 +558,13 @@ class AnnouncementCommand(
                 .awaitSingle()
         }
 
-        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
-            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
+        val announcement = announcementService.getAnnouncement(settings.guildId, announcementId)
+            ?: return event.createFollowup(getCommonMsg("error.notFound.announcement", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
 
         val newWizard = AnnouncementWizardState(
-            guildId = settings.guildID,
+            guildId = settings.guildId,
             userId = event.interaction.user.id,
             editing = false,
             entity = announcement.copy(id = KeyGenerator.generateAnnouncementId())
@@ -553,12 +584,12 @@ class AnnouncementCommand(
             .get()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
-        // If announcement is being edited, cancel the editor
-        announcementService.cancelWizard(settings.guildID, announcementId)
-        announcementService.deleteAnnouncement(settings.guildID, announcementId)
+        announcementService.deleteAnnouncement(settings.guildId, announcementId)
 
         return event.createFollowup(getMessage("delete.success", settings))
             .withEphemeral(ephemeral)
@@ -576,11 +607,15 @@ class AnnouncementCommand(
             .get()
 
         // Validate permissions
-        val hasControlRole = event.interaction.member.get().hasControlRole().awaitSingle()
-        if (!hasControlRole) return event.followup(getCommonMsg("error.perms.privileged", settings)).awaitSingle()
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
 
-        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
-            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
+        val announcement = announcementService.getAnnouncement(settings.guildId, announcementId)
+            ?: return event.createFollowup(getCommonMsg("error.notFound.announcement", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
 
         val new = announcement.copy(enabled = enabled)
         announcementService.updateAnnouncement(new)
@@ -600,8 +635,10 @@ class AnnouncementCommand(
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
 
-        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
-            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
+        val announcement = announcementService.getAnnouncement(settings.guildId, announcementId)
+            ?: return event.createFollowup(getCommonMsg("error.notFound.announcement", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
 
         return event.createFollowup()
             .withEphemeral(ephemeral)
@@ -633,11 +670,13 @@ class AnnouncementCommand(
             .getOrNull()
 
         // Get filtered announcements
-        val announcements = announcementService.getAllAnnouncements(settings.guildID, type, showDisabled)
+        val announcements = announcementService.getAllAnnouncements(settings.guildId, type, showDisabled)
             .filter { it.calendarNumber == calendar }
 
         return if (announcements.isEmpty()) {
-            event.followupEphemeral(getMessage("list.success.none", settings)).awaitSingle()
+            event.createFollowup(getMessage("list.success.none", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
         } else if (announcements.size == 1) {
             event.createFollowup()
                 .withEphemeral(ephemeral)
@@ -648,10 +687,15 @@ class AnnouncementCommand(
         } else {
             val limit = if (amount > 0) amount.coerceAtMost(announcements.size) else announcements.size
 
-            val message = event.followupEphemeral(getMessage("list.success.many", settings, "$limit")).awaitSingle()
+            val message = event.createFollowup(getMessage("list.success.many", settings, "$limit"))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
 
             announcements.subList(0, limit).forEach { announcement ->
-                event.followupEphemeral(embedService.condensedAnnouncementEmbed(announcement, settings)).awaitSingle()
+                event.createFollowup()
+                    .withEmbeds(embedService.condensedAnnouncementEmbed(announcement, settings))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
             }
 
             message
@@ -674,8 +718,10 @@ class AnnouncementCommand(
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
             .getOrNull()
 
-        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
-            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
+        val announcement = announcementService.getAnnouncement(settings.guildId, announcementId)
+            ?: return event.createFollowup(getCommonMsg("error.notFound.announcement", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
 
         var newSubs = announcement.subscribers
         if (userId != null) newSubs = newSubs.copy(users = newSubs.users + userId)
@@ -707,8 +753,10 @@ class AnnouncementCommand(
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
             .getOrNull()
 
-        val announcement = announcementService.getAnnouncement(settings.guildID, announcementId)
-            ?: return event.followupEphemeral(getCommonMsg("error.notFound.announcement", settings)).awaitSingle()
+        val announcement = announcementService.getAnnouncement(settings.guildId, announcementId)
+            ?: return event.createFollowup(getCommonMsg("error.notFound.announcement", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
 
         var newSubs = announcement.subscribers
         if (userId != null) newSubs = newSubs.copy(users = newSubs.users - userId)

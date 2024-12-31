@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.ReactiveStringRedisTemplate
 
 @Configuration
 class CacheConfig {
+    private val settingsTtl = Config.CACHE_TTL_SETTINGS_MINUTES.getLong().asMinutes()
     private val credentialsTll = Config.CACHE_TTL_CREDENTIALS_MINUTES.getLong().asMinutes()
     private val oauthStateTtl = Config.CACHE_TTL_OAUTH_STATE_MINUTES.getLong().asMinutes()
     private val calendarTtl = Config.CACHE_TTL_CALENDAR_MINUTES.getLong().asMinutes()
@@ -20,9 +21,17 @@ class CacheConfig {
     private val staticMessageTtl = Config.CACHE_TTL_STATIC_MESSAGE_MINUTES.getLong().asMinutes()
     private val announcementTll = Config.CACHE_TTL_ANNOUNCEMENT_MINUTES.getLong().asMinutes()
     private val wizardTtl = Config.TIMING_WIZARD_TIMEOUT_MINUTES.getLong().asMinutes()
+    private val calendarTokenTtl = Config.CACHE_TTL_CALENDAR_TOKEN_MINUTES.getLong().asMinutes()
+    private val eventTtl = Config.CACHE_TTL_EVENTS_MINUTES.getLong().asMinutes()
 
 
     // Redis caching
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun guildSettingsRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): GuildSettingsCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "GuildSettings", settingsTtl)
+
     @Bean
     @Primary
     @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
@@ -34,6 +43,12 @@ class CacheConfig {
     @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
     fun oauthStateRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): OauthStateCache =
     RedisStringCacheRepository(objectMapper, redisTemplate, "OauthStates", oauthStateTtl)
+
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun calendarMetadataRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): CalendarMetadataCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "CalendarMetadata", calendarTtl)
 
     @Bean
     @Primary
@@ -65,13 +80,37 @@ class CacheConfig {
     fun announcementWizardRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): AnnouncementWizardStateCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "AnnouncementWizards", wizardTtl)
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun eventWizardRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): EventWizardStateCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "EventWizards", wizardTtl)
+
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun calendarWizardRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): CalendarWizardStateCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "CalendarWizards", wizardTtl)
+
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun eventRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): EventCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "Events", eventTtl)
+
 
     // In-memory fallback caching
+    @Bean
+    fun guildSettingsFallbackCache(): GuildSettingsCache = JdkCacheRepository(settingsTtl)
+
     @Bean
     fun credentialsFallbackCache(): CredentialsCache = JdkCacheRepository(credentialsTll)
 
     @Bean
     fun oauthStateFallbackCache(): OauthStateCache = JdkCacheRepository(oauthStateTtl)
+
+    @Bean
+    fun calendarMetadataFallbackCache(): CalendarMetadataCache = JdkCacheRepository(calendarTtl)
 
     @Bean
     fun calendarFallbackCache(): CalendarCache = JdkCacheRepository(calendarTtl)
@@ -87,4 +126,16 @@ class CacheConfig {
 
     @Bean
     fun announcementWizardFallbackCache(): AnnouncementWizardStateCache = JdkCacheRepository(wizardTtl)
+
+    @Bean
+    fun eventWizardFallbackCache(): EventWizardStateCache = JdkCacheRepository(wizardTtl)
+
+    @Bean
+    fun calendarWizardFallbackCache(): CalendarWizardStateCache = JdkCacheRepository(wizardTtl)
+
+    @Bean
+    fun calendarTokenFallbackCache(): CalendarTokenCache = JdkCacheRepository(calendarTokenTtl)
+
+    @Bean
+    fun eventFallbackCache(): EventCache = JdkCacheRepository(eventTtl)
 }

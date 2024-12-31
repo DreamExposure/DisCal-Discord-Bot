@@ -1,15 +1,18 @@
 package org.dreamexposure.discal.server.endpoints.v2.guild
 
 import discord4j.common.util.Snowflake
-import discord4j.core.DiscordClient
+import kotlinx.coroutines.reactor.mono
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
+import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
-import org.dreamexposure.discal.core.extensions.discord4j.hasControlRole
-import org.dreamexposure.discal.core.extensions.discord4j.hasElevatedPermissions
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.web.WebCalendar
 import org.dreamexposure.discal.core.`object`.web.WebGuild
+import org.dreamexposure.discal.core.`object`.web.WebRole
 import org.dreamexposure.discal.core.utils.GlobalVal
+import org.dreamexposure.discal.server.business.WebGuildService
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
 import org.json.JSONException
@@ -21,15 +24,18 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import reactor.function.TupleUtils
 
 @RestController
 @RequestMapping("/v2/guild")
-class GetWebGuildEndpoint(val client: DiscordClient) {
+@Deprecated("Prefer using v3 implementation, this needs to go at some point")
+class GetWebGuildEndpoint(
+    private val webGuildService: WebGuildService,
+    private val authentication: Authentication,
+) {
     @PostMapping(value = ["/get"], produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
     fun getSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
-        return Authentication.authenticate(swe).flatMap { authState ->
+        return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
@@ -40,22 +46,39 @@ class GetWebGuildEndpoint(val client: DiscordClient) {
             val guildId = Snowflake.of(body.getString("guild_id"))
             val userId = Snowflake.of(body.getString("user_id"))
 
-            val g = client.getGuildById(guildId)
+            // This is so stupid, but I need to map these objects to maintain
+            // existing compatibility because I can't be assed to update a several year old website that is deprecated
 
-            WebGuild.fromGuild(g).flatMap { wg ->
-                val member = g.member(userId)
+            mono { webGuildService.getWebGuildForUser(guildId, userId) }.map { newModel ->
+                val oldModel = WebGuild(
+                    id = newModel.id.asLong(),
+                    name = newModel.name,
+                    iconUrl = newModel.iconUrl,
+                    settings = GuildSettings(
+                        guildID = newModel.settings.guildId,
+                        controlRole = newModel.settings.controlRole?.asString() ?: "everyone",
+                        announcementStyle = AnnouncementStyle.fromValue(newModel.settings.interfaceStyle.announcementStyle.value),
+                        timeFormat = newModel.settings.interfaceStyle.timeFormat,
+                        lang = newModel.settings.locale.toLanguageTag(),
+                        prefix = "!",
+                        patronGuild = newModel.settings.patronGuild,
+                        devGuild = newModel.settings.devGuild,
+                        maxCalendars = newModel.settings.maxCalendars,
+                        branded = newModel.settings.interfaceStyle.branded,
+                        eventKeepDuration = newModel.settings.eventKeepDuration,
+                    ),
+                    botNick = newModel.botNickname,
+                    elevatedAccess = newModel.userHasElevatedAccess,
+                    discalRole = newModel.userHasDisCalControlRole,
+                    calendar = if (newModel.calendars.isNotEmpty()) WebCalendar(newModel.calendars[0]) else WebCalendar.empty(),
+                )
+                oldModel.roles.addAll(newModel.roles.map(::WebRole))
 
-                val elevatedMono = member.hasElevatedPermissions()
-                val discalRoleMono = member.hasControlRole()
-
-                Mono.zip(elevatedMono, discalRoleMono)
-                        .map(TupleUtils.function { elevated, discalRole ->
-                            wg.elevatedAccess = elevated
-                            wg.discalRole = discalRole
-
-                            wg
-                        }).map { GlobalVal.JSON_FORMAT.encodeToString(it) }
-                        .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
+                oldModel
+            }.map {
+                GlobalVal.JSON_FORMAT.encodeToString(it)
+            }.doOnNext {
+                response.rawStatusCode = GlobalVal.STATUS_SUCCESS
             }
         }.onErrorResume(BotNotInGuildException::class.java) {
             response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND

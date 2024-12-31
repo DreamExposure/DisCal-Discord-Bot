@@ -5,10 +5,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.enums.announcement.AnnouncementType
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.time.GoodTimezone
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.new.Announcement
 import org.dreamexposure.discal.core.`object`.web.WebPartialGuild
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.web.handler.DiscordAccountHandler
@@ -96,9 +96,9 @@ class DiscordLoginHandler(
                             //Saving session and access info into memory...
                             val model = accountHandler.createDefaultModel()
                             model["logged_in"] = true
-                            model["good_timezones"] = GoodTimezone.values()
-                            model["announcement_types"] = AnnouncementType.values()
-                            model["event_colors"] = EventColor.values()
+                            model["good_timezones"] = GoodTimezone.entries
+                            model["announcement_types"] = Announcement.Type.entries
+                            model["event_colors"] = EventColor.entries
 
                             //User info
                             model["id"] = userInfo.getString("id")

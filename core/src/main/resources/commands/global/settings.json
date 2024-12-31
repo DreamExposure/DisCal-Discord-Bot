@@ -18,7 +18,7 @@
           "name": "role",
           "type": 8,
           "description": "The role required to use privileged commands",
-          "required": true
+          "required": false
         }
       ]
     },

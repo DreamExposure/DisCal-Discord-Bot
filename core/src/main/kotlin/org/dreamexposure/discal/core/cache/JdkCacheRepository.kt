@@ -19,14 +19,14 @@ class JdkCacheRepository<K : Any, V>(override val ttl: Duration) : CacheReposito
     override suspend fun put(guildId: Snowflake?, key: K, value: V) {
         val guildedMap = getGuildedCache(guildId)
 
-        guildedMap[key] = Pair(Instant.now().plus(ttl), value)
+        guildedMap[key] = Pair(Instant.now().plus(ttlWithJitter), value)
         cache[guildId] = guildedMap
     }
 
     override suspend fun putMany(guildId: Snowflake?, values: Map<K, V>) {
         val guildedMap = getGuildedCache(guildId)
 
-        guildedMap.putAll(values.mapValues { Pair(Instant.now().plus(ttl), it.value) })
+        guildedMap.putAll(values.mapValues { Pair(Instant.now().plus(ttlWithJitter), it.value) })
         cache[guildId] = guildedMap
     }
 

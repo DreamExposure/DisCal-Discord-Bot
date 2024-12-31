@@ -5,8 +5,7 @@ import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.extensions.discord4j.followupEphemeral
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.springframework.stereotype.Component
 
 @Component
@@ -15,9 +14,9 @@ class HelpCommand : SlashCommand {
     override val hasSubcommands = false
     override val ephemeral = true
 
-    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
-        return event.followupEphemeral(
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        return event.createFollowup(
             getMessage("error.workInProgress", settings, "${Config.URL_BASE.getString()}/commands")
-        ).awaitSingle()
+        ).withEphemeral(ephemeral).awaitSingle()
     }
 }

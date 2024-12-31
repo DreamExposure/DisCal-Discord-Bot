@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.config
 
+import org.dreamexposure.discal.core.config.Config.entries
 import java.io.FileReader
 import java.util.*
 
@@ -29,6 +30,8 @@ enum class Config(private val key: String, private var value: Any? = null) {
     CACHE_TTL_RSVP_MINUTES("bot.cache.ttl-minutes.rsvp", 60),
     CACHE_TTL_STATIC_MESSAGE_MINUTES("bot.cache.ttl-minutes.static-messages", 60),
     CACHE_TTL_ANNOUNCEMENT_MINUTES("bot.cache.ttl-minutes.announcements", 120),
+    CACHE_TTL_CALENDAR_TOKEN_MINUTES("bot.cache.ttl-minutes.calendar", 60),
+    CACHE_TTL_EVENTS_MINUTES("bot.cache.ttl-minutes.event", 15),
 
     // Security configuration
 
@@ -64,6 +67,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
 
     // UI and UX
     EMBED_RSVP_WAITLIST_DISPLAY_LENGTH("bot.ui.embed.rsvp.waitlist.length", 3),
+    CALENDAR_OVERVIEW_DEFAULT_EVENT_COUNT("bot.ui.embed.calendar.overview.event-count", 15),
 
     // Everything else
     SHARD_COUNT("bot.sharding.count"),
@@ -77,7 +81,9 @@ enum class Config(private val key: String, private var value: Any? = null) {
     LOGGING_WEBHOOKS_ALL_ERRORS("bot.logging.webhooks.all-error", false),
 
     INTEGRATIONS_UPDATE_BOT_LIST_SITES("bot.integrations.update-bot-sites", false),
+    INTEGRATIONS_REACTOR_METRICS("bot.integrations.reactor.metrics", false),
 
+    ANNOUNCEMENT_PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT("bot.announcement.process-global-default-upcoming-events", 30),
 
     ;
 

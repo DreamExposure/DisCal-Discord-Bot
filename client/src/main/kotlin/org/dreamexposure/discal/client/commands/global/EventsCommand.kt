@@ -1,43 +1,42 @@
 package org.dreamexposure.discal.client.commands.global
 
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
+import kotlinx.coroutines.reactive.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.client.message.embed.EventEmbed
-import org.dreamexposure.discal.core.`object`.GuildSettings
-import org.dreamexposure.discal.core.extensions.discord4j.followup
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
+import org.dreamexposure.discal.core.business.CalendarService
+import org.dreamexposure.discal.core.business.EmbedService
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
-import reactor.function.TupleUtils
 import java.time.Instant
 import java.time.LocalDate
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
 @Component
-class EventsCommand : SlashCommand {
+class EventsCommand(
+    private val calendarService: CalendarService,
+    private val embedService: EmbedService,
+) : SlashCommand {
     override val name = "events"
     override val hasSubcommands = true
     override val ephemeral = false
 
-    @Deprecated("Use new handleSuspend for K-coroutines")
-    override fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         return when (event.options[0].name) {
-            "upcoming" -> upcomingEventsSubcommand(event, settings)
-            "ongoing" -> ongoingEventsSubcommand(event, settings)
-            "today" -> eventsTodaySubcommand(event, settings)
-            "range" -> eventsRangeSubcommand(event, settings)
-            else -> Mono.empty() //Never can reach this, makes compiler happy.
+            "upcoming" -> upcomingEvents(event, settings)
+            "ongoing" -> ongoingEvents(event, settings)
+            "today" -> eventsToday(event, settings)
+            "range" -> eventsRange(event, settings)
+            else -> throw IllegalStateException("Invalid subcommand specified")
         }
     }
 
-    private fun upcomingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
+    private suspend fun upcomingEvents(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -49,156 +48,165 @@ class EventsCommand : SlashCommand {
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .orElse(1)
+            .coerceIn(1, 15)
 
+        val events = calendarService.getUpcomingEvents(settings.guildId, calendarNumber, amount)
 
-        if (amount < 1 || amount > 15) {
-            return event.followup(getMessage("upcoming.failure.outOfRange", settings))
-        }
+        return if (events.isEmpty()) {
+            event.createFollowup(getMessage("upcoming.success.none", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        } else if (events.size == 1) {
+            event.createFollowup(getMessage("upcoming.success.one", settings))
+                .withEmbeds(embedService.fullEventEmbed(events[0], settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        } else {
+            val response = event.createFollowup(getMessage("upcoming.success.many", settings, "${events.size}"))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
 
-        return event.interaction.guild.flatMap { guild ->
-            guild.getCalendar(calendarNumber).flatMap { cal ->
-                cal.getUpcomingEvents(amount).collectList().flatMap { events ->
-                    if (events.isEmpty()) {
-                        event.followup(getMessage("upcoming.success.none", settings))
-                    } else if (events.size == 1) {
-                        event.followup(
-                            getMessage("upcoming.success.one", settings),
-                            EventEmbed.getFull(guild, settings, events[0])
-                        )
-                    } else {
-                        event.followup(
-                            getMessage("upcoming.success.many", settings, "${events.size}")
-                        ).flatMapMany {
-                            Flux.fromIterable(events)
-                        }.concatMap {
-                            event.followup(EventEmbed.getCondensed(guild, settings, it))
-                        }.last()
-                    }
-                }
-            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
-        }
-    }
-
-    private fun ongoingEventsSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val calendarNumber = event.options[0].getOption("calendar")
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asLong)
-            .map(Long::toInt)
-            .orElse(1)
-
-        return event.interaction.guild.flatMap { guild ->
-            guild.getCalendar(calendarNumber).flatMap { cal ->
-                cal.getOngoingEvents().collectList().flatMap { events ->
-                    if (events.isEmpty()) {
-                        event.followup(getMessage("ongoing.success.none", settings))
-                    } else if (events.size == 1) {
-                        event.followup(
-                            getMessage("ongoing.success.one", settings),
-                            EventEmbed.getFull(guild, settings, events[0])
-                        )
-                    } else {
-                        event.followup(
-                            getMessage("ongoing.success.many", settings, "${events.size}")
-                        ).flatMapMany {
-                            Flux.fromIterable(events)
-                        }.concatMap {
-                            event.followup(EventEmbed.getCondensed(guild, settings, it))
-                        }.last()
-                    }
-                }
-            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
-        }
-    }
-
-    private fun eventsTodaySubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val calendarNumber = event.options[0].getOption("calendar")
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asLong)
-            .map(Long::toInt)
-            .orElse(1)
-
-        return event.interaction.guild.flatMap { guild ->
-            guild.getCalendar(calendarNumber).flatMap { cal ->
-                cal.getEventsInNext24HourPeriod(Instant.now()).collectList().flatMap { events ->
-                    if (events.isEmpty()) {
-                        event.followup(getMessage("today.success.none", settings))
-                    } else if (events.size == 1) {
-                        event.followup(
-                            getMessage("today.success.one", settings),
-                            EventEmbed.getFull(guild, settings, events[0])
-                        )
-                    } else {
-                        event.followup(
-                            getMessage("today.success.many", settings, "${events.size}")
-                        ).flatMapMany {
-                            Flux.fromIterable(events)
-                        }.concatMap {
-                            event.followup(EventEmbed.getCondensed(guild, settings, it))
-                        }.last()
-                    }
-                }
-            }.switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
-        }
-    }
-
-    private fun eventsRangeSubcommand(event: ChatInputInteractionEvent, settings: GuildSettings): Mono<Message> {
-        val gMono = event.interaction.guild.cache()
-
-        val calMono = Mono.justOrEmpty(event.options[0].getOption("calendar").flatMap { it.value })
-            .map { it.asLong().toInt() }
-            .defaultIfEmpty(1)
-            .flatMap { num ->
-                gMono.flatMap {
-                    it.getCalendar(num)
-                }
-            }.cache()
-
-        val sMono = Mono.justOrEmpty(event.options[0].getOption("start").flatMap { it.value })
-            .map { it.asString() }
-            .flatMap { value ->
-                calMono.map {
-                    val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-
-                    LocalDate.parse(value, formatter).atStartOfDay(it.timezone)
-                }
-            }.map(ZonedDateTime::toInstant)
-
-        val eMono = Mono.justOrEmpty(event.options[0].getOption("end").flatMap { it.value })
-            .map { it.asString() }
-            .flatMap { value ->
-                calMono.map {
-                    val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
-
-                    //At end of day
-                    LocalDate.parse(value, formatter).plusDays(1).atStartOfDay(it.timezone)
-                }
-            }.map(ZonedDateTime::toInstant)
-
-        return Mono.zip(gMono, calMono, sMono, eMono).flatMap(
-            TupleUtils.function { guild, cal, start, end ->
-                cal.getEventsInTimeRange(start, end).collectList().flatMap { events ->
-                    if (events.isEmpty()) {
-                        event.followup(getMessage("range.success.none", settings))
-                    } else if (events.size == 1) {
-                        event.followup(
-                            getMessage("range.success.one", settings),
-                            EventEmbed.getFull(guild, settings, events[0])
-                        )
-                    } else if (events.size > 15) {
-                        event.followup(getMessage("range.success.tooMany", settings, "${events.size}", cal.link))
-                    } else {
-                        event.followup(
-                            getMessage("range.success.many", settings, "${events.size}")
-                        ).flatMapMany {
-                            Flux.fromIterable(events)
-                        }.concatMap {
-                            event.followup(EventEmbed.getCondensed(guild, settings, it))
-                        }.last()
-                    }
-                }
-            }).switchIfEmpty(event.followup(getCommonMsg("error.notFound.calendar", settings)))
-            .onErrorResume(DateTimeParseException::class.java) {
-                event.followup(getCommonMsg("error.format.date", settings))
+            events.forEach {
+                event.createFollowup()
+                .withEmbeds(embedService.condensedEventEmbed(it, settings))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
             }
+
+            response
+        }
+    }
+
+    private suspend fun ongoingEvents(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val calendarNumber = event.options[0].getOption("calendar")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
+
+        val events = calendarService.getOngoingEvents(settings.guildId, calendarNumber)
+
+        return if (events.isEmpty()) {
+            event.createFollowup(getMessage("ongoing.success.none", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        } else if (events.size == 1) {
+            event.createFollowup(getMessage("ongoing.success.one", settings))
+                .withEmbeds(embedService.fullEventEmbed(events[0], settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        } else {
+            val response = event.createFollowup(getMessage("ongoing.success.many", settings, "${events.size}"))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+            events.forEach {
+                event.createFollowup()
+                    .withEmbeds(embedService.condensedEventEmbed(it, settings))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
+            }
+
+            response
+        }
+    }
+
+    private suspend fun eventsToday(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val calendarNumber = event.options[0].getOption("calendar")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
+
+        val events = calendarService.getEventsInNext24HourPeriod(settings.guildId, calendarNumber, Instant.now())
+
+        return if (events.isEmpty()) {
+            event.createFollowup(getMessage("today.success.none", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        } else if (events.size == 1) {
+            event.createFollowup(getMessage("today.success.one", settings))
+                .withEmbeds(embedService.fullEventEmbed(events[0], settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        } else {
+            val response = event.createFollowup(getMessage("today.success.many", settings, "${events.size}"))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+            events.forEach {
+                event.createFollowup()
+                    .withEmbeds(embedService.condensedEventEmbed(it, settings))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
+            }
+
+            response
+        }
+    }
+
+    private suspend fun eventsRange(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val calendarNumber = event.options[0].getOption("calendar")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .orElse(1)
+        val startInput = event.options[0].getOption("start")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
+        val endInput = event.options[0].getOption("end")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .get()
+
+        val formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+
+        // In order to parse the inputs with timezone, we need to fetch the calendar
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
+        if (calendar == null) {
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        }
+
+        try {
+            val start = LocalDate.parse(startInput, formatter).atStartOfDay(calendar.timezone).toInstant()
+            val end = LocalDate.parse(endInput, formatter).plusDays(1).atStartOfDay(calendar.timezone).toInstant()
+
+            val events = calendarService.getEventsInTimeRange(settings.guildId, calendarNumber, start, end)
+
+            return if (events.isEmpty()) {
+                event.createFollowup(getMessage("range.success.none", settings))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
+            } else if (events.size == 1) {
+                event.createFollowup(getMessage("range.success.one", settings))
+                    .withEmbeds(embedService.fullEventEmbed(events[0], settings))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
+            } else if (events.size > 15) {
+                event.createFollowup(getMessage("range.success.tooMany", settings, "${events.size}", calendar.link))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
+            } else {
+                val response = event.createFollowup(getMessage("range.success.many", settings, "${events.size}"))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
+
+                events.forEach {
+                    event.createFollowup()
+                        .withEmbeds(embedService.condensedEventEmbed(it, settings))
+                        .withEphemeral(ephemeral)
+                        .awaitSingle()
+                }
+
+                response
+            }
+        } catch (_: DateTimeParseException) {
+            return event.createFollowup(getCommonMsg("error.format.date", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        }
     }
 }

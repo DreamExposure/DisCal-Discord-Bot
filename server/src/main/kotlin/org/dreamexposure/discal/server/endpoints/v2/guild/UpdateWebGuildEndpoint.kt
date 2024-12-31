@@ -22,11 +22,14 @@ import java.util.*
 
 @RestController
 @RequestMapping("/v2/guild")
-class UpdateWebGuildEndpoint(val client: DiscordClient) {
+class UpdateWebGuildEndpoint(
+    private val client: DiscordClient,
+    private val authentication: Authentication,
+) {
     @PostMapping(value = ["/update"], produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
     fun updateGuild(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
-        return Authentication.authenticate(swe).flatMap { authState ->
+        return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))

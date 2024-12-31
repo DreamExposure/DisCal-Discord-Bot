@@ -8,7 +8,7 @@ import org.dreamexposure.discal.core.extensions.asInstantMilli
 import java.time.Instant
 
 
-@Suppress("DataClassPrivateConstructor")
+@ConsistentCopyVisibility
 data class Credential private constructor(
     val credentialNumber: Int,
     var expiresAt: Instant,

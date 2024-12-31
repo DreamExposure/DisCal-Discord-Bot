@@ -5,25 +5,27 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
+import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.EmbedService
-import org.dreamexposure.discal.core.extensions.discord4j.followup
-import org.dreamexposure.discal.core.extensions.discord4j.getCalendar
-import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.config.Config
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 
 @Component
 class LinkCalendarCommand(
     private val embedService: EmbedService,
+    private val calendarService: CalendarService,
 ) : SlashCommand {
     override val name = "linkcal"
     override val hasSubcommands = false
     override val ephemeral = false
 
+    private val OVERVIEW_EVENT_COUNT = Config.CALENDAR_OVERVIEW_DEFAULT_EVENT_COUNT.getInt()
 
-    override suspend fun suspendHandle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
         val showOverview = event.getOption("overview")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asBoolean)
@@ -34,13 +36,20 @@ class LinkCalendarCommand(
             .map(Long::toInt)
             .orElse(1)
 
-        val calendar = event.interaction.guild.flatMap {
-            it.getCalendar(calendarNumber)
-        }.awaitSingleOrNull()
+        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
         if (calendar == null) {
-            return event.followup(getCommonMsg("error.notFound.calendar", settings)).awaitSingle()
+            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
         }
 
-        return event.followup(embedService.linkCalendarEmbed(calendarNumber, settings, showOverview)).awaitSingle()
+        val events = if (showOverview)
+            calendarService.getUpcomingEvents(settings.guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
+        else null
+
+        return event.createFollowup()
+            .withEmbeds(embedService.linkCalendarEmbed(calendar, events))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
     }
 }

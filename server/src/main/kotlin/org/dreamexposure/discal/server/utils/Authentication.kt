@@ -1,12 +1,14 @@
 package org.dreamexposure.discal.server.utils
 
+import kotlinx.coroutines.reactor.mono
+import org.dreamexposure.discal.core.business.ApiKeyService
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.web.AuthenticationState
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.http.HttpMethod
+import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -15,7 +17,11 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 
 //TODO: Use DI and make this an application runner as well
-object Authentication {
+@Deprecated("Prefer to use new security requirement annotation implementation")
+@Component
+class Authentication(
+    private val apiKeyService: ApiKeyService,
+) {
     init {
         Flux.interval(Duration.ofHours(1))
             .map { handleExpiredKeys() }
@@ -76,7 +82,7 @@ object Authentication {
                     )
                 }
                 else -> { //Check if key is in database...
-                    DatabaseManager.getAPIAccount(authKey).map { acc ->
+                    mono { apiKeyService.getKey(authKey) }.map { acc ->
                         if (!acc.blocked) {
                             return@map AuthenticationState(true)
                                     .status(GlobalVal.STATUS_SUCCESS)
@@ -95,7 +101,7 @@ object Authentication {
                 }
             }
         } else {
-            LOGGER.debug(DEFAULT, "Attempted to use API without auth | ${swe.request.remoteAddress}")
+            LOGGER.debug(DEFAULT, "Attempted to use API without auth | {}", swe.request.remoteAddress)
 
             return Mono.just(AuthenticationState(false)
                     .status(GlobalVal.STATUS_BAD_REQUEST)

@@ -10,6 +10,7 @@ import org.dreamexposure.discal.core.serializers.SnowflakeAsStringSerializer
 import java.util.*
 
 @Serializable
+@Deprecated("Prefer to use new.GuildSettings impl")
 data class GuildSettings(
     @Serializable(with = SnowflakeAsStringSerializer::class)
         @SerialName("guild_id")

@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.server.network.dbotsgg
 
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.dreamexposure.discal.core.config.Config
@@ -19,6 +20,7 @@ import java.time.Duration
 @ConditionalOnProperty("bot.integrations.update-bot-sites", havingValue = "true")
 class UpdateDBotsData(
     private val networkManager: NetworkManager,
+    private val httpClient: OkHttpClient
 ) : ApplicationRunner {
     private val token = Config.SECRET_INTEGRATION_D_BOTS_GG_TOKEN.getString()
 
@@ -36,7 +38,7 @@ class UpdateDBotsData(
                 .header("Content-Type", "application/json")
                 .build()
 
-            GlobalVal.HTTP_CLIENT.newCall(request).execute()
+            httpClient.newCall(request).execute()
         }.doOnNext { response ->
             if (response.code != GlobalVal.STATUS_SUCCESS) {
                 LOGGER.debug("Failed to update DBots.gg stats | Body: ${response.body?.string()}")

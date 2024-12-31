@@ -7,7 +7,6 @@ import io.github.furstenheim.CopyDown
 import io.github.furstenheim.OptionsBuilder
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import org.jsoup.safety.Safelist
 import org.slf4j.Marker
 import org.slf4j.MarkerFactory
@@ -31,9 +30,6 @@ object GlobalVal {
     const val discordCdnUrl = "https://cdn.discordapp.com"
 
     val JSON = "application/json; charset=utf-8".toMediaType()
-
-    @Deprecated("Use DI instead")
-    val HTTP_CLIENT: OkHttpClient = OkHttpClient()
 
     val JSON_FORMAT = Json {
         encodeDefaults = true

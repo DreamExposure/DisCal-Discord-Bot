@@ -43,4 +43,13 @@ interface RsvpRepository: R2dbcRepository<RsvpData, String> {
         WHERE guild_id = :guildId AND rsvp_role = :rsvpRole
     """)
     fun removeRoleByGuildIdAndRsvpRole(guildId: Long, rsvpRole: Long): Mono<Int>
+
+    fun deleteAllByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<Void>
+
+    @Query("""
+        UPDATE rsvp
+        SET calendar_number = calendar_number - 1
+        WHERE calendar_number >= :calendarNumber AND guild_id = :guildId
+    """)
+    fun decrementCalendarsByGuildIdAndCalendarNumber(guildId: Long, calendarNumber: Int): Mono<Long>
 }

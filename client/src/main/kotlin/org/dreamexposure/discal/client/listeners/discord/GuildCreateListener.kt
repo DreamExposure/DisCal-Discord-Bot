@@ -4,16 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import discord4j.core.event.domain.guild.GuildCreateEvent
 import discord4j.discordjson.json.ApplicationCommandRequest
-import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
-import org.dreamexposure.discal.core.database.DatabaseManager
+import org.dreamexposure.discal.core.business.GuildSettingsService
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.springframework.stereotype.Component
 
 @Component
-class GuildCreateListener(objectMapper: ObjectMapper) : EventListener<GuildCreateEvent> {
+class GuildCreateListener(
+    private val settingsService: GuildSettingsService,
+    objectMapper: ObjectMapper
+) : EventListener<GuildCreateEvent> {
     private final val premiumCommands: List<ApplicationCommandRequest>
     private final val devCommands: List<ApplicationCommandRequest>
 
@@ -39,9 +41,9 @@ class GuildCreateListener(objectMapper: ObjectMapper) : EventListener<GuildCreat
     }
 
     override suspend fun handle(event: GuildCreateEvent) {
-        val settings = DatabaseManager.getSettings(event.guild.id).awaitSingle()
+        val guildId = event.guild.id
+        val settings = settingsService.getSettings(guildId)
         val appService = event.client.restClient.applicationService
-        val guildId = settings.guildID.asLong()
         val appId = event.client.selfId.asLong()
 
         val commands = mutableListOf<ApplicationCommandRequest>()
@@ -49,9 +51,9 @@ class GuildCreateListener(objectMapper: ObjectMapper) : EventListener<GuildCreat
         if (settings.devGuild) commands.addAll(devCommands)
 
         if (commands.isNotEmpty()) {
-            appService.bulkOverwriteGuildApplicationCommand(appId, guildId, commands)
-                .doOnNext { LOGGER.debug("Bulk guild overwrite read: ${it.name()} | $guildId") }
-                .doOnError { LOGGER.error(DEFAULT, "Bulk guild overwrite failed | $guildId", it) }
+            appService.bulkOverwriteGuildApplicationCommand(appId, guildId.asLong(), commands)
+                .doOnNext { LOGGER.debug("Bulk guild overwrite read: {} | {}", it.name(), guildId) }
+                .doOnError { LOGGER.error(DEFAULT, "Bulk guild overwrite failed | ${guildId.asLong()}", it) }
                 .then()
                 .awaitSingleOrNull()
         }

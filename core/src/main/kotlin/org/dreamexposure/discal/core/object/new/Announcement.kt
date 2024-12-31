@@ -18,7 +18,7 @@ data class Announcement(
     val channelId: Snowflake,
 
 
-    val subscribers: Subscribers = Subscribers(),
+    val subscribers: Subscribers = Subscribers(guildId = guildId),
     val eventId: String? = null,
     val eventColor: EventColor = EventColor.NONE,
 
@@ -41,6 +41,7 @@ data class Announcement(
         subscribers = Subscribers(
             roles = data.subscribersRole.asStringListFromDatabase().toSet(),
             users = data.subscribersUser.asStringListFromDatabase().map(Snowflake::of).toSet(),
+            guildId = data.guildId.asSnowflake(),
         ),
         eventId = if (data.eventId.isBlank() || data.eventId.equals("N/a", ignoreCase = true)) null else data.eventId,
         eventColor = EventColor.fromNameOrHexOrId(data.eventColor),
@@ -62,6 +63,7 @@ data class Announcement(
     data class Subscribers(
         val roles: Set<String> = setOf(),
         val users: Set<Snowflake> = setOf(),
+        val guildId: Snowflake,
     ) {
         fun buildMentions(): String {
             if (users.isEmpty() && roles.isEmpty()) return ""
@@ -69,7 +71,7 @@ data class Announcement(
             val userMentions = users.map { "<@${it.asLong()}> " }
 
             val roleMentions = roles.map {
-                if (it.equals("everyone", true)) "@everyone "
+                if (it.equals("everyone", true)) "<@&${guildId.asString()}> "
                 else if (it.equals("here", true)) "@here "
                 else "<@&$it> "
             }

@@ -4,7 +4,7 @@ import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.cam.managers.CalendarAuthManager
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
-import org.dreamexposure.discal.core.`object`.network.discal.CredentialData
+import org.dreamexposure.discal.core.`object`.new.model.discal.cam.TokenV1Model
 import org.dreamexposure.discal.core.`object`.new.security.Scope.CALENDAR_TOKEN_READ
 import org.dreamexposure.discal.core.`object`.new.security.TokenType.INTERNAL
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,7 +19,7 @@ class TokenController(
 ) {
     @SecurityRequirement(schemas = [INTERNAL], scopes = [CALENDAR_TOKEN_READ])
     @GetMapping(produces = ["application/json"])
-    suspend fun getToken(@RequestParam host: CalendarHost, @RequestParam id: Int, @RequestParam guild: Snowflake?): CredentialData? {
+    suspend fun getToken(@RequestParam host: CalendarHost, @RequestParam id: Int, @RequestParam guild: Snowflake?): TokenV1Model? {
         return calendarAuthManager.getCredentialData(host, id, guild)
     }
 }

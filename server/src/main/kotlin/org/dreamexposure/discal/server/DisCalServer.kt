@@ -3,7 +3,6 @@ package org.dreamexposure.discal.server
 import jakarta.annotation.PreDestroy
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.core.config.Config
-import org.dreamexposure.discal.core.database.DatabaseManager
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.core.utils.GlobalVal.STATUS
@@ -18,7 +17,6 @@ class DisCalServer {
     @PreDestroy
     fun onShutdown() {
         LOGGER.info(STATUS, "API shutting down.")
-        DatabaseManager.disconnectFromMySQL()
     }
 
     companion object {

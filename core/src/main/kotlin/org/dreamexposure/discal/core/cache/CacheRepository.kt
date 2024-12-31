@@ -2,10 +2,13 @@ package org.dreamexposure.discal.core.cache
 
 import discord4j.common.util.Snowflake
 import java.time.Duration
+import kotlin.random.Random
 
 interface CacheRepository<K, V> {
     val ttl: Duration
         get() = Duration.ofMinutes(60)
+    val ttlWithJitter: Duration
+        get() = ttl.plusSeconds(Random.Default.nextLong(-333,333))
 
     // Write
     suspend fun put(guildId: Snowflake? = null, key: K, value: V)

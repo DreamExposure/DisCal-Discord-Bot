@@ -17,12 +17,15 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/v2/status")
-class GetStatusEndpoint(val networkManager: NetworkManager) {
+class GetStatusEndpoint(
+    private val networkManager: NetworkManager,
+    private val authentication: Authentication,
+) {
 
     @PostMapping("/get", produces = ["application/json"])
     @SecurityRequirement(disableSecurity = true, scopes = [])
     fun getStatus(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
-        return Authentication.authenticate(swe).map { authState ->
+        return authentication.authenticate(swe).map { authState ->
             if (!authState.success) {
                 response.rawStatusCode = authState.status
                 return@map GlobalVal.JSON_FORMAT.encodeToString(authState)
