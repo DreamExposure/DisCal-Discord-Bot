@@ -22,19 +22,17 @@ data class CalendarMetadata(
 ) {
     companion object {
         suspend operator fun invoke(data: CalendarMetadataData): CalendarMetadata {
-            val aes = AESEncryption(data.privateKey)
+            val aes = if (data.privateKey.length == 16 && data.external) AESEncryption(data.privateKey) else null
             val accessToken =
-                if (!data.expiresAt.asInstantMilli().isExpiredTtl() && data.external) aes.decrypt(data.accessToken)
+                if (aes != null && !data.expiresAt.asInstantMilli().isExpiredTtl()) aes.decrypt(data.accessToken)
                     .onErrorResume(IllegalBlockSizeException::class.java) {
                         Mono.empty()
                     }.awaitSingleOrNull()
                 else null // No point in trying to decrypt if it's expired
             val refreshToken =
-                if (data.external) aes.decrypt(data.refreshToken)
-                    .onErrorResume(IllegalBlockSizeException::class.java) {
-                        Mono.empty()
-                    }.awaitSingleOrNull()
-                else null // No point in trying to decrypt if calendar is not external, we don't use these internally
+                aes?.decrypt(data.refreshToken)?.onErrorResume(IllegalBlockSizeException::class.java) {
+                    Mono.empty()
+                }?.awaitSingleOrNull() // No point in trying to decrypt if calendar is not external, we don't use these internally
 
             return CalendarMetadata(
                 guildId = data.guildId.asSnowflake(),
