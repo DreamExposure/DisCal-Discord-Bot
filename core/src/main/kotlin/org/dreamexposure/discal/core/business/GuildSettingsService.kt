@@ -27,7 +27,7 @@ class GuildSettingsService(
         settings = repository.findByGuildId(guildId.asLong())
             .map(::GuildSettings)
             .defaultIfEmpty(GuildSettings(guildId = guildId))
-            .awaitSingle()
+            .awaitSingleOrNull() ?: GuildSettings(guildId = guildId) // For sanity
 
         cache.put(key = guildId, value = settings)
         return settings
