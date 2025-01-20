@@ -4,7 +4,8 @@ import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.core.spec.EmbedCreateSpec
 import kotlinx.coroutines.reactor.awaitSingle
-import org.dreamexposure.discal.*
+import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
@@ -82,7 +83,7 @@ class EmbedService(
     ////// Settings Embeds //////
     /////////////////////////////
     suspend fun settingsEmbeds(settings: GuildSettings): EmbedCreateSpec {
-        val controlRoleValue = if (settings.controlRole == null) "<@&${settings.guildId.asLong()}>" else "<@&${settings.controlRole}>"
+        val controlRoleValue = if (settings.controlRole == null) "<@&${settings.guildId.asLong()}>" else "<@&${settings.controlRole.asLong()}>"
 
         return defaultEmbedBuilder(settings)
             .title(getEmbedMessage("settings", "view.title", settings.locale))
@@ -106,14 +107,21 @@ class EmbedService(
         val settings = settingsService.getSettings(calendar.metadata.guildId)
         val builder = defaultEmbedBuilder(settings)
 
+        // This is used to truncate how many days/events are displayed to prevent going over the 6000 character count limit
+        var calculatedEmbedCharacterLength = 0
+
         // Get events sorted and grouped
         val groupedEvents = events.groupByDate()
 
         //Handle optional fields
-        if (calendar.name.isNotBlank())
+        if (calendar.name.isNotBlank()) {
             builder.title(calendar.name.toMarkdown().embedTitleSafe())
-        if (calendar.description.isNotBlank())
+            calculatedEmbedCharacterLength += calendar.name.toMarkdown().embedTitleSafe().length
+        }
+        if (calendar.description.isNotBlank()) {
             builder.description(calendar.description.toMarkdown().embedDescriptionSafe())
+            calculatedEmbedCharacterLength += calendar.description.toMarkdown().embedDescriptionSafe().length
+        }
 
         // Truncate dates to 23 due to discord enforcing the field limit
         val truncatedEvents = mutableMapOf<ZonedDateTime, List<Event>>()
@@ -171,8 +179,10 @@ class EmbedService(
                 // Finish event
                 content.append("```\n")
             }
+            calculatedEmbedCharacterLength += title.length + content.toString().embedFieldSafe().length
 
-            if (content.isNotBlank())
+            // max embed length is 6000 characters, we are going to go a bit under that in just for extra safety
+            if (content.isNotBlank() && calculatedEmbedCharacterLength <= 5750)
                 builder.addField(title, content.toString().embedFieldSafe(), false)
         }
 
