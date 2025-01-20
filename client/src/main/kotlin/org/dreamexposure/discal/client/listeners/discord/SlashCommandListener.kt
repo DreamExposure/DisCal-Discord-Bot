@@ -40,7 +40,7 @@ class SlashCommandListener(
 
                 command.handle(event, settings)
             } catch (e: Exception) {
-                LOGGER.error(DEFAULT, "Error handling slash command | $event", e)
+                LOGGER.error(DEFAULT, "Error handling slash command | cmd:${event.commandName} | $event", e)
 
                 // Attempt to provide a message if there's an unhandled exception
                 event.createFollowup(getCommonMsg("error.unknown", Locale.ENGLISH))

@@ -35,7 +35,7 @@ class ButtonInteractionListener(
 
                 button.handle(event, settings)
             } catch (e: Exception) {
-                LOGGER.error(DEFAULT, "Error handling button interaction | $event", e)
+                LOGGER.error(DEFAULT, "Error handling button interaction | #${button.ids.joinToString(",")} | $event", e)
 
                 // Attempt to provide a message if there's an unhandled exception
                 event.createFollowup(getCommonMsg("error.unknown", Locale.ENGLISH))
