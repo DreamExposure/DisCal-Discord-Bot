@@ -60,7 +60,6 @@ allprojects {
         mavenLocal()
 
         maven("https://repo.maven.apache.org/maven2/")
-        maven("https://kotlin.bintray.com/kotlinx")
         maven("https://oss.sonatype.org/content/repositories/snapshots")
         maven("https://repo.spring.io/milestone")
         maven("https://jitpack.io")

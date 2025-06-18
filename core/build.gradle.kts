@@ -20,7 +20,7 @@ plugins {
 }
 
 val discord4jVersion: String by properties
-val kotlinSrcDir: File = buildDir.resolve("core/src/main/kotlin")
+val kotlinSrcDir: File = layout.buildDirectory.dir("core/src/main/kotlin").map(Directory::getAsFile).get()
 
 kotlin {
     sourceSets {
@@ -46,6 +46,10 @@ gitProperties {
 
 tasks {
     generateGitProperties {
+        gitProperties {
+            dotGitDirectory = project.rootProject.layout.projectDirectory.dir(".git")
+        }
+
         doLast {
             @Suppress("UNCHECKED_CAST")
             val gitProperties = ext[gitProperties.extProperty] as Map<String, String>
