@@ -90,7 +90,7 @@ allprojects {
         implementation("org.springframework.boot:spring-boot-starter-actuator")
 
         // Database
-        implementation("io.asyncer:r2dbc-mysql:1.3.0") // TODO: Remove hard coded version once spring includes this in bom as it is a breaking change
+        implementation("io.asyncer:r2dbc-mysql")
         implementation("com.mysql:mysql-connector-j")
 
         // Serialization
