@@ -3,6 +3,7 @@ package org.dreamexposure.discal.client.listeners.discord
 import discord4j.core.event.domain.message.MessageCreateEvent
 import discord4j.core.`object`.entity.Message
 import discord4j.core.`object`.entity.User
+import discord4j.discordjson.json.MessageReferenceData
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.business.AnnouncementService
@@ -32,7 +33,7 @@ class BotMentionListener(
             val embed = embedService.discalInfoEmbed(settings, guildCount, calendarCount, announcementCount)
 
             channel.createMessage(embed)
-                .withMessageReference(event.message.id)
+                .withMessageReference(MessageReferenceData.builder().messageId(event.message.id.asLong()).build())
                 .awaitSingleOrNull()
         }
     }

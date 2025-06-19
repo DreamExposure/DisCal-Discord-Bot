@@ -2,7 +2,7 @@ package org.dreamexposure.discal.server.endpoints.v2.guild
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
-import discord4j.discordjson.json.ImmutableNicknameModifyData
+import discord4j.discordjson.json.CurrentMemberModifyData
 import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -47,8 +47,10 @@ class UpdateWebGuildEndpoint(
             //Handle nickname change
             val nicknameMono = Mono.defer {
                 if (body.has("bot_nick")) {
-                    return@defer guild.modifyOwnNickname(ImmutableNicknameModifyData.of(Optional.ofNullable(body.getString
-                    ("bot_nick"))))
+                    return@defer guild.modifyCurrentMember(CurrentMemberModifyData.builder()
+                        .nick(Optional.ofNullable(body.getString("bot_nick")))
+                        .build()
+                    )
                 }
                 return@defer Mono.empty()
             }
