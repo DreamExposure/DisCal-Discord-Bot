@@ -71,7 +71,7 @@ data class Announcement(
             val userMentions = users.map { "<@${it.asLong()}> " }
 
             val roleMentions = roles.map {
-                if (it.equals("everyone", true)) "<@&${guildId.asString()}> "
+                if (it.equals("everyone", true) || it == "<@&${guildId.asString()}") "@everyone "
                 else if (it.equals("here", true)) "@here "
                 else "<@&$it> "
             }
