@@ -27,7 +27,7 @@ class TimezoneAutocompleteHandler: InteractionHandler<ChatInputAutoCompleteEvent
             .ifEmpty { allTimezonesFormatted }
 
         val toSendActual = toSendMatching
-            .subList(0, 25.coerceAtMost(toSendMatching.size - 1))
+            .subList(0, 25.coerceAtMost(toSendMatching.size))
             .map {
                 ApplicationCommandOptionChoiceData.builder()
                     .name(it)
