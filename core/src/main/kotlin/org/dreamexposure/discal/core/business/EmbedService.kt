@@ -82,8 +82,9 @@ class EmbedService(
     /////////////////////////////
     ////// Settings Embeds //////
     /////////////////////////////
-    suspend fun settingsEmbeds(settings: GuildSettings): EmbedCreateSpec {
-        val controlRoleValue = if (settings.controlRole == null) "<@&${settings.guildId.asLong()}>" else "<@&${settings.controlRole.asLong()}>"
+    suspend fun settingsEmbeds(settings: GuildSettings, debug: Boolean = false): EmbedCreateSpec {
+        var controlRoleValue = if (settings.controlRole == null) "@everyone" else "<@&${settings.controlRole.asLong()}>"
+        if (debug) controlRoleValue = "$controlRoleValue (${settings.controlRole?.asLong()})"
 
         return defaultEmbedBuilder(settings)
             .title(getEmbedMessage("settings", "view.title", settings.locale))
