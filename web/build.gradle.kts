@@ -64,7 +64,7 @@ tasks {
         }
 
         workingDir("..")
-        commandLine(npm, "ci")
+        commandLine(npm, "install")
     }
 
     this.register<Exec>("cleanWeb") {
