@@ -51,6 +51,7 @@
           "name": "timezone",
           "type": 3,
           "description": "The timezone of the new calendar",
+          "autocomplete": true,
           "required": false
         },
         {
@@ -105,6 +106,7 @@
           "name": "timezone",
           "type": 3,
           "description": "The new timezone of the calendar",
+          "autocomplete": true,
           "required": true
         }
       ]
