@@ -86,20 +86,20 @@ jobs:
           attempt_limit: 25
           # 1 minute in ms
           attempt_delay: 60000
-  deploy-dev:
-    name: Deploy dev
-    runs-on: ubuntu-latest
-    if: github.ref_name == 'develop'
-    needs: publish-artifacts
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # Have K8S pull latest images for dev pods
-      - name: Trigger dev deploy
-        uses: davi020/kubernetes-action@master
-        env:
-          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
-        with:
-          args: delete -n discal pods -l env=dev,app=discal
+#  deploy-dev:
+#    name: Deploy dev
+#    runs-on: ubuntu-latest
+#    if: github.ref_name == 'develop'
+#    needs: publish-artifacts
+#    steps:
+#      - uses: actions/checkout@v4
+#        with:
+#          fetch-depth: 0
+#
+#      # Have K8S pull latest images for dev pods
+#      - name: Trigger dev deploy
+#        uses: davi020/kubernetes-action@master
+#        env:
+#          KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+#        with:
+#          args: delete -n discal pods -l env=dev,app=discal
