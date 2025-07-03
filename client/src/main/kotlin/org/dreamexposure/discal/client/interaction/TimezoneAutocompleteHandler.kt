@@ -13,14 +13,14 @@ class TimezoneAutocompleteHandler: InteractionHandler<ChatInputAutoCompleteEvent
     override val ids: Array<String> = arrayOf("calendar.timezone")
     override val ephemeral = true
 
+    private val allTimezonesFormatted =  GoodTimezone.entries
+        .map(GoodTimezone::name)
+        .map { it.replace("___", "/") }
+
     override suspend fun handle(event: ChatInputAutoCompleteEvent, settings: GuildSettings) {
         val input = event.focusedOption.value
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
-
-        val allTimezonesFormatted =  GoodTimezone.entries
-            .map(GoodTimezone::name)
-            .map { it.replace("___", "/") }
 
         val toSendMatching = allTimezonesFormatted
             .filter { it.contains(input, ignoreCase = true) }
