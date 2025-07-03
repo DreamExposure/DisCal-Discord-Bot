@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.client.listeners.discord
 
-import discord4j.core.event.domain.interaction.ButtonInteractionEvent
+import discord4j.core.event.domain.interaction.ModalSubmitInteractionEvent
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.interaction.InteractionHandler
 import org.dreamexposure.discal.core.business.GuildSettingsService
@@ -13,29 +13,30 @@ import org.springframework.util.StopWatch
 import java.util.*
 
 @Component
-class ButtonInteractionListener(
-    private val buttons: List<InteractionHandler<ButtonInteractionEvent>>,
+class ModalInteractionListener(
     private val settingsService: GuildSettingsService,
+    private val modals: List<InteractionHandler<ModalSubmitInteractionEvent>>,
     private val metricService: MetricService,
-): EventListener<ButtonInteractionEvent> {
-    override suspend fun handle(event: ButtonInteractionEvent) {
+) : EventListener<ModalSubmitInteractionEvent> {
+
+    override suspend fun handle(event: ModalSubmitInteractionEvent) {
         val timer = StopWatch()
         timer.start()
 
         if (!event.interaction.guildId.isPresent) {
-            event.reply(getCommonMsg("error.dm.not-supported", Locale.ENGLISH))
+            event.reply(getCommonMsg("error.dm.not-supported", Locale.ENGLISH)).awaitSingleOrNull()
             return
         }
 
-        val button = buttons.firstOrNull { it.ids.contains(event.customId) }
+        val modal = modals.firstOrNull { it.ids.any(event.customId::startsWith) }
 
-        if (button != null) {
+        if (modal != null) {
             try {
-                val settings = settingsService.getSettings(event.interaction.guildId.get())
+                if (modal.shouldDefer(event)) event.deferReply().withEphemeral(modal.ephemeral).awaitSingleOrNull()
 
-                button.handle(event, settings)
+                modal.handle(event, settingsService.getSettings(event.interaction.guildId.get()))
             } catch (e: Exception) {
-                LOGGER.error(DEFAULT, "Error handling button interaction | #${event.customId} | $event", e)
+                LOGGER.error(DEFAULT, "Error handling modal interaction | ${event.customId} | $event", e)
 
                 // Attempt to provide a message if there's an unhandled exception
                 event.createFollowup(getCommonMsg("error.unknown", Locale.ENGLISH))
@@ -49,6 +50,6 @@ class ButtonInteractionListener(
         }
 
         timer.stop()
-        metricService.recordInteractionDuration(event.customId, "button", timer.totalTimeMillis)
+        metricService.recordInteractionDuration(modal?.ids?.joinToString("|") ?: event.customId, "button", timer.totalTimeMillis)
     }
 }

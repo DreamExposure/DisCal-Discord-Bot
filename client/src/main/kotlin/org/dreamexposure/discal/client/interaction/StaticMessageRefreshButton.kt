@@ -13,12 +13,13 @@ class StaticMessageRefreshButton(
     private val staticMessageService: StaticMessageService,
 ): InteractionHandler<ButtonInteractionEvent> {
     override val ids = arrayOf("refresh-static-message")
+    override val ephemeral = true
 
     override suspend fun handle(event: ButtonInteractionEvent, settings: GuildSettings) {
         try {
             // Defer, this process can take a bit
             event.deferEdit()
-                .withEphemeral(true)
+                .withEphemeral(ephemeral)
                 .awaitSingleOrNull()
 
             staticMessageService.updateStaticMessage(settings.guildId, event.messageId)
@@ -26,7 +27,7 @@ class StaticMessageRefreshButton(
             LOGGER.error("Error handling static message refresh button | guildId:${settings.guildId.asLong()} | messageId: ${event.messageId.asLong()}", ex)
 
             event.createFollowup(getCommonMsg("error.unknown", settings.locale))
-                .withEphemeral(true)
+                .withEphemeral(ephemeral)
                 .awaitSingleOrNull()
         }
     }
