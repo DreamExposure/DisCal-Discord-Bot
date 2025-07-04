@@ -6,13 +6,15 @@ import org.jsoup.Jsoup
 import java.time.ZoneId
 import java.util.*
 
-fun String.embedTitleSafe(): String = this.substring(0, (256).coerceAtMost(this.length))
+fun String.embedTitleSafe(additionalTrim: Int  = 0): String = this.substring(0, (256 - additionalTrim).coerceAtMost(this.length))
 
-fun String.embedDescriptionSafe(): String = this.substring(0, (4096).coerceAtMost(this.length))
+fun String.embedDescriptionSafe(additionalTrim: Int  = 0): String = this.substring(0, (4096 - additionalTrim).coerceAtMost(this.length))
 
-fun String.embedFieldSafe(): String = this.substring(0, (1024).coerceAtMost(this.length))
+fun String.embedFieldSafe(additionalTrim: Int  = 0): String = this.substring(0, (1024 - additionalTrim).coerceAtMost(this.length))
 
-fun String.messageContentSafe(): String = this.substring(0, (2000).coerceAtMost(this.length))
+fun String.messageContentSafe(additionalTrim: Int  = 0): String = this.substring(0, (2000 - additionalTrim).coerceAtMost(this.length))
+
+fun String.autocompleteSafe(additionalTrim: Int  = 0): String = this.substring(0, (100 - additionalTrim).coerceAtMost(this.length))
 
 fun String.sanitize(): String = Jsoup.clean(this, GlobalVal.HTML_WHITELIST)
 
