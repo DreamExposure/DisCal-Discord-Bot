@@ -28,21 +28,23 @@ class CalendarAutocompleteHandler(
 
     override suspend fun handle(event: ChatInputAutoCompleteEvent, settings: GuildSettings) {
         val input = event.focusedOption.value
-            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(ApplicationCommandInteractionOptionValue::getRaw)
             .get()
 
         val calendars = calendarService.getAllCalendars(settings.guildId)
 
-        // I really wanted to filter by name, but it seems I'd need to accept string input which I really don't want to deal with :/
         val filtered = calendars
-            .filter { it.metadata.number == input.toInt() }
-            .ifEmpty { calendars }
+            .filter {
+                it.name.contains(input, ignoreCase = true)
+                    || it.description.contains(input, ignoreCase = true)
+                    || it.metadata.number == input.toIntOrNull()
+            }.ifEmpty { calendars }
 
         val toSend = filtered
             .subList(0, 25.coerceAtMost(filtered.size))
             .map {
                 ApplicationCommandOptionChoiceData.builder()
-                    .name("[${it.metadata.number}] ${it.name.autocompleteSafe(5)}")
+                    .name("[${it.metadata.number}] ${it.name.autocompleteSafe(6)}")
                     .value(it.metadata.number)
                     .build()
             }
