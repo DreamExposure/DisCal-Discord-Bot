@@ -18,6 +18,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from. Defaults to 1",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -39,6 +40,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from. Defaults to 1",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -60,6 +62,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from. Defaults to 1",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -81,6 +84,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from. Defaults to 1",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -102,6 +106,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from. Defaults to 1",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -123,6 +128,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from. Defaults to 1",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -151,6 +157,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from. Defaults to 1",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -178,6 +185,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from. Defaults to 1",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }

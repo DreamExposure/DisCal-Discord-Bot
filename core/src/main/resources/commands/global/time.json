@@ -6,6 +6,7 @@
       "name": "calendar",
       "type": 4,
       "description": "The calendar to pull the time from. Defaults to 1",
+      "autocomplete":true,
       "required": false,
       "min_value": 1
     }

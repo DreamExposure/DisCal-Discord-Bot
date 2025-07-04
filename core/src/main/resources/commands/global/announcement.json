@@ -58,6 +58,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar to create the announcement in (defaults to 1)",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -243,6 +244,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the announcement will read from (defaults to 1)",
+          "autocomplete":true,
           "required": true,
           "min_value": 1
         }
@@ -374,6 +376,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar to pull the announcements from. Defaults to 1",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         },
