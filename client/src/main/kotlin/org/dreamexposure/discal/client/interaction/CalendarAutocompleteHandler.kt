@@ -6,6 +6,7 @@ import discord4j.discordjson.json.ApplicationCommandOptionChoiceData
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.extensions.autocompleteSafe
+import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.springframework.stereotype.Component
 
@@ -44,7 +45,7 @@ class CalendarAutocompleteHandler(
             .subList(0, 25.coerceAtMost(filtered.size))
             .map {
                 ApplicationCommandOptionChoiceData.builder()
-                    .name("[${it.metadata.number}] ${it.name.autocompleteSafe(6)}")
+                    .name("[${it.metadata.number}] ${it.name.toMarkdown().autocompleteSafe(6)}")
                     .value(it.metadata.number)
                     .build()
             }
