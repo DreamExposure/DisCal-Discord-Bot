@@ -28,7 +28,7 @@ class SelectMenuInteractionListener(
             return
         }
 
-        val dropdown = dropdowns.firstOrNull { it.ids.contains(event.customId) }
+        val dropdown = dropdowns.firstOrNull { it.ids.any(event.customId::startsWith) }
 
         if (dropdown != null) {
             if (dropdown.shouldDefer(event)) event.deferReply().withEphemeral(dropdown.ephemeral).awaitSingleOrNull()
@@ -50,6 +50,6 @@ class SelectMenuInteractionListener(
         }
 
         timer.stop()
-        metricService.recordInteractionDuration(event.customId, "select-menu", timer.totalTimeMillis)
+        metricService.recordInteractionDuration(dropdown?.ids?.joinToString("|") ?: event.customId, "select-menu", timer.totalTimeMillis)
     }
 }

@@ -27,7 +27,7 @@ class ButtonInteractionListener(
             return
         }
 
-        val button = buttons.firstOrNull { it.ids.contains(event.customId) }
+        val button = buttons.firstOrNull { it.ids.any(event.customId::startsWith) }
 
         if (button != null) {
             try {
@@ -49,6 +49,6 @@ class ButtonInteractionListener(
         }
 
         timer.stop()
-        metricService.recordInteractionDuration(event.customId, "button", timer.totalTimeMillis)
+        metricService.recordInteractionDuration(button?.ids?.joinToString("|") ?: event.customId, "button", timer.totalTimeMillis)
     }
 }
