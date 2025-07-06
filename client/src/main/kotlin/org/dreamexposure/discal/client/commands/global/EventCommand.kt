@@ -7,10 +7,7 @@ import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.core.business.CalendarService
-import org.dreamexposure.discal.core.business.EmbedService
-import org.dreamexposure.discal.core.business.ImageValidationService
-import org.dreamexposure.discal.core.business.PermissionService
+import org.dreamexposure.discal.core.business.*
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.event.EventFrequency
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -29,6 +26,7 @@ class EventCommand(
     private val permissionService: PermissionService,
     private val calendarService: CalendarService,
     private val embedService: EmbedService,
+    private val componentService: ComponentService,
     private val imageValidationService: ImageValidationService,
 ) : SlashCommand {
     override val name = "event"
@@ -611,6 +609,7 @@ class EventCommand(
         return event.createFollowup(message)
             .withEphemeral(false)
             .withEmbeds(embedService.fullEventEmbed(confirmedEvent, settings))
+            .withComponents(*componentService.getEventRsvpComponents(confirmedEvent, settings))
             .awaitSingle()
     }
 
@@ -783,6 +782,7 @@ class EventCommand(
             event.createFollowup()
                 .withEphemeral(false)
                 .withEmbeds(embedService.fullEventEmbed(calendarEvent, settings))
+                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
                 .awaitSingle()
         } else {
             event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))

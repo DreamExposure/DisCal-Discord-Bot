@@ -7,6 +7,7 @@ import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactive.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.CalendarService
+import org.dreamexposure.discal.core.business.ComponentService
 import org.dreamexposure.discal.core.business.EmbedService
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
@@ -20,6 +21,7 @@ import java.time.format.DateTimeParseException
 class EventsCommand(
     private val calendarService: CalendarService,
     private val embedService: EmbedService,
+    private val componentService: ComponentService,
 ) : SlashCommand {
     override val name = "events"
     override val hasSubcommands = true
@@ -59,6 +61,7 @@ class EventsCommand(
         } else if (events.size == 1) {
             event.createFollowup(getMessage("upcoming.success.one", settings))
                 .withEmbeds(embedService.fullEventEmbed(events[0], settings))
+                .withComponents(*componentService.getEventRsvpComponents(events[0], settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         } else {
@@ -93,6 +96,7 @@ class EventsCommand(
         } else if (events.size == 1) {
             event.createFollowup(getMessage("ongoing.success.one", settings))
                 .withEmbeds(embedService.fullEventEmbed(events[0], settings))
+                .withComponents(*componentService.getEventRsvpComponents(events[0], settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         } else {
@@ -127,6 +131,7 @@ class EventsCommand(
         } else if (events.size == 1) {
             event.createFollowup(getMessage("today.success.one", settings))
                 .withEmbeds(embedService.fullEventEmbed(events[0], settings))
+                .withComponents(*componentService.getEventRsvpComponents(events[0], settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         } else {
@@ -183,6 +188,7 @@ class EventsCommand(
             } else if (events.size == 1) {
                 event.createFollowup(getMessage("range.success.one", settings))
                     .withEmbeds(embedService.fullEventEmbed(events[0], settings))
+                    .withComponents(*componentService.getEventRsvpComponents(events[0], settings))
                     .withEphemeral(ephemeral)
                     .awaitSingle()
             } else if (events.size > 15) {

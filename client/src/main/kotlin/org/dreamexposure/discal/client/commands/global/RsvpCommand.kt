@@ -6,10 +6,7 @@ import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
 import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.core.business.CalendarService
-import org.dreamexposure.discal.core.business.EmbedService
-import org.dreamexposure.discal.core.business.PermissionService
-import org.dreamexposure.discal.core.business.RsvpService
+import org.dreamexposure.discal.core.business.*
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
@@ -19,6 +16,7 @@ import reactor.core.publisher.Mono
 class RsvpCommand(
     private val rsvpService: RsvpService,
     private val embedService: EmbedService,
+    private val componentService: ComponentService,
     private val permissionService: PermissionService,
     private val calendarService: CalendarService,
 ) : SlashCommand {
@@ -77,6 +75,7 @@ class RsvpCommand(
 
             event.createFollowup(getMessage("onTime.success", settings))
                 .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
+                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         } else {
@@ -84,6 +83,7 @@ class RsvpCommand(
 
             event.createFollowup(getMessage("onTime.failure.limit", settings))
                 .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
+                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         }
@@ -125,6 +125,7 @@ class RsvpCommand(
 
             event.createFollowup(getMessage("late.success", settings))
                 .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
+                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         } else {
@@ -132,6 +133,7 @@ class RsvpCommand(
 
             event.createFollowup(getMessage("late.failure.limit", settings))
                 .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
+                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         }
@@ -172,6 +174,7 @@ class RsvpCommand(
 
         return event.createFollowup(getMessage("unsure.success", settings))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -211,6 +214,7 @@ class RsvpCommand(
 
         return event.createFollowup(getMessage("notGoing.success", settings))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -250,6 +254,7 @@ class RsvpCommand(
 
         return event.createFollowup(getMessage("remove.success", settings))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -282,6 +287,7 @@ class RsvpCommand(
 
         return event.createFollowup()
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -335,6 +341,7 @@ class RsvpCommand(
 
         return event.createFollowup(getMessage("limit.success", settings, limit.toString()))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -392,6 +399,7 @@ class RsvpCommand(
 
         return event.createFollowup(message)
             .withEmbeds(embed)
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }

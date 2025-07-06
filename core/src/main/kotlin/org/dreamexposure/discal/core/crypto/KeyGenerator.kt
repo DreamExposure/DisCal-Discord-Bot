@@ -3,12 +3,10 @@ package org.dreamexposure.discal.core.crypto
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
 
-@Suppress("SpellCheckingInspection")
 object KeyGenerator {
     private val VALID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456879".toCharArray()
     private val VALID_CHARS_2 = "abcdefghijklmnopqrstuv0123456789".toCharArray()
 
-    @JvmStatic
     fun csRandomAlphaNumericString(numChars: Int): String {
         val secRand = SecureRandom()
         val buff = ByteArray(numChars)
@@ -18,7 +16,6 @@ object KeyGenerator {
         return buff.toString(StandardCharsets.UTF_8)
     }
 
-    @JvmStatic
     fun generateEventId(): String {
         val secRand = SecureRandom()
         val buff = ByteArray(9)
