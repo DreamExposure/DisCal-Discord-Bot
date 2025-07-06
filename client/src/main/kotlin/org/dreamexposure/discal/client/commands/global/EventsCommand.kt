@@ -72,6 +72,7 @@ class EventsCommand(
             events.forEach {
                 event.createFollowup()
                 .withEmbeds(embedService.condensedEventEmbed(it, settings))
+                    .withComponents(*componentService.getEventRsvpComponents(it, settings))
                     .withEphemeral(ephemeral)
                     .awaitSingle()
             }
@@ -107,6 +108,7 @@ class EventsCommand(
             events.forEach {
                 event.createFollowup()
                     .withEmbeds(embedService.condensedEventEmbed(it, settings))
+                    .withComponents(*componentService.getEventRsvpComponents(it, settings))
                     .withEphemeral(ephemeral)
                     .awaitSingle()
             }
@@ -142,6 +144,7 @@ class EventsCommand(
             events.forEach {
                 event.createFollowup()
                     .withEmbeds(embedService.condensedEventEmbed(it, settings))
+                    .withComponents(*componentService.getEventRsvpComponents(it, settings))
                     .withEphemeral(ephemeral)
                     .awaitSingle()
             }
@@ -203,6 +206,7 @@ class EventsCommand(
                 events.forEach {
                     event.createFollowup()
                         .withEmbeds(embedService.condensedEventEmbed(it, settings))
+                        .withComponents(*componentService.getEventRsvpComponents(it, settings))
                         .withEphemeral(ephemeral)
                         .awaitSingle()
                 }
