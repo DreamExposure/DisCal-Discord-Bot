@@ -546,8 +546,7 @@ class EmbedService(
     /////////////////////////////////
     ////// Announcement Embeds //////
     /////////////////////////////////
-    suspend fun determineAnnouncementEmbed(announcement: Announcement, event: Event): EmbedCreateSpec {
-        val settings = settingsService.getSettings(announcement.guildId)
+    suspend fun determineAnnouncementEmbed(announcement: Announcement, event: Event, settings: GuildSettings): EmbedCreateSpec {
         return when (settings.interfaceStyle.announcementStyle) {
             FULL -> fullAnnouncementEmbed(announcement, event, settings)
             SIMPLE -> simpleAnnouncementEmbed(announcement, event, settings)

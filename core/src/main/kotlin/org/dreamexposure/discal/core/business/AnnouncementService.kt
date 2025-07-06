@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
+import discord4j.core.`object`.component.LayoutComponent
 import discord4j.discordjson.json.MessageCreateRequest
 import discord4j.rest.http.client.ClientException
 import kotlinx.coroutines.reactor.awaitSingle
@@ -30,7 +31,9 @@ class AnnouncementService(
     private val announcementCache: AnnouncementCache,
     private val announcementWizardStateCache: AnnouncementWizardStateCache,
     private val embedService: EmbedService,
+    private val componentService: ComponentService,
     private val calendarService: CalendarService,
+    private val settingsService: GuildSettingsService,
     private val metricService: MetricService,
     private val beanFactory: BeanFactory,
 ) {
@@ -157,6 +160,8 @@ class AnnouncementService(
 
     suspend fun sendAnnouncement(announcement: Announcement, event: Event) {
         try {
+            val settings = settingsService.getSettings(announcement.guildId)
+
             val channel = discordClient.getChannelById(announcement.channelId)
             // While we don't need the channel data, we do want to make sure it exists
             val existingData = channel
@@ -169,11 +174,12 @@ class AnnouncementService(
                 return
             }
 
-            val embed = embedService.determineAnnouncementEmbed(announcement, event)
+            val embed = embedService.determineAnnouncementEmbed(announcement, event, settings)
 
             val message = channel.createMessage(MessageCreateRequest.builder()
                 .content(announcement.subscribers.buildMentions().messageContentSafe())
                 .addEmbed(embed.asRequest())
+                .addAllComponents(componentService.getEventRsvpComponents(event, settings).map(LayoutComponent::getData))
                 .build()
             ).awaitSingle()
 
