@@ -86,6 +86,10 @@ class EmbedService(
         var controlRoleValue = if (settings.controlRole == null) "@everyone" else "<@&${settings.controlRole.asLong()}>"
         if (debug) controlRoleValue = "$controlRoleValue (${settings.controlRole?.asLong()})"
 
+        val announcementsPausedUntil = if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isAfter(Instant.now()))
+            settings.pauseAnnouncementsUntil.asDiscordTimestamp(LONG_DATETIME)
+        else "N/a"
+
         return defaultEmbedBuilder(settings)
             .title(getEmbedMessage("settings", "view.title", settings.locale))
             .addField(getEmbedMessage("settings", "view.field.role", settings.locale), controlRoleValue, false)
@@ -97,6 +101,7 @@ class EmbedService(
             .addField(getEmbedMessage("settings", "view.field.dev", settings.locale), "${settings.devGuild}", true)
             .addField(getEmbedMessage("settings", "view.field.cal", settings.locale), "${settings.maxCalendars}", true)
             .addField(getEmbedMessage("settings", "view.field.brand", settings.locale), "${settings.interfaceStyle.branded}", false)
+            .addField(getEmbedMessage("settings", "view.field.pauseAnnouncements", settings.locale), announcementsPausedUntil, false)
             .footer(getEmbedMessage("settings", "view.footer", settings.locale), null)
             .build()
     }
@@ -430,6 +435,9 @@ class EmbedService(
                 warnings.add(getEmbedMessage("event", "warning.wizard.veryLong", settings.locale))
             }
 
+        }
+        if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isAfter(Instant.now())) {
+            warnings.add(getEmbedMessage("event", "warning.wizard.announcementsPaused", settings.locale))
         }
         if (warnings.isNotEmpty()) {
             val warnText = "```fix\n${warnings.joinToString("\n")}\n```"
@@ -816,7 +824,9 @@ class EmbedService(
         if (announcement.getCalculatedTime() < Duration.ofMinutes(5))
             warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.time", settings.locale)).appendLine()
         if (announcement.calendarNumber > settings.maxCalendars)
-            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.calNum", settings.locale))
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.calNum", settings.locale)).appendLine()
+        if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isAfter(Instant.now()))
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.paused", settings.locale))
 
 
 

@@ -17,6 +17,7 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Announcement
 import org.dreamexposure.discal.core.`object`.new.AnnouncementWizardState
 import org.dreamexposure.discal.core.`object`.new.Event
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
@@ -158,10 +159,8 @@ class AnnouncementService(
         announcementCache.evict(key = guildId)
     }
 
-    suspend fun sendAnnouncement(announcement: Announcement, event: Event) {
+    suspend fun sendAnnouncement(announcement: Announcement, event: Event, settings: GuildSettings) {
         try {
-            val settings = settingsService.getSettings(announcement.guildId)
-
             val channel = discordClient.getChannelById(announcement.channelId)
             // While we don't need the channel data, we do want to make sure it exists
             val existingData = channel
@@ -217,6 +216,11 @@ class AnnouncementService(
         val taskTimer = StopWatch()
         taskTimer.start()
 
+        // Get settings and check if announcements are paused
+        val settings = settingsService.getSettings(guildId)
+        if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isAfter(Instant.now())) return
+
+
         // Since we currently can't look up upcoming events from cache cuz I dunno how, we just hold in very temporary and scoped memory at least
         val events: MutableMap<Int, List<Event>> = mutableMapOf()
 
@@ -226,7 +230,7 @@ class AnnouncementService(
             if (announcement.type == Announcement.Type.SPECIFIC) {
                 val event = calendarService.getEvent(guildId, announcement.calendarNumber, announcement.eventId!!) ?: return@forEach
                 if (isInRange(announcement, event, maxDifference)) {
-                    sendAnnouncement(announcement, event)
+                    sendAnnouncement(announcement, event, settings)
                 }
             }
 
@@ -249,7 +253,7 @@ class AnnouncementService(
             // Loop through filtered events and post any announcements in range
             filteredEvents
                 .filter { isInRange(announcement, it, maxDifference) }
-                .forEach { sendAnnouncement(announcement, it) }
+                .forEach { sendAnnouncement(announcement, it, settings) }
 
         }
 

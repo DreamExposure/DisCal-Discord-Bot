@@ -9,10 +9,14 @@ import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.EmbedService
 import org.dreamexposure.discal.core.business.GuildSettingsService
 import org.dreamexposure.discal.core.business.PermissionService
+import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat.LONG_DATETIME
 import org.dreamexposure.discal.core.enums.time.TimeFormat
+import org.dreamexposure.discal.core.extensions.asDiscordTimestamp
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @Component
@@ -40,6 +44,7 @@ class SettingsCommand(
             "time-format" -> timeFormat(event, settings)
             "keep-event-duration" -> eventKeepDuration(event, settings)
             "branding" -> branding(event, settings)
+            "pause-announcements" -> pauseAnnouncements(event, settings)
             else -> throw IllegalStateException("Invalid subcommand specified")
         }
     }
@@ -139,6 +144,42 @@ class SettingsCommand(
         val newSettings = settingsService.upsertSettings(settings.copy(interfaceStyle = settings.interfaceStyle.copy(branded = useBranding)))
 
         return event.createFollowup(getMessage("brand.success", settings, "$useBranding"))
+            .withEmbeds(embedService.settingsEmbeds(newSettings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+    }
+
+    private suspend fun pauseAnnouncements(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val hours = event.options[0].getOption("hours")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .orElse(0)
+        val days = event.options[0].getOption("days")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .orElse(0)
+        val weeks = event.options[0].getOption("weeks")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .orElse(0)
+
+        // Remove pause
+        if (hours + days + weeks == 0L) {
+            val newSettings = settingsService.upsertSettings(settings.copy(pauseAnnouncementsUntil = null))
+
+            return event.createFollowup(getMessage("pauseAnnouncements.success.unpause", settings))
+                .withEmbeds(embedService.settingsEmbeds(newSettings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        }
+
+        val pauseUntil = Instant.now()
+            .plus(hours, ChronoUnit.HOURS)
+            .plus(days, ChronoUnit.DAYS)
+            .plus(weeks, ChronoUnit.WEEKS)
+        val newSettings = settingsService.upsertSettings(settings.copy(pauseAnnouncementsUntil = pauseUntil))
+
+        return event.createFollowup(getMessage("pauseAnnouncements.success.pause", settings, pauseUntil.asDiscordTimestamp(LONG_DATETIME)))
             .withEmbeds(embedService.settingsEmbeds(newSettings))
             .withEphemeral(ephemeral)
             .awaitSingle()
