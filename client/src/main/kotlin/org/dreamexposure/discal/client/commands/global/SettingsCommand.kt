@@ -176,7 +176,7 @@ class SettingsCommand(
         val pauseUntil = Instant.now()
             .plus(hours, ChronoUnit.HOURS)
             .plus(days, ChronoUnit.DAYS)
-            .plus(weeks, ChronoUnit.WEEKS)
+            .plus(weeks * 7, ChronoUnit.DAYS) // Weeks not supported lmao
         val newSettings = settingsService.upsertSettings(settings.copy(pauseAnnouncementsUntil = pauseUntil))
 
         return event.createFollowup(getMessage("pauseAnnouncements.success.pause", settings, pauseUntil.asDiscordTimestamp(LONG_DATETIME)))
