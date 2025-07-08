@@ -16,5 +16,5 @@ data class GuildSettingsData(
     val branded: Boolean,
     val announcementStyle: Int,
     val eventKeepDuration: Boolean,
-    val pauseAnnouncementsUtil: Instant?,
+    val pauseAnnouncementsUntil: Instant?,
 )

@@ -30,7 +30,7 @@ data class GuildSettings(
         maxCalendars = data.maxCalendars,
         locale = data.lang.asLocale(),
         eventKeepDuration = data.eventKeepDuration,
-        pauseAnnouncementsUntil = data.pauseAnnouncementsUtil,
+        pauseAnnouncementsUntil = data.pauseAnnouncementsUntil,
 
         interfaceStyle = InterfaceStyle(
             // Just in case there's weird data, I'm going to allow going back to the default value on a failure

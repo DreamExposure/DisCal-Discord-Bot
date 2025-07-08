@@ -48,7 +48,7 @@ class GuildSettingsService(
             branded = settings.interfaceStyle.branded,
             announcementStyle = settings.interfaceStyle.announcementStyle.value,
             eventKeepDuration = settings.eventKeepDuration,
-            pauseAnnouncementsUtil = settings.pauseAnnouncementsUntil,
+            pauseAnnouncementsUntil = settings.pauseAnnouncementsUntil,
         )).map(::GuildSettings).awaitSingle()
 
         cache.put(key = saved.guildId, value = saved)
