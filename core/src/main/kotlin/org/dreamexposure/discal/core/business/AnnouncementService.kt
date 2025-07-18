@@ -12,6 +12,7 @@ import org.dreamexposure.discal.AnnouncementWizardStateCache
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.AnnouncementData
 import org.dreamexposure.discal.core.database.AnnouncementRepository
+import org.dreamexposure.discal.core.extensions.isExpiredTtl
 import org.dreamexposure.discal.core.extensions.messageContentSafe
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Announcement
@@ -90,9 +91,10 @@ class AnnouncementService(
         return announcements
     }
 
-    suspend fun getAllAnnouncements(guildId: Snowflake, type: Announcement.Type? = null, returnDisabled: Boolean = true): List<Announcement> {
+    suspend fun getAllAnnouncements(guildId: Snowflake, type: Announcement.Type? = null, modifier: Announcement.Modifier? = null, returnDisabled: Boolean = true): List<Announcement> {
         return getAllAnnouncements(guildId)
             .filter { if (type == null) true else it.type == type }
+            .filter { if (modifier == null) true else it.modifier == modifier }
             .filter { if (returnDisabled) true else it.enabled }
     }
 
@@ -199,17 +201,33 @@ class AnnouncementService(
     }
 
     suspend fun isInRange(announcement: Announcement, event: Event, maxDifference: Duration): Boolean {
-        val timeUntilEvent = Duration.between(Instant.now(), event.start)
+        return when (announcement.modifier) {
+            Announcement.Modifier.BEFORE -> {
+                val timeUntilEvent = Duration.between(Instant.now(), event.start)
+                val difference = timeUntilEvent - announcement.getCalculatedTime()
 
-        val difference = timeUntilEvent - announcement.getCalculatedTime()
+                if (difference.isNegative) {
+                    // Event has past, check delete conditions
+                    if (announcement.type == Announcement.Type.SPECIFIC) deleteAnnouncement(announcement.guildId, announcement.id)
 
-        return if (difference.isNegative) {
-            // Event has past, check delete conditions
-            if (announcement.type == Announcement.Type.SPECIFIC) deleteAnnouncement(announcement.guildId, announcement.id)
+                    false
+                } else difference <= maxDifference
+            }
+            Announcement.Modifier.DURING -> {
+                val timeSinceStart = Duration.between(event.start, Instant.now())
+                val difference = timeSinceStart - announcement.getCalculatedTime()
 
-            false
-        } else difference <= maxDifference
+                if (difference.isNegative) {
+                    // Event has past, check delete conditions
+                    if (announcement.type == Announcement.Type.SPECIFIC) deleteAnnouncement(announcement.guildId, announcement.id)
 
+                    false
+                } else difference <= maxDifference
+            }
+            Announcement.Modifier.END -> {
+                TODO("Gotta figure out how I want to do this one")
+            }
+        }
     }
 
     suspend fun processAnnouncementsForGuild(guildId: Snowflake, maxDifference: Duration) {
@@ -218,13 +236,12 @@ class AnnouncementService(
 
         // Get settings and check if announcements are paused
         val settings = settingsService.getSettings(guildId)
-        if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isAfter(Instant.now())) return
-
+        if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isExpiredTtl()) return
 
         // Since we currently can't look up upcoming events from cache cuz I dunno how, we just hold in very temporary and scoped memory at least
-        val events: MutableMap<Int, List<Event>> = mutableMapOf()
+        val upcomingEvents: MutableMap<Int, List<Event>> = mutableMapOf()
+        val ongoingEvents: MutableMap<Int, List<Event>> = mutableMapOf()
 
-        // TODO: Need to break this out to add handling for modifiers
         getAllAnnouncements(guildId, returnDisabled = false).forEach { announcement ->
             // Handle specific type first, since we don't need to fetch all events for this
             if (announcement.type == Announcement.Type.SPECIFIC) {
@@ -235,10 +252,28 @@ class AnnouncementService(
             }
 
             // Get the events to filter through
-            var filteredEvents = events[announcement.calendarNumber]
-            if (filteredEvents == null) {
-                filteredEvents = calendarService.getUpcomingEvents(guildId, announcement.calendarNumber, PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT)
-                events[announcement.calendarNumber] = filteredEvents
+            var filteredEvents = when (announcement.modifier) {
+                Announcement.Modifier.BEFORE -> {
+                    var events = ongoingEvents[announcement.calendarNumber]
+                    if (events == null) {
+                        events = calendarService.getOngoingEvents(guildId, announcement.calendarNumber)
+                        ongoingEvents[announcement.calendarNumber] = events
+                    }
+
+                    events
+                }
+                Announcement.Modifier.DURING -> {
+                    var events = upcomingEvents[announcement.calendarNumber]
+                    if (events == null) {
+                        events = calendarService.getUpcomingEvents(guildId, announcement.calendarNumber, PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT)
+                        upcomingEvents[announcement.calendarNumber] = events
+                    }
+
+                    events
+                }
+                Announcement.Modifier.END -> {
+                    TODO("Need to figure out how to implement this still")
+                }
             }
 
             // Handle filtering out events based on this announcement's types

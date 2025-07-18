@@ -86,7 +86,7 @@ class EmbedService(
         var controlRoleValue = if (settings.controlRole == null) "@everyone" else "<@&${settings.controlRole.asLong()}>"
         if (debug) controlRoleValue = "$controlRoleValue (${settings.controlRole?.asLong()})"
 
-        val announcementsPausedUntil = if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isAfter(Instant.now()))
+        val announcementsPausedUntil = if (settings.pauseAnnouncementsUntil != null && !settings.pauseAnnouncementsUntil.isExpiredTtl())
             settings.pauseAnnouncementsUntil.asDiscordTimestamp(LONG_DATETIME)
         else "N/a"
 
@@ -821,13 +821,14 @@ class EmbedService(
             warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.eventId", settings.locale)).appendLine()
         if (announcement.type == Announcement.Type.COLOR && announcement.eventColor == EventColor.NONE)
             warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.color", settings.locale)).appendLine()
+        if (announcement.modifier == Announcement.Modifier.DURING)
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.modifier.during", settings.locale)).appendLine()
         if (announcement.getCalculatedTime() < Duration.ofMinutes(5))
             warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.time", settings.locale)).appendLine()
         if (announcement.calendarNumber > settings.maxCalendars)
             warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.calNum", settings.locale)).appendLine()
-        if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isAfter(Instant.now()))
+        if (settings.pauseAnnouncementsUntil != null && !settings.pauseAnnouncementsUntil.isExpiredTtl())
             warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.paused", settings.locale))
-
 
 
         if (warningsBuilder.isNotBlank()) {

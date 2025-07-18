@@ -35,6 +35,7 @@ class AnnouncementCommand(
         return when (event.options[0].name) {
             "create" -> create(event, settings)
             "type" -> type(event, settings)
+            "modifier" -> modifier(event, settings)
             "event" -> event(event, settings)
             "color" -> color(event, settings)
             "channel" -> channel(event, settings)
@@ -64,6 +65,11 @@ class AnnouncementCommand(
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(Announcement.Type::valueOf)
             .orElse(Announcement.Type.UNIVERSAL)
+        val modifier = event.options[0].getOption("modifier")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(Announcement.Modifier::valueOf)
+            .orElse(Announcement.Modifier.BEFORE)
         val channelId = event.options[0].getOption("channel")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
@@ -107,6 +113,7 @@ class AnnouncementCommand(
                 guildId = settings.guildId,
                 calendarNumber = calendar,
                 type = type,
+                modifier = modifier,
                 channelId = channelId,
                 hoursBefore = hours,
                 minutesBefore = minutes,
@@ -150,6 +157,35 @@ class AnnouncementCommand(
         announcementService.putWizard(altered)
 
         return event.createFollowup(getMessage("type.success", settings))
+            .withEphemeral(true)
+            .withEmbeds(embedService.announcementWizardEmbed(altered, settings))
+            .awaitSingle()
+    }
+
+    private suspend fun modifier(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val modifier = event.options[0].getOption("modifier")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(Announcement.Modifier::valueOf)
+            .get()
+
+        // Validate permissions
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+
+        val altered = existingWizard.copy(entity = existingWizard.entity.copy(modifier = modifier))
+        announcementService.putWizard(altered)
+
+        return event.createFollowup(getMessage("modifier.success", settings))
             .withEphemeral(true)
             .withEmbeds(embedService.announcementWizardEmbed(altered, settings))
             .awaitSingle()
@@ -668,9 +704,14 @@ class AnnouncementCommand(
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(Announcement.Type::valueOf)
             .getOrNull()
+        val modifier = event.options[0].getOption("modifier")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(Announcement.Modifier::valueOf)
+            .getOrNull()
 
         // Get filtered announcements
-        val announcements = announcementService.getAllAnnouncements(settings.guildId, type, showDisabled)
+        val announcements = announcementService.getAllAnnouncements(settings.guildId, type, modifier, showDisabled)
             .filter { it.calendarNumber == calendar }
 
         return if (announcements.isEmpty()) {
