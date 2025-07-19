@@ -217,7 +217,7 @@ class AnnouncementService(
                 val timeSinceStart = Duration.between(event.start, Instant.now())
                 val difference = timeSinceStart - announcement.getCalculatedTime()
 
-                if (difference.isNegative && !event.isOngoing()) {
+                if (difference.isNegative) {
                     // Event has past, check delete conditions
                     if (announcement.type == Announcement.Type.SPECIFIC) deleteAnnouncement(announcement.guildId, announcement.id)
 
