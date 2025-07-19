@@ -236,7 +236,7 @@ class AnnouncementService(
 
         // Get settings and check if announcements are paused
         val settings = settingsService.getSettings(guildId)
-        if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isExpiredTtl()) return
+        if (settings.pauseAnnouncementsUntil != null && !settings.pauseAnnouncementsUntil.isExpiredTtl()) return
 
         // Since we currently can't look up upcoming events from cache cuz I dunno how, we just hold in very temporary and scoped memory at least
         val upcomingEvents: MutableMap<Int, List<Event>> = mutableMapOf()
