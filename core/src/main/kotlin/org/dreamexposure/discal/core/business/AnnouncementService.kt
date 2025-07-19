@@ -254,19 +254,19 @@ class AnnouncementService(
             // Get the events to filter through
             var filteredEvents = when (announcement.modifier) {
                 Announcement.Modifier.BEFORE -> {
-                    var events = ongoingEvents[announcement.calendarNumber]
+                    var events = upcomingEvents[announcement.calendarNumber]
                     if (events == null) {
-                        events = calendarService.getOngoingEvents(guildId, announcement.calendarNumber)
-                        ongoingEvents[announcement.calendarNumber] = events
+                        events = calendarService.getUpcomingEvents(guildId, announcement.calendarNumber, PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT)
+                        upcomingEvents[announcement.calendarNumber] = events
                     }
 
                     events
                 }
                 Announcement.Modifier.DURING -> {
-                    var events = upcomingEvents[announcement.calendarNumber]
+                    var events = ongoingEvents[announcement.calendarNumber]
                     if (events == null) {
-                        events = calendarService.getUpcomingEvents(guildId, announcement.calendarNumber, PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT)
-                        upcomingEvents[announcement.calendarNumber] = events
+                        events = calendarService.getOngoingEvents(guildId, announcement.calendarNumber)
+                        ongoingEvents[announcement.calendarNumber] = events
                     }
 
                     events
