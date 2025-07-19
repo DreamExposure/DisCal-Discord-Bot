@@ -661,7 +661,13 @@ class EmbedService(
     suspend fun eventAnnouncementEmbed(announcement: Announcement, event: Event, settings: GuildSettings): EmbedCreateSpec {
         val builder = defaultEmbedBuilder(settings)
             .color(event.color.asColor())
-            .title(getEmbedMessage("announcement", "event.title", settings.locale))
+
+        val title = when (announcement.modifier) {
+            Announcement.Modifier.BEFORE -> { "event.title.upcoming" }
+            Announcement.Modifier.DURING -> { "event.title.ongoing" }
+            else -> TODO("Modifier not supported")
+        }
+        builder.title(getEmbedMessage("announcement", title, settings.locale))
 
         if (event.name.isNotBlank()) builder.addField(
             getEmbedMessage("announcement", "event.field.name", settings.locale),
