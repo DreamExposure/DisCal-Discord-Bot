@@ -139,6 +139,7 @@ DisCal uses a simple-to-understand permission scheme for handling access to comm
 |-----------------------------|-------------------------------------------------------------------------------------|-------------------------|
 | `/announcement create`      | Starts the announcement create wizard                                               | privileged              |
 | `/announcement type`        | Sets the announcement type. Valid types: UNIVERSAL, SPECIFIC, COLOR, RECUR          | privileged              |
+| `/announcement modifier`    | Sets the announcement modifier. Valid types: BEFORE (default), DURING               | privileged              |
 | `/announcement event`       | Sets the announcement's event. Only needed when using SPECIFIC or RECUR types       | privileged              |
 | `/announcement color`       | Sets the announcement's color. Only needed when using COLOR type                    | privileged              |
 | `/announcement channel`     | Sets the channel the announcement will be posted in                                 | privileged              |
@@ -163,14 +164,15 @@ DisCal uses a simple-to-understand permission scheme for handling access to comm
 <details>
 <summary>Settings Commands (/settings)</summary>
 
-| Command                        | Description                                                              | Permissions           |
-|--------------------------------|--------------------------------------------------------------------------|-----------------------|
-| `/settings view`               | Displays the current settings for the guild                              | elevated              |
-| `/settings role`               | Sets the role required to use privileged commands                        | elevated              |
-| `/settings announcement-style` | Changes the style announcements will be posted as                        | elevated              |
-| `/settings language`           | Changes the language the bot will use in responses                       | elevated              |
-| `/settings time-format`        | Changes what format to display date/time when needed                     | elevated              |
-| `/settings branding`           | Toggles between DisCal branding or the guild's name/image where possible | elevated, patron-only |
+| Command                         | Description                                                                       | Permissions           |
+|---------------------------------|-----------------------------------------------------------------------------------|-----------------------|
+| `/settings view`                | Displays the current settings for the guild                                       | elevated              |
+| `/settings role`                | Sets the role required to use privileged commands                                 | elevated              |
+| `/settings announcement-style`  | Changes the style announcements will be posted as                                 | elevated              |
+| `/settings pause-announcements` | Allows pausing and unpausing all announcements for the guild for a period of time | elevated              |
+| `/settings language`            | Changes the language the bot will use in responses                                | elevated              |
+| `/settings time-format`         | Changes what format to display date/time when needed                              | elevated              |
+| `/settings branding`            | Toggles between DisCal branding or the guild's name/image where possible          | elevated, patron-only |
 </details>
 
 <details>
@@ -189,8 +191,7 @@ DisCal uses a simple-to-understand permission scheme for handling access to comm
 # 🗓️ Planned & Work In Progress
 This bot is a hobby project for me, please note that while these features are planned, there's no solid timeline.
 - Website rewrite (it's old and ugly)
-- [WIP] Migration to Spring data
-- [WIP] Kotlin coroutines rewrite
+- Further improvements to announcements
 
 # 🧰 Tech stack
 - Java 17
