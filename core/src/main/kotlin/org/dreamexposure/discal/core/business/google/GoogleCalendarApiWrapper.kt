@@ -185,6 +185,13 @@ class GoogleCalendarApiWrapper(
                 .setQuotaUser(metadata.guildId.asString())
                 .execute()
             ResponseModel(true)
+        } catch (e: GoogleJsonResponseException) {
+            // Treat 404 errors on this endpoint as a soft success
+            if (e.statusCode == 404) ResponseModel(true)
+            else {
+                LOGGER.error("Failed to delete calendar from Google Calendar", e)
+                ResponseModel(600, false, ErrorResponse("Failed to delete calendar from Google Calendar", e))
+            }
         } catch (e: Exception) {
             LOGGER.error("Failed to delete calendar from Google Calendar", e)
             ResponseModel(600, false, ErrorResponse("Failed to delete calendar from Google Calendar", e))
