@@ -95,6 +95,7 @@ class GoogleCalendarProviderService(
 
     override suspend fun updateCalendar(guildId: Snowflake, metadata: CalendarMetadata, spec: Calendar.UpdateSpec): Calendar {
         val content = com.google.api.services.calendar.model.Calendar()
+        content.id = metadata.id
 
         spec.name?.let { content.summary = it }
         spec.description?.let { content.description = it }
