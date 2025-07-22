@@ -11,7 +11,7 @@ import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.springframework.stereotype.Component
 
 @Component
-class CalendarAutocompleteHandler(
+class CalendarAutocomplete(
     private val calendarService: CalendarService,
 ): InteractionHandler<ChatInputAutoCompleteEvent> {
     override val ids = arrayOf(

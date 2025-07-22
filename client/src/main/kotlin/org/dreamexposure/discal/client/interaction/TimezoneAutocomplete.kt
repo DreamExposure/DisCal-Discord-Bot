@@ -9,7 +9,7 @@ import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.springframework.stereotype.Component
 
 @Component
-class TimezoneAutocompleteHandler: InteractionHandler<ChatInputAutoCompleteEvent> {
+class TimezoneAutocomplete: InteractionHandler<ChatInputAutoCompleteEvent> {
     override val ids: Array<String> = arrayOf("calendar.timezone")
     override val ephemeral = true
 

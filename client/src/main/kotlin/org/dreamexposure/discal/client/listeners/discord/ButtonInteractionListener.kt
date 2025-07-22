@@ -33,6 +33,8 @@ class ButtonInteractionListener(
             try {
                 val settings = settingsService.getSettings(event.interaction.guildId.get())
 
+                if (button.shouldDefer(event)) event.deferReply().withEphemeral(button.ephemeral).awaitSingleOrNull()
+
                 button.handle(event, settings)
             } catch (e: Exception) {
                 LOGGER.error(DEFAULT, "Error handling button interaction | #${event.customId} | $event", e)

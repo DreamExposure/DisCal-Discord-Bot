@@ -15,6 +15,9 @@ class StaticMessageRefreshButton(
     override val ids = arrayOf("refresh-static-message")
     override val ephemeral = true
 
+    // Specifically because we want to defer the edit without an additional reply
+    override suspend fun shouldDefer(event: ButtonInteractionEvent) = false
+
     override suspend fun handle(event: ButtonInteractionEvent, settings: GuildSettings) {
         try {
             // Defer, this process can take a bit
