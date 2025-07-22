@@ -55,13 +55,13 @@ class ComponentService {
             else "button.wizard.confirm.create.label"
         val confirmButton = Button.success(
             "wizard-confirm-$wizardType",
-            Emoji.of(null, "heavy_check_mark", false),
+            Emoji.unicode("\u2714\ufe0f"),
             getCommonMsg(confirmButtonTitle, settings.locale)
         )
 
         val cancelButton = Button.secondary(
             "wizard-cancel-$wizardType",
-            Emoji.of(null, "x", false),
+            Emoji.unicode("\u274c"),
             getCommonMsg("button.wizard.cancel.label", settings.locale)
         )
 
