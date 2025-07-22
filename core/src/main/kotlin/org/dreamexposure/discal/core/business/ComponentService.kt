@@ -6,8 +6,7 @@ import discord4j.core.`object`.component.Button
 import discord4j.core.`object`.component.LayoutComponent
 import discord4j.core.`object`.component.SelectMenu
 import discord4j.core.`object`.emoji.Emoji
-import org.dreamexposure.discal.core.`object`.new.Event
-import org.dreamexposure.discal.core.`object`.new.GuildSettings
+import org.dreamexposure.discal.core.`object`.new.*
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 
@@ -41,5 +40,31 @@ class ComponentService {
             .withPlaceholder(getCommonMsg("dropdown.rsvp.placeholder", settings.locale))
 
         return arrayOf(ActionRow.of(selectMenu))
+    }
+
+    fun <T> getWizardComponents(wizard: WizardState<T>, settings: GuildSettings): Array<LayoutComponent> {
+        val wizardType = when (wizard) {
+            is CalendarWizardState -> "calendar"
+            is EventWizardState -> "event"
+            is AnnouncementWizardState -> "announcement"
+            else -> throw NotImplementedError("Unexpected wizard type")
+        }
+
+        val confirmButtonTitle =
+            if (wizard.editing) "button.wizard.confirm.edit.label"
+            else "button.wizard.confirm.create.label"
+        val confirmButton = Button.success(
+            "wizard-confirm-$wizardType",
+            Emoji.of(null, "heavy_check_mark", false),
+            getCommonMsg(confirmButtonTitle, settings.locale)
+        )
+
+        val cancelButton = Button.secondary(
+            "wizard-cancel-$wizardType",
+            Emoji.of(null, "x", false),
+            getCommonMsg("button.wizard.cancel.label", settings.locale)
+        )
+
+        return arrayOf(ActionRow.of(confirmButton, cancelButton))
     }
 }

@@ -7,10 +7,7 @@ import discord4j.core.`object`.entity.Message
 import discord4j.rest.util.AllowedMentions
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.core.business.AnnouncementService
-import org.dreamexposure.discal.core.business.CalendarService
-import org.dreamexposure.discal.core.business.EmbedService
-import org.dreamexposure.discal.core.business.PermissionService
+import org.dreamexposure.discal.core.business.*
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.`object`.new.Announcement
@@ -26,6 +23,7 @@ class AnnouncementCommand(
     private val permissionService: PermissionService,
     private val embedService: EmbedService,
     private val calendarService: CalendarService,
+    private val componentService: ComponentService,
 ) : SlashCommand {
     override val name = "announcement"
     override val hasSubcommands = true
@@ -102,6 +100,7 @@ class AnnouncementCommand(
             return event.createFollowup(getMessage("error.wizard.started", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -124,6 +123,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("create.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
             .awaitSingle()
     }
 
@@ -159,6 +159,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("type.success", settings))
             .withEphemeral(true)
             .withEmbeds(embedService.announcementWizardEmbed(altered, settings))
+            .withComponents(*componentService.getWizardComponents(altered, settings))
             .awaitSingle()
     }
 
@@ -188,6 +189,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("modifier.success", settings))
             .withEphemeral(true)
             .withEmbeds(embedService.announcementWizardEmbed(altered, settings))
+            .withComponents(*componentService.getWizardComponents(altered, settings))
             .awaitSingle()
     }
 
@@ -215,6 +217,7 @@ class AnnouncementCommand(
             return event.createFollowup(getMessage("event.failure.type", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -224,6 +227,7 @@ class AnnouncementCommand(
             return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -237,6 +241,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("event.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -265,6 +270,7 @@ class AnnouncementCommand(
             return event.createFollowup(getMessage("color.failure.type", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -274,6 +280,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("color.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -302,6 +309,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("channel.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -331,6 +339,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("minutes.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -360,6 +369,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("hours.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -389,6 +399,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("info.success.set", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -418,6 +429,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("calendar.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -445,6 +457,7 @@ class AnnouncementCommand(
             return event.createFollowup(getCommonMsg("error.patronOnly", settings.locale))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -454,6 +467,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("publish.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -473,6 +487,7 @@ class AnnouncementCommand(
         return event.createFollowup()
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .awaitSingle()
     }
 
@@ -503,6 +518,7 @@ class AnnouncementCommand(
             return event.createFollowup(failureReason)
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -551,6 +567,7 @@ class AnnouncementCommand(
             return event.createFollowup(getMessage("error.wizard.started", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -570,6 +587,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("edit.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
             .awaitSingle()
     }
 
@@ -591,6 +609,7 @@ class AnnouncementCommand(
             return event.createFollowup(getMessage("error.wizard.started", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -610,6 +629,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("copy.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
             .awaitSingle()
     }
 

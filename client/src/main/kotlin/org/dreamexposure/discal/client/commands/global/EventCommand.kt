@@ -85,6 +85,7 @@ class EventCommand(
         if (existingWizard != null) return event.createFollowup(getMessage("error.wizard.started", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .awaitSingle()
 
         // Make sure calendar exists
@@ -118,6 +119,7 @@ class EventCommand(
         return event.createFollowup(getMessage("create.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
             .awaitSingle()
     }
 
@@ -146,6 +148,7 @@ class EventCommand(
         return event.createFollowup(getMessage("name.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -174,6 +177,7 @@ class EventCommand(
         return event.createFollowup(getMessage("description.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -241,6 +245,7 @@ class EventCommand(
 
             event.createFollowup(message)
                 .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
+                .withComponents(*componentService.getWizardComponents(modifiedWizard, settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         } else {
@@ -260,12 +265,14 @@ class EventCommand(
 
                 event.createFollowup(message)
                     .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
+                    .withComponents(*componentService.getWizardComponents(modifiedWizard, settings))
                     .withEphemeral(ephemeral)
                     .awaitSingle()
             } else {
                 // Event end cannot be before event start
                 event.createFollowup(getMessage("start.failure.afterEnd", settings))
                     .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
+                    .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                     .withEphemeral(ephemeral)
                     .awaitSingle()
             }
@@ -338,6 +345,7 @@ class EventCommand(
 
             event.createFollowup(message)
                 .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
+                .withComponents(*componentService.getWizardComponents(modifiedWizard, settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         } else {
@@ -358,6 +366,7 @@ class EventCommand(
 
                 event.createFollowup(message)
                     .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
+                    .withComponents(*componentService.getWizardComponents(modifiedWizard, settings))
                     .withEphemeral(ephemeral)
                     .awaitSingle()
 
@@ -365,6 +374,7 @@ class EventCommand(
                 // Event start cannot be after event end
                 event.createFollowup(getMessage("end.failure.beforeStart", settings))
                     .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
+                    .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                     .withEphemeral(ephemeral)
                     .awaitSingle()
             }
@@ -397,6 +407,7 @@ class EventCommand(
         return event.createFollowup(getMessage("color.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -425,6 +436,7 @@ class EventCommand(
         return event.createFollowup(getMessage("location.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -451,6 +463,7 @@ class EventCommand(
         if (!isValidImage) return event.createFollowup(getMessage("image.failure", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .awaitSingle()
 
         val alteredWizard = existingWizard.copy(entity = existingWizard.entity.copy(image = image))
@@ -459,6 +472,7 @@ class EventCommand(
         return event.createFollowup(getMessage("image.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -507,6 +521,7 @@ class EventCommand(
 
         return event.createFollowup(message)
             .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
+            .withComponents(*componentService.getWizardComponents(modifiedWizard, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -526,6 +541,7 @@ class EventCommand(
 
         return event.createFollowup()
             .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -548,6 +564,7 @@ class EventCommand(
             return event.createFollowup(getMessage("confirm.failure.missing.time", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -596,6 +613,7 @@ class EventCommand(
             return event.createFollowup(message)
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -649,6 +667,7 @@ class EventCommand(
         if (existingWizard != null) return event.createFollowup(getMessage("error.wizard.started", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .awaitSingle()
 
         // Make sure calendar exists
@@ -688,6 +707,7 @@ class EventCommand(
         return event.createFollowup(getMessage("edit.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
             .awaitSingle()
     }
 
@@ -718,6 +738,7 @@ class EventCommand(
         if (existingWizard != null) return event.createFollowup(getMessage("error.wizard.started", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .awaitSingle()
 
         // Make sure source calendar exists
@@ -759,6 +780,8 @@ class EventCommand(
 
         return event.createFollowup(getMessage("copy.success", settings))
             .withEmbeds(embedService.eventWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
+
             .withEphemeral(ephemeral)
             .awaitSingle()
     }

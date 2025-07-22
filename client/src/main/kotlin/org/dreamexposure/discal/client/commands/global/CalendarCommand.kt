@@ -7,6 +7,7 @@ import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.CalendarService
+import org.dreamexposure.discal.core.business.ComponentService
 import org.dreamexposure.discal.core.business.EmbedService
 import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.config.Config
@@ -26,6 +27,7 @@ class CalendarCommand(
     private val calendarService: CalendarService,
     private val permissionService: PermissionService,
     private val embedService: EmbedService,
+    private val componentService: ComponentService,
 ) : SlashCommand {
     override val name = "calendar"
     override val hasSubcommands = true
@@ -136,6 +138,7 @@ class CalendarCommand(
         if (existingWizard != null) return event.createFollowup(getMessage("error.wizard.started", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.calendarWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .awaitSingle()
 
         // Check if new calendar can be added
@@ -175,6 +178,7 @@ class CalendarCommand(
         return event.createFollowup(getMessage("create.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.calendarWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
             .awaitSingle()
     }
 
@@ -202,6 +206,7 @@ class CalendarCommand(
 
         return event.createFollowup(getMessage("name.success", settings))
             .withEmbeds(embedService.calendarWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -229,6 +234,7 @@ class CalendarCommand(
 
         return event.createFollowup(getMessage("description.success", settings))
             .withEmbeds(embedService.calendarWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -255,6 +261,7 @@ class CalendarCommand(
         if (timezone == null) return event.createFollowup(getMessage("timezone.failure.invalid", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.calendarWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .awaitSingle()
 
 
@@ -264,6 +271,7 @@ class CalendarCommand(
         return event.createFollowup(getMessage("timezone.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.calendarWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -282,6 +290,7 @@ class CalendarCommand(
 
         return event.createFollowup()
             .withEmbeds(embedService.calendarWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -337,6 +346,7 @@ class CalendarCommand(
 
             return event.createFollowup(message)
                 .withEmbeds(embedService.calendarWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         }
@@ -394,6 +404,7 @@ class CalendarCommand(
         if (existingWizard != null) return event.createFollowup(getMessage("error.wizard.started", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.calendarWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .awaitSingle()
 
         val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
@@ -412,6 +423,7 @@ class CalendarCommand(
         return event.createFollowup(getMessage("edit.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.calendarWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
             .awaitSingle()
     }
 }
