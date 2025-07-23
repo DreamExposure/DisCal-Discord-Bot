@@ -38,7 +38,7 @@ class AnnouncementCronJob(
 
     // TODO: Remove this one debugging is done before release
     private suspend fun processAnnouncementsForGuildAlt(guildId: Snowflake, maxDifference: Duration) {
-        throw NotImplementedError("Doing this to try to replicate what I'm seeing in prod")
+        throw UnsupportedOperationException("Doing this to try to replicate what I'm seeing in prod")
     }
 
     private fun doActionRedux() = mono {
