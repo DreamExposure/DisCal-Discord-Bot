@@ -47,7 +47,7 @@ class ComponentService {
             is CalendarWizardState -> "calendar"
             is EventWizardState -> "event"
             is AnnouncementWizardState -> "announcement"
-            else -> throw NotImplementedError("Unexpected wizard type")
+            else -> throw UnsupportedOperationException("Unexpected wizard type")
         }
 
         val confirmButtonTitle =

@@ -30,7 +30,7 @@ class WizardConfirmButton(
             "calendar" -> confirmCalendar(event, settings)
             "event" -> confirmEvent(event, settings)
             "announcement" -> confirmAnnouncement(event, settings)
-            else -> throw NotImplementedError("Unrecognized wizard type ${event.customId}")
+            else -> throw UnsupportedOperationException("Unrecognized wizard type ${event.customId}")
         }
     }
 

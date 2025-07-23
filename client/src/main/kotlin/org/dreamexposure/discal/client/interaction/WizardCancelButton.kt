@@ -70,7 +70,7 @@ class WizardCancelButton(
                     .awaitSingle()
 
             }
-            else -> throw NotImplementedError("Unrecognized wizard type ${event.customId}")
+            else -> throw UnsupportedOperationException("Unrecognized wizard type ${event.customId}")
         }
     }
 }

@@ -69,7 +69,7 @@ class GoogleCalendarApiWrapper(
         } else if (tokenResponse.code == HttpStatus.FORBIDDEN.value() && tokenResponse.error?.error.equals("Access to resource revoked")) {
             // User MUST reauthorize DisCal in Google if we are seeing this error as the refresh token is invalid
             // TODO: Call to delete calendar here to mimic old behavior. Consider marking instead so they can re-auth?
-            throw NotImplementedError("Call to delete calendar on refresh token revoked (or alternative) not yet implemented")
+            throw UnsupportedOperationException("Call to delete calendar on refresh token revoked (or alternative) not yet implemented")
         } else {
             throw RuntimeException("Error requesting local google calendar token from CAM for guild:${guildId.asString()} calendarNumber: $calendarNumber | response: error: ${tokenResponse.error?.error}")
         }
