@@ -7,10 +7,7 @@ import discord4j.core.`object`.entity.Message
 import discord4j.rest.util.AllowedMentions
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
-import org.dreamexposure.discal.core.business.AnnouncementService
-import org.dreamexposure.discal.core.business.CalendarService
-import org.dreamexposure.discal.core.business.EmbedService
-import org.dreamexposure.discal.core.business.PermissionService
+import org.dreamexposure.discal.core.business.*
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.`object`.new.Announcement
@@ -26,6 +23,7 @@ class AnnouncementCommand(
     private val permissionService: PermissionService,
     private val embedService: EmbedService,
     private val calendarService: CalendarService,
+    private val componentService: ComponentService,
 ) : SlashCommand {
     override val name = "announcement"
     override val hasSubcommands = true
@@ -35,6 +33,7 @@ class AnnouncementCommand(
         return when (event.options[0].name) {
             "create" -> create(event, settings)
             "type" -> type(event, settings)
+            "modifier" -> modifier(event, settings)
             "event" -> event(event, settings)
             "color" -> color(event, settings)
             "channel" -> channel(event, settings)
@@ -64,6 +63,11 @@ class AnnouncementCommand(
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(Announcement.Type::valueOf)
             .orElse(Announcement.Type.UNIVERSAL)
+        val modifier = event.options[0].getOption("modifier")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(Announcement.Modifier::valueOf)
+            .orElse(Announcement.Modifier.BEFORE)
         val channelId = event.options[0].getOption("channel")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asSnowflake)
@@ -96,6 +100,7 @@ class AnnouncementCommand(
             return event.createFollowup(getMessage("error.wizard.started", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -107,6 +112,7 @@ class AnnouncementCommand(
                 guildId = settings.guildId,
                 calendarNumber = calendar,
                 type = type,
+                modifier = modifier,
                 channelId = channelId,
                 hoursBefore = hours,
                 minutesBefore = minutes,
@@ -117,6 +123,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("create.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
             .awaitSingle()
     }
 
@@ -152,6 +159,37 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("type.success", settings))
             .withEphemeral(true)
             .withEmbeds(embedService.announcementWizardEmbed(altered, settings))
+            .withComponents(*componentService.getWizardComponents(altered, settings))
+            .awaitSingle()
+    }
+
+    private suspend fun modifier(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val modifier = event.options[0].getOption("modifier")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(Announcement.Modifier::valueOf)
+            .get()
+
+        // Validate permissions
+        val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
+        if (!hasControlRole) return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+
+        // Check if wizard not started
+        val existingWizard = announcementService.getWizard(settings.guildId, event.interaction.user.id)
+            ?: return event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+
+
+        val altered = existingWizard.copy(entity = existingWizard.entity.copy(modifier = modifier))
+        announcementService.putWizard(altered)
+
+        return event.createFollowup(getMessage("modifier.success", settings))
+            .withEphemeral(true)
+            .withEmbeds(embedService.announcementWizardEmbed(altered, settings))
+            .withComponents(*componentService.getWizardComponents(altered, settings))
             .awaitSingle()
     }
 
@@ -179,6 +217,7 @@ class AnnouncementCommand(
             return event.createFollowup(getMessage("event.failure.type", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -188,6 +227,7 @@ class AnnouncementCommand(
             return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -201,6 +241,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("event.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -229,6 +270,7 @@ class AnnouncementCommand(
             return event.createFollowup(getMessage("color.failure.type", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -238,6 +280,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("color.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -266,6 +309,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("channel.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -295,6 +339,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("minutes.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -324,6 +369,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("hours.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -353,6 +399,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("info.success.set", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -382,6 +429,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("calendar.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -409,6 +457,7 @@ class AnnouncementCommand(
             return event.createFollowup(getCommonMsg("error.patronOnly", settings.locale))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -418,6 +467,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("publish.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
             .awaitSingle()
     }
 
@@ -437,6 +487,7 @@ class AnnouncementCommand(
         return event.createFollowup()
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
             .awaitSingle()
     }
 
@@ -467,6 +518,7 @@ class AnnouncementCommand(
             return event.createFollowup(failureReason)
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -515,6 +567,7 @@ class AnnouncementCommand(
             return event.createFollowup(getMessage("error.wizard.started", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -534,6 +587,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("edit.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
             .awaitSingle()
     }
 
@@ -555,6 +609,7 @@ class AnnouncementCommand(
             return event.createFollowup(getMessage("error.wizard.started", settings))
                 .withEphemeral(ephemeral)
                 .withEmbeds(embedService.announcementWizardEmbed(existingWizard, settings))
+                .withComponents(*componentService.getWizardComponents(existingWizard, settings))
                 .awaitSingle()
         }
 
@@ -574,6 +629,7 @@ class AnnouncementCommand(
         return event.createFollowup(getMessage("copy.success", settings))
             .withEphemeral(ephemeral)
             .withEmbeds(embedService.announcementWizardEmbed(newWizard, settings))
+            .withComponents(*componentService.getWizardComponents(newWizard, settings))
             .awaitSingle()
     }
 
@@ -668,9 +724,14 @@ class AnnouncementCommand(
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(Announcement.Type::valueOf)
             .getOrNull()
+        val modifier = event.options[0].getOption("modifier")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(Announcement.Modifier::valueOf)
+            .getOrNull()
 
         // Get filtered announcements
-        val announcements = announcementService.getAllAnnouncements(settings.guildId, type, showDisabled)
+        val announcements = announcementService.getAllAnnouncements(settings.guildId, type, modifier, showDisabled)
             .filter { it.calendarNumber == calendar }
 
         return if (announcements.isEmpty()) {

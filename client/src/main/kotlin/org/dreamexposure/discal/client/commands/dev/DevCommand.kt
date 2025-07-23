@@ -49,6 +49,7 @@ class DevCommand(
         val newTargetSettings = settingsService.upsertSettings(oldTargetSettings.copy(patronGuild = !oldTargetSettings.patronGuild))
 
         return event.createFollowup(getMessage("patron.success", settings, "${newTargetSettings.patronGuild}"))
+            .withEmbeds(embedService.settingsEmbeds(newTargetSettings, debug = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -64,6 +65,7 @@ class DevCommand(
         val newTargetSettings = settingsService.upsertSettings(oldTargetSettings.copy(devGuild = !oldTargetSettings.devGuild))
 
         return event.createFollowup(getMessage("dev.success", settings, newTargetSettings.devGuild.toString()))
+            .withEmbeds(embedService.settingsEmbeds(newTargetSettings, debug = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -81,9 +83,10 @@ class DevCommand(
             .get()
 
         val oldTargetSettings = settingsService.getSettings(guildId)
-        settingsService.upsertSettings(oldTargetSettings.copy(maxCalendars = amount))
+        val newTargetSettings = settingsService.upsertSettings(oldTargetSettings.copy(maxCalendars = amount))
 
-        return event.createFollowup(getMessage("maxcal.success", settings, "$amount"))
+        return event.createFollowup(getMessage("maxcal.success", newTargetSettings, "$amount"))
+            .withEmbeds(embedService.settingsEmbeds(newTargetSettings, debug = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -98,7 +101,7 @@ class DevCommand(
         val targetSettings = settingsService.getSettings(guildId)
 
         return event.createFollowup()
-            .withEmbeds(embedService.settingsEmbeds(targetSettings))
+            .withEmbeds(embedService.settingsEmbeds(targetSettings, debug = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }

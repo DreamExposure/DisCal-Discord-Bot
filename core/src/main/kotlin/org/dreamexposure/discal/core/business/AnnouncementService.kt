@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
+import discord4j.core.`object`.component.LayoutComponent
 import discord4j.discordjson.json.MessageCreateRequest
 import discord4j.rest.http.client.ClientException
 import kotlinx.coroutines.reactor.awaitSingle
@@ -11,11 +12,13 @@ import org.dreamexposure.discal.AnnouncementWizardStateCache
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.database.AnnouncementData
 import org.dreamexposure.discal.core.database.AnnouncementRepository
+import org.dreamexposure.discal.core.extensions.isExpiredTtl
 import org.dreamexposure.discal.core.extensions.messageContentSafe
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Announcement
 import org.dreamexposure.discal.core.`object`.new.AnnouncementWizardState
 import org.dreamexposure.discal.core.`object`.new.Event
+import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
@@ -30,7 +33,9 @@ class AnnouncementService(
     private val announcementCache: AnnouncementCache,
     private val announcementWizardStateCache: AnnouncementWizardStateCache,
     private val embedService: EmbedService,
+    private val componentService: ComponentService,
     private val calendarService: CalendarService,
+    private val settingsService: GuildSettingsService,
     private val metricService: MetricService,
     private val beanFactory: BeanFactory,
 ) {
@@ -86,9 +91,10 @@ class AnnouncementService(
         return announcements
     }
 
-    suspend fun getAllAnnouncements(guildId: Snowflake, type: Announcement.Type? = null, returnDisabled: Boolean = true): List<Announcement> {
+    suspend fun getAllAnnouncements(guildId: Snowflake, type: Announcement.Type? = null, modifier: Announcement.Modifier? = null, returnDisabled: Boolean = true): List<Announcement> {
         return getAllAnnouncements(guildId)
             .filter { if (type == null) true else it.type == type }
+            .filter { if (modifier == null) true else it.modifier == modifier }
             .filter { if (returnDisabled) true else it.enabled }
     }
 
@@ -155,7 +161,7 @@ class AnnouncementService(
         announcementCache.evict(key = guildId)
     }
 
-    suspend fun sendAnnouncement(announcement: Announcement, event: Event) {
+    suspend fun sendAnnouncement(announcement: Announcement, event: Event, settings: GuildSettings) {
         try {
             val channel = discordClient.getChannelById(announcement.channelId)
             // While we don't need the channel data, we do want to make sure it exists
@@ -169,11 +175,12 @@ class AnnouncementService(
                 return
             }
 
-            val embed = embedService.determineAnnouncementEmbed(announcement, event)
+            val embed = embedService.determineAnnouncementEmbed(announcement, event, settings)
 
             val message = channel.createMessage(MessageCreateRequest.builder()
                 .content(announcement.subscribers.buildMentions().messageContentSafe())
                 .addEmbed(embed.asRequest())
+                .addAllComponents(componentService.getEventRsvpComponents(event, settings).map(LayoutComponent::getData))
                 .build()
             ).awaitSingle()
 
@@ -194,41 +201,79 @@ class AnnouncementService(
     }
 
     suspend fun isInRange(announcement: Announcement, event: Event, maxDifference: Duration): Boolean {
-        val timeUntilEvent = Duration.between(Instant.now(), event.start)
+        return when (announcement.modifier) {
+            Announcement.Modifier.BEFORE -> {
+                val timeUntilEvent = Duration.between(Instant.now(), event.start)
+                val difference = timeUntilEvent - announcement.getCalculatedTime()
 
-        val difference = timeUntilEvent - announcement.getCalculatedTime()
+                if (difference.isNegative) {
+                    // Event has past, check delete conditions
+                    if (announcement.type == Announcement.Type.SPECIFIC) deleteAnnouncement(announcement.guildId, announcement.id)
 
-        return if (difference.isNegative) {
-            // Event has past, check delete conditions
-            if (announcement.type == Announcement.Type.SPECIFIC) deleteAnnouncement(announcement.guildId, announcement.id)
+                    false
+                } else difference <= maxDifference
+            }
+            Announcement.Modifier.DURING -> {
+                val timeSinceStart = Duration.between(event.start, Instant.now())
+                val difference = timeSinceStart - announcement.getCalculatedTime()
 
-            false
-        } else difference <= maxDifference
+                if (difference.isNegative) {
+                    // Event has past, check delete conditions
+                    if (announcement.type == Announcement.Type.SPECIFIC) deleteAnnouncement(announcement.guildId, announcement.id)
 
+                    false
+                } else difference <= maxDifference
+            }
+            Announcement.Modifier.END -> {
+                TODO("Gotta figure out how I want to do this one")
+            }
+        }
     }
 
     suspend fun processAnnouncementsForGuild(guildId: Snowflake, maxDifference: Duration) {
         val taskTimer = StopWatch()
         taskTimer.start()
 
-        // Since we currently can't look up upcoming events from cache cuz I dunno how, we just hold in very temporary and scoped memory at least
-        val events: MutableMap<Int, List<Event>> = mutableMapOf()
+        // Get settings and check if announcements are paused
+        val settings = settingsService.getSettings(guildId)
+        if (settings.pauseAnnouncementsUntil != null && !settings.pauseAnnouncementsUntil.isExpiredTtl()) return
 
-        // TODO: Need to break this out to add handling for modifiers
+        // Since we currently can't look up upcoming events from cache cuz I dunno how, we just hold in very temporary and scoped memory at least
+        val upcomingEvents: MutableMap<Int, List<Event>> = mutableMapOf()
+        val ongoingEvents: MutableMap<Int, List<Event>> = mutableMapOf()
+
         getAllAnnouncements(guildId, returnDisabled = false).forEach { announcement ->
             // Handle specific type first, since we don't need to fetch all events for this
             if (announcement.type == Announcement.Type.SPECIFIC) {
                 val event = calendarService.getEvent(guildId, announcement.calendarNumber, announcement.eventId!!) ?: return@forEach
                 if (isInRange(announcement, event, maxDifference)) {
-                    sendAnnouncement(announcement, event)
+                    sendAnnouncement(announcement, event, settings)
                 }
             }
 
             // Get the events to filter through
-            var filteredEvents = events[announcement.calendarNumber]
-            if (filteredEvents == null) {
-                filteredEvents = calendarService.getUpcomingEvents(guildId, announcement.calendarNumber, PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT)
-                events[announcement.calendarNumber] = filteredEvents
+            var filteredEvents = when (announcement.modifier) {
+                Announcement.Modifier.BEFORE -> {
+                    var events = upcomingEvents[announcement.calendarNumber]
+                    if (events == null) {
+                        events = calendarService.getUpcomingEvents(guildId, announcement.calendarNumber, PROCESS_GUILD_DEFAULT_UPCOMING_EVENTS_COUNT)
+                        upcomingEvents[announcement.calendarNumber] = events
+                    }
+
+                    events
+                }
+                Announcement.Modifier.DURING -> {
+                    var events = ongoingEvents[announcement.calendarNumber]
+                    if (events == null) {
+                        events = calendarService.getOngoingEvents(guildId, announcement.calendarNumber)
+                        ongoingEvents[announcement.calendarNumber] = events
+                    }
+
+                    events
+                }
+                Announcement.Modifier.END -> {
+                    TODO("Need to figure out how to implement this still")
+                }
             }
 
             // Handle filtering out events based on this announcement's types
@@ -243,7 +288,7 @@ class AnnouncementService(
             // Loop through filtered events and post any announcements in range
             filteredEvents
                 .filter { isInRange(announcement, it, maxDifference) }
-                .forEach { sendAnnouncement(announcement, it) }
+                .forEach { sendAnnouncement(announcement, it, settings) }
 
         }
 

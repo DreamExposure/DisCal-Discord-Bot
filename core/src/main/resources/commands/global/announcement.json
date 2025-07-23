@@ -33,6 +33,22 @@
           ]
         },
         {
+          "name": "modifier",
+          "type": 3,
+          "description": "The modifier affecting when the announcement should be posted relative to the event",
+          "required": false,
+          "choices": [
+            {
+              "name": "Before - Will be posted before an event is to begin",
+              "value": "BEFORE"
+            },
+            {
+              "name": "During - Will be posted while the event is ongoing",
+              "value": "DURING"
+            }
+          ]
+        },
+        {
           "name": "channel",
           "type": 7,
           "description": "The channel to post the announcement in",
@@ -58,6 +74,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar to create the announcement in (defaults to 1)",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -90,6 +107,30 @@
             {
               "name": "Recur",
               "value": "RECUR"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "modifier",
+      "type": 1,
+      "description": "Sets the modifier for the announcement, affecting when it will be posted relative to the event",
+      "required": false,
+      "options": [
+        {
+          "name": "modifier",
+          "type": 3,
+          "description": "The modifier affecting when the announcement should be posted relative to the event",
+          "required": true,
+          "choices": [
+            {
+              "name": "Before - Will be posted before an event is to begin",
+              "value": "BEFORE"
+            },
+            {
+              "name": "During - Will be posted while the event is ongoing",
+              "value": "DURING"
             }
           ]
         }
@@ -243,6 +284,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the announcement will read from (defaults to 1)",
+          "autocomplete":true,
           "required": true,
           "min_value": 1
         }
@@ -374,6 +416,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar to pull the announcements from. Defaults to 1",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         },
@@ -404,6 +447,22 @@
             {
               "name": "Recur",
               "value": "RECUR"
+            }
+          ]
+        },
+        {
+          "name": "modifier",
+          "type": 3,
+          "description": "The modifier affecting when the announcement should be posted relative to the event",
+          "required": false,
+          "choices": [
+            {
+              "name": "Before - Will be posted before an event is to begin",
+              "value": "BEFORE"
+            },
+            {
+              "name": "During - Will be posted while the event is ongoing",
+              "value": "DURING"
             }
           ]
         }

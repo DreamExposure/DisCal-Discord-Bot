@@ -1,6 +1,7 @@
 package org.dreamexposure.discal.core.database
 
 import org.springframework.data.relational.core.mapping.Table
+import java.time.Instant
 
 @Table("guild_settings")
 data class GuildSettingsData(
@@ -15,4 +16,5 @@ data class GuildSettingsData(
     val branded: Boolean,
     val announcementStyle: Int,
     val eventKeepDuration: Boolean,
+    val pauseAnnouncementsUntil: Instant?,
 )

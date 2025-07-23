@@ -30,6 +30,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar to create the event in (defaults to 1)",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -633,6 +634,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from (defaults to 1)",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -654,6 +656,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from (defaults to 1)",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         },
@@ -661,6 +664,7 @@
           "name": "target",
           "type": 4,
           "description": "The calendar to copy the event to (defaults to the calendar the copied event is from)",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -682,6 +686,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from (defaults to 1)",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }
@@ -703,6 +708,7 @@
           "name": "calendar",
           "type": 4,
           "description": "The calendar the event is from (defaults to 1)",
+          "autocomplete":true,
           "required": false,
           "min_value": 1
         }

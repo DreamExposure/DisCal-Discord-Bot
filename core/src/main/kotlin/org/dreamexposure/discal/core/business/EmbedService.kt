@@ -4,7 +4,8 @@ import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.core.spec.EmbedCreateSpec
 import kotlinx.coroutines.reactor.awaitSingle
-import org.dreamexposure.discal.*
+import org.dreamexposure.discal.Application
+import org.dreamexposure.discal.GitProperty
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.enums.time.DiscordTimestampFormat
@@ -81,8 +82,13 @@ class EmbedService(
     /////////////////////////////
     ////// Settings Embeds //////
     /////////////////////////////
-    suspend fun settingsEmbeds(settings: GuildSettings): EmbedCreateSpec {
-        val controlRoleValue = if (settings.controlRole == null) "<@&${settings.guildId.asLong()}>" else "<@&${settings.controlRole}>"
+    suspend fun settingsEmbeds(settings: GuildSettings, debug: Boolean = false): EmbedCreateSpec {
+        var controlRoleValue = if (settings.controlRole == null) "@everyone" else "<@&${settings.controlRole.asLong()}>"
+        if (debug) controlRoleValue = "$controlRoleValue (${settings.controlRole?.asLong()})"
+
+        val announcementsPausedUntil = if (settings.pauseAnnouncementsUntil != null && !settings.pauseAnnouncementsUntil.isExpiredTtl())
+            settings.pauseAnnouncementsUntil.asDiscordTimestamp(LONG_DATETIME)
+        else "N/a"
 
         return defaultEmbedBuilder(settings)
             .title(getEmbedMessage("settings", "view.title", settings.locale))
@@ -95,6 +101,7 @@ class EmbedService(
             .addField(getEmbedMessage("settings", "view.field.dev", settings.locale), "${settings.devGuild}", true)
             .addField(getEmbedMessage("settings", "view.field.cal", settings.locale), "${settings.maxCalendars}", true)
             .addField(getEmbedMessage("settings", "view.field.brand", settings.locale), "${settings.interfaceStyle.branded}", false)
+            .addField(getEmbedMessage("settings", "view.field.pauseAnnouncements", settings.locale), announcementsPausedUntil, false)
             .footer(getEmbedMessage("settings", "view.footer", settings.locale), null)
             .build()
     }
@@ -106,14 +113,21 @@ class EmbedService(
         val settings = settingsService.getSettings(calendar.metadata.guildId)
         val builder = defaultEmbedBuilder(settings)
 
+        // This is used to truncate how many days/events are displayed to prevent going over the 6000 character count limit
+        var calculatedEmbedCharacterLength = 0
+
         // Get events sorted and grouped
         val groupedEvents = events.groupByDate()
 
         //Handle optional fields
-        if (calendar.name.isNotBlank())
+        if (calendar.name.isNotBlank()) {
             builder.title(calendar.name.toMarkdown().embedTitleSafe())
-        if (calendar.description.isNotBlank())
+            calculatedEmbedCharacterLength += calendar.name.toMarkdown().embedTitleSafe().length
+        }
+        if (calendar.description.isNotBlank()) {
             builder.description(calendar.description.toMarkdown().embedDescriptionSafe())
+            calculatedEmbedCharacterLength += calendar.description.toMarkdown().embedDescriptionSafe().length
+        }
 
         // Truncate dates to 23 due to discord enforcing the field limit
         val truncatedEvents = mutableMapOf<ZonedDateTime, List<Event>>()
@@ -171,8 +185,10 @@ class EmbedService(
                 // Finish event
                 content.append("```\n")
             }
+            calculatedEmbedCharacterLength += title.length + content.toString().embedFieldSafe().length
 
-            if (content.isNotBlank())
+            // max embed length is 6000 characters, we are going to go a bit under that in just for extra safety
+            if (content.isNotBlank() && calculatedEmbedCharacterLength <= 5750)
                 builder.addField(title, content.toString().embedFieldSafe(), false)
         }
 
@@ -420,6 +436,9 @@ class EmbedService(
             }
 
         }
+        if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isAfter(Instant.now())) {
+            warnings.add(getEmbedMessage("event", "warning.wizard.announcementsPaused", settings.locale))
+        }
         if (warnings.isNotEmpty()) {
             val warnText = "```fix\n${warnings.joinToString("\n")}\n```"
             builder.addField(getEmbedMessage("event", "wizard.field.warnings", settings.locale), warnText, false)
@@ -535,8 +554,7 @@ class EmbedService(
     /////////////////////////////////
     ////// Announcement Embeds //////
     /////////////////////////////////
-    suspend fun determineAnnouncementEmbed(announcement: Announcement, event: Event): EmbedCreateSpec {
-        val settings = settingsService.getSettings(announcement.guildId)
+    suspend fun determineAnnouncementEmbed(announcement: Announcement, event: Event, settings: GuildSettings): EmbedCreateSpec {
         return when (settings.interfaceStyle.announcementStyle) {
             FULL -> fullAnnouncementEmbed(announcement, event, settings)
             SIMPLE -> simpleAnnouncementEmbed(announcement, event, settings)
@@ -643,7 +661,13 @@ class EmbedService(
     suspend fun eventAnnouncementEmbed(announcement: Announcement, event: Event, settings: GuildSettings): EmbedCreateSpec {
         val builder = defaultEmbedBuilder(settings)
             .color(event.color.asColor())
-            .title(getEmbedMessage("announcement", "event.title", settings.locale))
+
+        val title = when (announcement.modifier) {
+            Announcement.Modifier.BEFORE -> { "event.title.upcoming" }
+            Announcement.Modifier.DURING -> { "event.title.ongoing" }
+            else -> TODO("Modifier not supported")
+        }
+        builder.title(getEmbedMessage("announcement", title, settings.locale))
 
         if (event.name.isNotBlank()) builder.addField(
             getEmbedMessage("announcement", "event.field.name", settings.locale),
@@ -803,11 +827,14 @@ class EmbedService(
             warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.eventId", settings.locale)).appendLine()
         if (announcement.type == Announcement.Type.COLOR && announcement.eventColor == EventColor.NONE)
             warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.color", settings.locale)).appendLine()
+        if (announcement.modifier == Announcement.Modifier.DURING)
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.modifier.during", settings.locale)).appendLine()
         if (announcement.getCalculatedTime() < Duration.ofMinutes(5))
             warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.time", settings.locale)).appendLine()
         if (announcement.calendarNumber > settings.maxCalendars)
-            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.calNum", settings.locale))
-
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.calNum", settings.locale)).appendLine()
+        if (settings.pauseAnnouncementsUntil != null && !settings.pauseAnnouncementsUntil.isExpiredTtl())
+            warningsBuilder.appendLine(getEmbedMessage("announcement", "warning.wizard.paused", settings.locale))
 
 
         if (warningsBuilder.isNotBlank()) {

@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.database
 import org.springframework.data.r2dbc.repository.Query
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 import reactor.core.publisher.Mono
+import java.time.Instant
 
 interface GuildSettingsRepository : R2dbcRepository<GuildSettingsData, Long> {
 
@@ -20,7 +21,8 @@ interface GuildSettingsRepository : R2dbcRepository<GuildSettingsData, Long> {
             lang = :lang,
             branded = :branded,
             announcement_style = :announcementStyle,
-            event_keep_duration = :eventKeepDuration
+            event_keep_duration = :eventKeepDuration,
+            pause_announcements_until = :pauseAnnouncementsUntil
         WHERE guild_id = :guildId
     """)
     fun updateByGuildId(
@@ -35,5 +37,6 @@ interface GuildSettingsRepository : R2dbcRepository<GuildSettingsData, Long> {
         branded: Boolean,
         announcementStyle: Int,
         eventKeepDuration: Boolean,
+        pauseAnnouncementsUntil: Instant?,
     ): Mono<Int>
 }

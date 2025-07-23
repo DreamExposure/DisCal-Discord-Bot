@@ -1,6 +1,6 @@
 package org.dreamexposure.discal.client.listeners.discord
 
-import discord4j.core.event.domain.interaction.ButtonInteractionEvent
+import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.interaction.InteractionHandler
 import org.dreamexposure.discal.core.business.GuildSettingsService
@@ -13,31 +13,30 @@ import org.springframework.util.StopWatch
 import java.util.*
 
 @Component
-class ButtonInteractionListener(
-    private val buttons: List<InteractionHandler<ButtonInteractionEvent>>,
+class SelectMenuInteractionListener(
     private val settingsService: GuildSettingsService,
+    private val dropdowns: List<InteractionHandler<SelectMenuInteractionEvent>>,
     private val metricService: MetricService,
-): EventListener<ButtonInteractionEvent> {
-    override suspend fun handle(event: ButtonInteractionEvent) {
+) : EventListener<SelectMenuInteractionEvent> {
+
+    override suspend fun handle(event: SelectMenuInteractionEvent) {
         val timer = StopWatch()
         timer.start()
 
         if (!event.interaction.guildId.isPresent) {
-            event.reply(getCommonMsg("error.dm.not-supported", Locale.ENGLISH))
+            event.reply(getCommonMsg("error.dm.not-supported", Locale.ENGLISH)).awaitSingleOrNull()
             return
         }
 
-        val button = buttons.firstOrNull { it.ids.any(event.customId::startsWith) }
+        val dropdown = dropdowns.firstOrNull { it.ids.any(event.customId::startsWith) }
 
-        if (button != null) {
+        if (dropdown != null) {
+            if (dropdown.shouldDefer(event)) event.deferReply().withEphemeral(dropdown.ephemeral).awaitSingleOrNull()
+
             try {
-                val settings = settingsService.getSettings(event.interaction.guildId.get())
-
-                if (button.shouldDefer(event)) event.deferReply().withEphemeral(button.ephemeral).awaitSingleOrNull()
-
-                button.handle(event, settings)
+                dropdown.handle(event, settingsService.getSettings(event.interaction.guildId.get()))
             } catch (e: Exception) {
-                LOGGER.error(DEFAULT, "Error handling button interaction | #${event.customId} | $event", e)
+                LOGGER.error(DEFAULT, "Error handling select menu interaction | id:${event.customId} | $event", e)
 
                 // Attempt to provide a message if there's an unhandled exception
                 event.createFollowup(getCommonMsg("error.unknown", Locale.ENGLISH))
@@ -51,6 +50,6 @@ class ButtonInteractionListener(
         }
 
         timer.stop()
-        metricService.recordInteractionDuration(button?.ids?.joinToString("|") ?: event.customId, "button", timer.totalTimeMillis)
+        metricService.recordInteractionDuration(dropdown?.ids?.joinToString("|") ?: event.customId, "select-menu", timer.totalTimeMillis)
     }
 }

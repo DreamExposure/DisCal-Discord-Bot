@@ -1,3 +1,5 @@
+@file:Suppress("EnumEntryName")
+
 package org.dreamexposure.discal.core.enums.time
 
 enum class GoodTimezone {

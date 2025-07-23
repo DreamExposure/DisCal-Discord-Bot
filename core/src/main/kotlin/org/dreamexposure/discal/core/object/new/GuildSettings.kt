@@ -5,7 +5,8 @@ import org.dreamexposure.discal.core.database.GuildSettingsData
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.asLocale
 import org.dreamexposure.discal.core.extensions.asSnowflake
-import java.util.Locale
+import java.time.Instant
+import java.util.*
 
 data class GuildSettings(
     val guildId: Snowflake,
@@ -16,6 +17,7 @@ data class GuildSettings(
     val maxCalendars: Int = 1,
     val locale: Locale = Locale.ENGLISH,
     val eventKeepDuration: Boolean = false,
+    val pauseAnnouncementsUntil: Instant? = null,
 
     val interfaceStyle: InterfaceStyle = InterfaceStyle()
 ) {
@@ -28,10 +30,12 @@ data class GuildSettings(
         maxCalendars = data.maxCalendars,
         locale = data.lang.asLocale(),
         eventKeepDuration = data.eventKeepDuration,
+        pauseAnnouncementsUntil = data.pauseAnnouncementsUntil,
 
         interfaceStyle = InterfaceStyle(
-            timeFormat = TimeFormat.entries.first { it.value == data.timeFormat },
-            announcementStyle = AnnouncementStyle.entries.first { it.value == data.announcementStyle },
+            // Just in case there's weird data, I'm going to allow going back to the default value on a failure
+            timeFormat = TimeFormat.entries.firstOrNull { it.value == data.timeFormat } ?: TimeFormat.TWENTY_FOUR_HOUR,
+            announcementStyle = AnnouncementStyle.entries.firstOrNull { it.value == data.announcementStyle } ?: AnnouncementStyle.EVENT,
             branded = data.branded,
         )
     )

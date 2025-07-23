@@ -1,0 +1,3 @@
+ALTER TABLE guild_settings
+    ADD COLUMN PAUSE_ANNOUNCEMENTS_UNTIL DATETIME NULL DEFAULT NULL
+        AFTER event_keep_duration;

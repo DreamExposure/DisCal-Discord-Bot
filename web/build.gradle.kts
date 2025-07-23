@@ -1,3 +1,4 @@
+
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -56,17 +57,17 @@ jib {
 // The weird OS checks are because of windows. See this SO answer: https://stackoverflow.com/a/53428540
 
 tasks {
-    create<Exec>("npm") {
+    this.register<Exec>("npm") {
         var npm = "npm"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             npm = "npm.cmd"
         }
 
         workingDir("..")
-        commandLine(npm, "ci")
+        commandLine(npm, "install")
     }
 
-    create<Exec>("cleanWeb") {
+    this.register<Exec>("cleanWeb") {
         dependsOn("npm")
         var gulp = "gulp"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -75,7 +76,7 @@ tasks {
         commandLine(gulp, "clean:all")
     }
 
-    create<Exec>("compileCSS") {
+    this.register<Exec>("compileCSS") {
         dependsOn("npm")
         var gulp = "gulp"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -85,7 +86,7 @@ tasks {
         commandLine(gulp, "build")
     }
 
-    create<Exec>("compileTypescript") {
+    this.register<Exec>("compileTypescript") {
         dependsOn("npm")
         var webpack = "webpack"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {

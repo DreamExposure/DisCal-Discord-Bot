@@ -28,7 +28,7 @@ buildscript {
 allprojects {
     //Project props
     group = "org.dreamexposure.discal"
-    version = "4.2.7"
+    version = "4.2.8"
     description = "DisCal"
 
     //Plugins
@@ -60,7 +60,6 @@ allprojects {
         mavenLocal()
 
         maven("https://repo.maven.apache.org/maven2/")
-        maven("https://kotlin.bintray.com/kotlinx")
         maven("https://oss.sonatype.org/content/repositories/snapshots")
         maven("https://repo.spring.io/milestone")
         maven("https://jitpack.io")
@@ -90,7 +89,7 @@ allprojects {
         implementation("org.springframework.boot:spring-boot-starter-actuator")
 
         // Database
-        implementation("io.asyncer:r2dbc-mysql:1.3.0") // TODO: Remove hard coded version once spring includes this in bom as it is a breaking change
+        implementation("io.asyncer:r2dbc-mysql")
         implementation("com.mysql:mysql-connector-j")
 
         // Serialization
@@ -120,8 +119,8 @@ allprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlin {
@@ -150,7 +149,7 @@ subprojects {
 tasks {
     wrapper {
         distributionType = ALL
-        gradleVersion = "8.10.2"
+        gradleVersion = "8.14.2"
     }
 
     bootJar {

@@ -27,7 +27,7 @@ class GuildSettingsService(
         settings = repository.findByGuildId(guildId.asLong())
             .map(::GuildSettings)
             .defaultIfEmpty(GuildSettings(guildId = guildId))
-            .awaitSingle()
+            .awaitSingleOrNull() ?: GuildSettings(guildId = guildId) // For sanity
 
         cache.put(key = guildId, value = settings)
         return settings
@@ -48,6 +48,7 @@ class GuildSettingsService(
             branded = settings.interfaceStyle.branded,
             announcementStyle = settings.interfaceStyle.announcementStyle.value,
             eventKeepDuration = settings.eventKeepDuration,
+            pauseAnnouncementsUntil = settings.pauseAnnouncementsUntil,
         )).map(::GuildSettings).awaitSingle()
 
         cache.put(key = saved.guildId, value = saved)
@@ -69,6 +70,7 @@ class GuildSettingsService(
             branded = settings.interfaceStyle.branded,
             announcementStyle = settings.interfaceStyle.announcementStyle.value,
             eventKeepDuration = settings.eventKeepDuration,
+            pauseAnnouncementsUntil = settings.pauseAnnouncementsUntil,
         ).awaitSingleOrNull()
 
         cache.put(key = settings.guildId, value = settings)

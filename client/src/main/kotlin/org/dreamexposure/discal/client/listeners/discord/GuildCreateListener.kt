@@ -34,7 +34,7 @@ class GuildCreateListener(
         val devCommands = mutableListOf<ApplicationCommandRequest>()
         for (res in matcher.getResources("commands/dev/*.json")) {
             val request = objectMapper.readValue<ApplicationCommandRequest>(res.inputStream)
-            premiumCommands.add(request)
+            devCommands.add(request)
         }
         this.devCommands = devCommands
 

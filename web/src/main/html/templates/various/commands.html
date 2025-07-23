@@ -365,14 +365,6 @@
                             <td class="tb-flex-row tb-usage" role="cell">/displaycal new (time) (calendar)</td>
                             <td class="tb-flex-row tb-access" role="cell">elevated</td>
                         </tr>
-
-                        <!--Start displaycal update command-->
-                        <tr class="flex-table" role="rowgroup">
-                            <td class="tb-flex-row tb-command" role="cell">update</td>
-                            <td class="tb-flex-row" role="cell">Updates an existing calendar overview</td>
-                            <td class="tb-flex-row tb-usage" role="cell">/displaycal update [message-id]</td>
-                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
-                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -701,7 +693,7 @@
                             <td class="tb-flex-row tb-command" role="cell">create</td>
                             <td class="tb-flex-row" role="cell">Starts the announcement create wizard</td>
                             <td class="tb-flex-row tb-usage" role="cell">
-                                /announcement create (type) (channel) (minutes) (hours) (calendar)
+                                /announcement create (type) (modifier) (channel) (minutes) (hours) (calendar)
                             </td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
@@ -714,6 +706,17 @@
                                 Valid types: UNIVERSAL, SPECIFIC, COLOR, RECUR
                             </td>
                             <td class="tb-flex-row tb-usage" role="cell">/announcement type [type]</td>
+                            <td class="tb-flex-row tb-access" role="cell">privileged</td>
+                        </tr>
+
+                        <!--Start modifier command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">type</td>
+                            <td class="tb-flex-row" role="cell">
+                                Sets the announcement modifier.
+                                Valid modifiers: BEFORE (default), DURING
+                            </td>
+                            <td class="tb-flex-row tb-usage" role="cell">/announcement modifier [modifier]</td>
                             <td class="tb-flex-row tb-access" role="cell">privileged</td>
                         </tr>
 
@@ -937,6 +940,14 @@
                             <td class="tb-flex-row tb-command" role="cell">announcement-style</td>
                             <td class="tb-flex-row" role="cell">Changes what style announcements will be posted as</td>
                             <td class="tb-flex-row tb-usage" role="cell">/settings announcement-style [style]</td>
+                            <td class="tb-flex-row tb-access" role="cell">elevated</td>
+                        </tr>
+
+                        <!--Start pause-announcements command-->
+                        <tr class="flex-table" role="rowgroup">
+                            <td class="tb-flex-row tb-command" role="cell">pause-announcements</td>
+                            <td class="tb-flex-row" role="cell">Allows pausing and unpausing of all announcements for a period of time. Leave options blank to unpause</td>
+                            <td class="tb-flex-row tb-usage" role="cell">/settings pause-announcements (hours) (days) (weeks)</td>
                             <td class="tb-flex-row tb-access" role="cell">elevated</td>
                         </tr>
 

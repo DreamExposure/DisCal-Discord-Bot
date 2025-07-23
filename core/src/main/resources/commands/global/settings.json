@@ -120,6 +120,35 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "pause-announcements",
+      "type": 1,
+      "description": "Allows pausing announcements for a period of time",
+      "required": false,
+      "options": [
+        {
+          "name": "hours",
+          "type": 4,
+          "description": "Hours to pause announcements. Added to days/weeks",
+          "required": false,
+          "min_value": 0
+        },
+        {
+          "name": "days",
+          "type": 4,
+          "description": "Days to pause announcements. Added to hours/weeks",
+          "required": false,
+          "min_value": 0
+        },
+        {
+          "name": "weeks",
+          "type": 4,
+          "description": "Weeks to pause announcements. Added to hours/days",
+          "required": false,
+          "min_value": 0
+        }
+      ]
     }
   ],
   "default_permissions": true
