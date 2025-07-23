@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.client.business.cronjob
 
+import discord4j.common.util.Snowflake
 import discord4j.core.GatewayDiscordClient
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.mono
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component
 import org.springframework.util.StopWatch
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.time.Duration
 
 @Component
 class AnnouncementCronJob(
@@ -28,10 +30,35 @@ class AnnouncementCronJob(
     override fun run(args: ApplicationArguments?) {
         Flux.interval(interval)
             .onBackpressureDrop()
-            .flatMap { doAction() }
+            .flatMap { doActionRedux() }
             .doOnError { LOGGER.error(DEFAULT, "!-Announcement run error-! Failed to process announcements for all guilds", it) }
             .onErrorResume { Mono.empty() }
             .subscribe()
+    }
+
+    // TODO: Remove this one debugging is done before release
+    private suspend fun processAnnouncementsForGuildAlt(guildId: Snowflake, maxDifference: Duration) {
+        throw NotImplementedError("Doing this to try to replicate what I'm seeing in prod")
+    }
+
+    private fun doActionRedux() = mono {
+        try {
+            val taskTimer = StopWatch()
+            taskTimer.start()
+
+            val guilds = discordClient.guilds.collectList().awaitSingle()
+
+            guilds.forEach { guild ->
+                try {
+                    processAnnouncementsForGuildAlt(guild.id, maxDifference)
+                } catch (ex: Exception) {
+                    LOGGER.error(DEFAULT, "Failed to process announcements for guild | ${guild.id.asLong()}", ex)
+                }
+            }
+
+        } catch (ex: Exception) {
+            LOGGER.error(DEFAULT, "Announcement-redux task failed for all guilds", ex)
+        }
     }
 
     private fun doAction() = mono {
