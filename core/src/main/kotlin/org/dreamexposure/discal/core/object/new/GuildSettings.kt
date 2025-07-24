@@ -55,5 +55,6 @@ data class GuildSettings(
         FULL(1),
         SIMPLE(2),
         EVENT(3),
+        MINIMAL(4),
     }
 }

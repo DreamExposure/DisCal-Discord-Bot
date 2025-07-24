@@ -45,6 +45,10 @@
             {
               "name": "Event Only",
               "value": 3
+            },
+            {
+              "name": "Minimal",
+              "value": 4
             }
           ]
         }
