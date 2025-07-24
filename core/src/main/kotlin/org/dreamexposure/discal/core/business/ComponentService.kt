@@ -22,7 +22,9 @@ class ComponentService {
         return arrayOf(ActionRow.of(refreshButton))
     }
 
-    fun getEventRsvpComponents(event: Event, settings: GuildSettings): Array<LayoutComponent> {
+    fun getEventRsvpComponents(event: Event, settings: GuildSettings, alwaysShow: Boolean = false): Array<LayoutComponent> {
+        if (!alwaysShow && !settings.showRsvpDropdown) return emptyArray() // This way we don't need the message UI code to get cluttered
+
         val goingOnTime = SelectMenu.Option.of(getCommonMsg("dropdown.rsvp.option.on-time.label", settings.locale), "rsvp_on_time")
             .withEmoji(Emoji.custom(Snowflake.of(1390911034708988025), "rsvp_on_time_ts", false))
 

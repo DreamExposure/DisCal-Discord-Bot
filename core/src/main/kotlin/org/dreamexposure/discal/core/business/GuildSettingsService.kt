@@ -48,6 +48,7 @@ class GuildSettingsService(
             branded = settings.interfaceStyle.branded,
             announcementStyle = settings.interfaceStyle.announcementStyle.value,
             eventKeepDuration = settings.eventKeepDuration,
+            showRsvpDropdown = settings.showRsvpDropdown,
             pauseAnnouncementsUntil = settings.pauseAnnouncementsUntil,
         )).map(::GuildSettings).awaitSingle()
 
@@ -70,6 +71,7 @@ class GuildSettingsService(
             branded = settings.interfaceStyle.branded,
             announcementStyle = settings.interfaceStyle.announcementStyle.value,
             eventKeepDuration = settings.eventKeepDuration,
+            showRsvpDropdown = settings.showRsvpDropdown,
             pauseAnnouncementsUntil = settings.pauseAnnouncementsUntil,
         ).awaitSingleOrNull()
 

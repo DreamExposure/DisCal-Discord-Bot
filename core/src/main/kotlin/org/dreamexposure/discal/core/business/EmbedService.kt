@@ -101,7 +101,8 @@ class EmbedService(
             .addField(getEmbedMessage("settings", "view.field.dev", settings.locale), "${settings.devGuild}", true)
             .addField(getEmbedMessage("settings", "view.field.cal", settings.locale), "${settings.maxCalendars}", true)
             .addField(getEmbedMessage("settings", "view.field.brand", settings.locale), "${settings.interfaceStyle.branded}", false)
-            .addField(getEmbedMessage("settings", "view.field.pauseAnnouncements", settings.locale), announcementsPausedUntil, false)
+            .addField(getEmbedMessage("settings", "view.field.pauseAnnouncements", settings.locale), announcementsPausedUntil, true)
+            .addField(getEmbedMessage("settings", "view.field.showRsvpDropdown", settings.locale), "${settings.showRsvpDropdown}", true)
             .footer(getEmbedMessage("settings", "view.footer", settings.locale), null)
             .build()
     }

@@ -22,6 +22,7 @@ interface GuildSettingsRepository : R2dbcRepository<GuildSettingsData, Long> {
             branded = :branded,
             announcement_style = :announcementStyle,
             event_keep_duration = :eventKeepDuration,
+            show_rsvp_dropdown = :showRsvpDropdown,
             pause_announcements_until = :pauseAnnouncementsUntil
         WHERE guild_id = :guildId
     """)
@@ -37,6 +38,7 @@ interface GuildSettingsRepository : R2dbcRepository<GuildSettingsData, Long> {
         branded: Boolean,
         announcementStyle: Int,
         eventKeepDuration: Boolean,
+        showRsvpDropdown: Boolean,
         pauseAnnouncementsUntil: Instant?,
     ): Mono<Int>
 }

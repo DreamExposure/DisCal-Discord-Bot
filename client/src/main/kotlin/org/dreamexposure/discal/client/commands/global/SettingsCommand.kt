@@ -43,6 +43,7 @@ class SettingsCommand(
             "language" -> language(event, settings)
             "time-format" -> timeFormat(event, settings)
             "keep-event-duration" -> eventKeepDuration(event, settings)
+            "show-rsvp-dropdown" -> showRsvpDropdown(event, settings)
             "branding" -> branding(event, settings)
             "pause-announcements" -> pauseAnnouncements(event, settings)
             else -> throw IllegalStateException("Invalid subcommand specified")
@@ -126,6 +127,20 @@ class SettingsCommand(
         val newSettings = settingsService.upsertSettings(settings.copy(eventKeepDuration = keepDuration))
 
         return event.createFollowup(getMessage("eventKeepDuration.success.$keepDuration", settings))
+            .withEmbeds(embedService.settingsEmbeds(newSettings))
+            .withEphemeral(ephemeral)
+            .awaitSingle()
+    }
+
+    private suspend fun showRsvpDropdown(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+        val shown = event.options[0].getOption("shown")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asBoolean)
+            .get()
+
+        val newSettings = settingsService.upsertSettings(settings.copy(showRsvpDropdown = shown))
+
+        return event.createFollowup(getMessage("showRsvpDropdown.success.$shown", settings))
             .withEmbeds(embedService.settingsEmbeds(newSettings))
             .withEphemeral(ephemeral)
             .awaitSingle()

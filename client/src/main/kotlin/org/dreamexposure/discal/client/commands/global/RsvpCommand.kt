@@ -75,7 +75,7 @@ class RsvpCommand(
 
             event.createFollowup(getMessage("onTime.success", settings))
                 .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
-                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         } else {
@@ -83,7 +83,7 @@ class RsvpCommand(
 
             event.createFollowup(getMessage("onTime.failure.limit", settings))
                 .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
-                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         }
@@ -125,7 +125,7 @@ class RsvpCommand(
 
             event.createFollowup(getMessage("late.success", settings))
                 .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
-                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         } else {
@@ -133,7 +133,7 @@ class RsvpCommand(
 
             event.createFollowup(getMessage("late.failure.limit", settings))
                 .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
-                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+                .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
         }
@@ -174,7 +174,7 @@ class RsvpCommand(
 
         return event.createFollowup(getMessage("unsure.success", settings))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
-            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -214,7 +214,7 @@ class RsvpCommand(
 
         return event.createFollowup(getMessage("notGoing.success", settings))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
-            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -254,7 +254,7 @@ class RsvpCommand(
 
         return event.createFollowup(getMessage("remove.success", settings))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
-            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -287,7 +287,7 @@ class RsvpCommand(
 
         return event.createFollowup()
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
-            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -341,7 +341,7 @@ class RsvpCommand(
 
         return event.createFollowup(getMessage("limit.success", settings, limit.toString()))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
-            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
@@ -399,7 +399,7 @@ class RsvpCommand(
 
         return event.createFollowup(message)
             .withEmbeds(embed)
-            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }

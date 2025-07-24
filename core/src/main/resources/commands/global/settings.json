@@ -108,6 +108,19 @@
       ]
     },
     {
+      "name": "show-rsvp-dropdown",
+      "type": 1,
+      "description": "Toggles whether a dropdown to RSVP to events is shown on all announcement and event posts",
+      "options": [
+        {
+          "name": "shown",
+          "type": 5,
+          "description": "Whether or not to show the RSVP dropdown",
+          "required": true
+        }
+      ]
+    },
+    {
       "name": "branding",
       "type": 1,
       "description": "Toggles between using discal branding or your guild's name/image where possible",
