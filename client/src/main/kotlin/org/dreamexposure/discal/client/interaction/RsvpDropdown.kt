@@ -87,7 +87,7 @@ class RsvpDropdown(
 
         event.createFollowup(message)
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
-            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings))
+            .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
