@@ -2,8 +2,6 @@ package org.dreamexposure.discal.client.business.cronjob
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import discord4j.core.GatewayDiscordClient
-import kotlinx.coroutines.reactor.awaitSingle
-import kotlinx.coroutines.reactor.mono
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -38,26 +36,22 @@ class HeartbeatCronJob(
             .subscribe()
     }
 
-    private fun heartbeat() = mono {
-        try {
-            val guildCount = discordClient.guilds.count().map(Long::toInt).awaitSingle()
+    private fun heartbeat(): Mono<Void> {
+        return discordClient.guilds.count().map(Long::toInt).map { guildCount ->
             val requestBody = HeartbeatV3RequestModel(HeartbeatV3RequestModel.Type.BOT, bot = BotInstanceDataV3Model(guilds = guildCount))
 
-            val request = Request.Builder()
+           Request.Builder()
                 .url("$apiUrl/v3/status/heartbeat")
                 .post(objectMapper.writeValueAsString(requestBody).toRequestBody(GlobalVal.JSON))
                 .header("Authorization", "Int ${Config.SECRET_DISCAL_API_KEY.getString()}")
                 .header("Content-Type", "application/json")
                 .build()
-
-            Mono.fromCallable(httpClient.newCall(request)::execute)
-                .map(Response::close)
-                .subscribeOn(Schedulers.boundedElastic())
-                .doOnError { LOGGER.error(DEFAULT, "[Heartbeat] Failed to heartbeat", it) }
-                .onErrorResume { Mono.empty() }
-                .subscribe()
-        } catch (ex: Exception) {
-            LOGGER.error(DEFAULT, "[Heartbeat] Failed to heartbeat", ex)
         }
+            .flatMap { Mono.fromCallable(httpClient.newCall(it)::execute) }
+            .map(Response::close)
+            .then()
+            .subscribeOn(Schedulers.boundedElastic())
+            .doOnError { LOGGER.error(DEFAULT, "[Heartbeat] Failed to heartbeat", it) }
+            .onErrorResume { Mono.empty() }
     }
 }
