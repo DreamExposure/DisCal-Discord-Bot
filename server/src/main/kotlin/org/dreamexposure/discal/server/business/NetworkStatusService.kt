@@ -31,7 +31,9 @@ class NetworkStatusService(
         return status
     }
 
-    suspend fun updateNetworkStatus(status: NetworkDataV3Model) = networkStatusCache.put(key = 0, value = status)
+    suspend fun updateNetworkStatus(status: NetworkDataV3Model) {
+        networkStatusCache.put(key = 0, value = status)
+    }
 
     suspend fun updateAndReturnStatus(): NetworkDataV3Model {
         // Get the things we need
@@ -80,6 +82,9 @@ class NetworkStatusService(
     }
 
     suspend fun handleBotHeartbeat(data: BotInstanceDataV3Model) {
+
+        LOGGER.debug("Bot heartbeat incoming...")
+
         val networkStatus = getNetworkStatus()
         val existing = networkStatus.botStatus.find { it.shardIndex == data.shardIndex }
         if (existing == null)
