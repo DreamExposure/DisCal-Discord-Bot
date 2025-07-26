@@ -11,9 +11,8 @@ import okhttp3.Response
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.extensions.asSeconds
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
-import org.dreamexposure.discal.core.`object`.rest.HeartbeatRequest
-import org.dreamexposure.discal.core.`object`.rest.HeartbeatType
+import org.dreamexposure.discal.core.`object`.new.model.discal.BotInstanceDataV3Model
+import org.dreamexposure.discal.core.`object`.new.model.discal.HeartbeatV3RequestModel
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.springframework.boot.ApplicationArguments
@@ -41,9 +40,9 @@ class HeartbeatCronJob(
 
     private fun heartbeat() = mono {
         try {
-            val data = BotInstanceData.load(discordClient).awaitSingle()
+            val guildCount = discordClient.guilds.count().map(Long::toInt).awaitSingle()
+            val requestBody = HeartbeatV3RequestModel(HeartbeatV3RequestModel.Type.BOT, bot = BotInstanceDataV3Model(guilds = guildCount))
 
-            val requestBody = HeartbeatRequest(HeartbeatType.BOT, botInstanceData = data)
             val request = Request.Builder()
                 .url("$apiUrl/v3/status/heartbeat")
                 .post(objectMapper.writeValueAsString(requestBody).toRequestBody(GlobalVal.JSON))
