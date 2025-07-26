@@ -60,7 +60,7 @@ class NetworkStatusService(
 
         if (networkStatus.websiteStatus == null)
             LOGGER.info(STATUS, "Website now connected")
-        else if (networkStatus.websiteStatus?.instanceId != data.instanceId)
+        else if (networkStatus.websiteStatus!!.instanceId != data.instanceId)
             LOGGER.info(STATUS, "Website instance ID changed")
 
         updateNetworkStatus(networkStatus.copy(websiteStatus = data))
