@@ -7,6 +7,7 @@ import org.dreamexposure.discal.core.`object`.new.model.discal.NetworkDataV3Mode
 import org.dreamexposure.discal.core.`object`.new.security.Scope.INTERNAL_HEARTBEAT
 import org.dreamexposure.discal.core.`object`.new.security.TokenType.INTERNAL
 import org.dreamexposure.discal.core.`object`.rest.GenericResponse
+import org.dreamexposure.discal.core.utils.GlobalVal.DEFAULT
 import org.dreamexposure.discal.server.business.NetworkStatusService
 import org.springframework.web.bind.annotation.*
 
@@ -23,7 +24,7 @@ class StatusController(
     @SecurityRequirement(schemas = [INTERNAL], scopes = [INTERNAL_HEARTBEAT])
     @PostMapping("/heartbeat", produces = ["application/json"])
     suspend fun post(@RequestBody body: HeartbeatV3RequestModel): GenericResponse {
-        LOGGER.debug("Heartbeat request received type: {}", body.type)
+        LOGGER.debug(DEFAULT, "Heartbeat request received type: ${body.type}")
 
         when (body.type) {
             HeartbeatV3RequestModel.Type.BOT -> networkStatusService.handleBotHeartbeat(body.bot!!)

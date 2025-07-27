@@ -47,7 +47,7 @@ class NetworkStatusService(
         // Update that shit
         val updatedStatus = status.copy(
             apiStatus = status.apiStatus
-                .filterNot { it.instanceId == thisInstance.instanceId } // Remove this instance's old data
+                .filter { it.instanceId != thisInstance.instanceId } // Remove this instance's old data
                 .plus(thisInstance.copy(lastHeartbeat = Instant.now(), uptime = Application.getUptime())),
             totalCalendars = totalCalendars,
             totalAnnouncements = totalAnnouncements,
@@ -58,6 +58,8 @@ class NetworkStatusService(
     }
 
     suspend fun handleWebsiteHeartbeat(data: InstanceDataV3Model) {
+        LOGGER.debug("Web heartbeat incoming...")
+
         val networkStatus = getNetworkStatus()
 
         if (networkStatus.websiteStatus == null)
@@ -69,6 +71,8 @@ class NetworkStatusService(
     }
 
     suspend fun handleCamHeartbeat(data: InstanceDataV3Model) {
+        LOGGER.debug("Cam heartbeat incoming...")
+
         val networkStatus = getNetworkStatus()
         val existing = networkStatus.camStatus.find { it.instanceId == data.instanceId }
 
@@ -76,7 +80,7 @@ class NetworkStatusService(
 
         updateNetworkStatus(networkStatus.copy(
             camStatus = networkStatus.camStatus
-                .filterNot { it.instanceId == data.instanceId } // Remove updated instance
+                .filter { it.instanceId != data.instanceId } // Remove updated instance
                 .plus(data)
         ))
     }
@@ -94,7 +98,7 @@ class NetworkStatusService(
 
         updateNetworkStatus(networkStatus.copy(
             botStatus = networkStatus.botStatus
-                .filterNot { it.shardIndex == data.shardIndex } // Remove updated instance
+                .filter { it.shardIndex != data.shardIndex } // Remove updated instance
                 .plus(data)
                 .sortedWith(Comparator.comparingInt(BotInstanceDataV3Model::shardIndex))
         ))

@@ -37,6 +37,8 @@ class HeartbeatCronJob(
     }
 
     private fun heartbeat(): Mono<Void> {
+        LOGGER.debug("Bot heart beating...")
+
         return discordClient.guilds.count().map(Long::toInt).map { guildCount ->
             val requestBody = HeartbeatV3RequestModel(HeartbeatV3RequestModel.Type.BOT, bot = BotInstanceDataV3Model(guilds = guildCount))
 
