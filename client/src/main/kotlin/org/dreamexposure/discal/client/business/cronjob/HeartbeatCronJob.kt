@@ -50,6 +50,7 @@ class HeartbeatCronJob(
                 .build()
         }
             .flatMap { Mono.fromCallable(httpClient.newCall(it)::execute) }
+            .doOnNext { LOGGER.debug("bot heartbeat complete ${it.body.string()}") }
             .map(Response::close)
             .then()
             .subscribeOn(Schedulers.boundedElastic())
