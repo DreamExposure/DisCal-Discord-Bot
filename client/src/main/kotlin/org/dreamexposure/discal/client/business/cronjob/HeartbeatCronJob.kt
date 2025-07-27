@@ -42,6 +42,10 @@ class HeartbeatCronJob(
         return discordClient.guilds.count().map(Long::toInt).map { guildCount ->
             val requestBody = HeartbeatV3RequestModel(HeartbeatV3RequestModel.Type.BOT, bot = BotInstanceDataV3Model(guilds = guildCount))
 
+            val requestBodyAsString = objectMapper.writeValueAsString(requestBody)
+
+            LOGGER.debug("Bot heart beating request: $requestBodyAsString")
+
            Request.Builder()
                 .url("$apiUrl/v3/status/heartbeat")
                 .post(objectMapper.writeValueAsString(requestBody).toRequestBody(GlobalVal.JSON))
@@ -50,7 +54,7 @@ class HeartbeatCronJob(
                 .build()
         }
             .flatMap { Mono.fromCallable(httpClient.newCall(it)::execute) }
-            .doOnNext { LOGGER.debug("bot heartbeat complete ${it.body.string()}") }
+            .doOnNext { LOGGER.debug("bot heartbeat complete ${it.code} | ${it.body.string()}") }
             .map(Response::close)
             .then()
             .subscribeOn(Schedulers.boundedElastic())
