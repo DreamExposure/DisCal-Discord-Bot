@@ -1,7 +1,5 @@
 package org.dreamexposure.discal.core.`object`.new.model.discal
 
-import kotlin.math.roundToInt
-
 data class NetworkDataV3Model(
     val totalCalendars: Int = 0,
     val totalAnnouncements: Int = 0,
@@ -25,7 +23,5 @@ data class NetworkDataV3Model(
             .sum()
             .div(1024)
             .times(100)
-            .roundToInt()
             .div(100)
-            .toDouble()
 }
