@@ -48,7 +48,7 @@ class NetworkStatusService(
         val updatedStatus = status.copy(
             apiStatus = status.apiStatus
                 .filter { it.instanceId != thisInstance.instanceId } // Remove this instance's old data
-                .plus(thisInstance.copy(lastHeartbeat = Instant.now(), uptime = Application.getUptime())),
+                .plus(thisInstance.copy(lastHeartbeat = Instant.now().toString(), uptime = Application.getUptime())),
             totalCalendars = totalCalendars,
             totalAnnouncements = totalAnnouncements,
         )
@@ -102,13 +102,13 @@ class NetworkStatusService(
 
         // I should do something to attempt to restart these, but that's not something I plan to implement any time soon
         val oldApiInstances = status.apiStatus
-            .filter { Instant.now().isAfter(it.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
+            .filter { Instant.now().isAfter(Instant.parse(it.lastHeartbeat).plus(5, ChronoUnit.MINUTES)) }
             .onEach { LOGGER.warn(STATUS, "API instance disconnected from network | Id: ${it.instanceId}") }
         val oldCamInstances = status.camStatus
-            .filter { Instant.now().isAfter(it.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
+            .filter { Instant.now().isAfter(Instant.parse(it.lastHeartbeat).plus(5, ChronoUnit.MINUTES)) }
             .onEach { LOGGER.warn(STATUS, "Cam disconnected from network | Id: ${it.instanceId}") }
         val oldBotInstances = status.botStatus
-            .filter { Instant.now().isAfter(it.instanceData.lastHeartbeat.plus(5, ChronoUnit.MINUTES)) }
+            .filter { Instant.now().isAfter(Instant.parse(it.instanceData.lastHeartbeat).plus(5, ChronoUnit.MINUTES)) }
             .onEach { LOGGER.warn(STATUS, "Client disconnected from network | Index: ${it.shardIndex}") }
 
         if (oldApiInstances.isNotEmpty() || oldCamInstances.isNotEmpty() || oldBotInstances.isNotEmpty()) {
