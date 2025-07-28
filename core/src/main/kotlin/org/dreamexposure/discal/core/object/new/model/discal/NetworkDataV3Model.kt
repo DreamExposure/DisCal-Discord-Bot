@@ -1,5 +1,7 @@
 package org.dreamexposure.discal.core.`object`.new.model.discal
 
+import java.math.RoundingMode
+
 data class NetworkDataV3Model(
     val totalCalendars: Int = 0,
     val totalAnnouncements: Int = 0,
@@ -22,6 +24,7 @@ data class NetworkDataV3Model(
             .plus(botStatus.map { it.instanceData.memory })
             .sum()
             .div(1024)
-            .times(100)
-            .div(100)
+            .toBigDecimal()
+            .setScale(2, RoundingMode.UP)
+            .toDouble()
 }
