@@ -58,8 +58,6 @@ class NetworkStatusService(
     }
 
     suspend fun handleWebsiteHeartbeat(data: InstanceDataV3Model) {
-        LOGGER.debug("Web heartbeat incoming...")
-
         val networkStatus = getNetworkStatus()
 
         if (networkStatus.websiteStatus == null)
@@ -71,8 +69,6 @@ class NetworkStatusService(
     }
 
     suspend fun handleCamHeartbeat(data: InstanceDataV3Model) {
-        LOGGER.debug("Cam heartbeat incoming...")
-
         val networkStatus = getNetworkStatus()
         val existing = networkStatus.camStatus.find { it.instanceId == data.instanceId }
 
@@ -86,9 +82,6 @@ class NetworkStatusService(
     }
 
     suspend fun handleBotHeartbeat(data: BotInstanceDataV3Model) {
-
-        LOGGER.debug("Bot heartbeat incoming...")
-
         val networkStatus = getNetworkStatus()
         val existing = networkStatus.botStatus.find { it.shardIndex == data.shardIndex }
         if (existing == null)

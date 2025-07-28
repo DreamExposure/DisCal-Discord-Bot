@@ -33,7 +33,6 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
                         RestError.NOT_FOUND
                     }
                     HttpStatus.BAD_REQUEST -> {
-                        LOGGER.error("[GlobalErrorHandler] Bad request exception", throwable)
                         exchange.response.statusCode = HttpStatus.BAD_REQUEST
                         RestError.BAD_REQUEST
                     }
@@ -54,7 +53,6 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
             }
             is TypeMismatchException,
             is SerializationException -> {
-                LOGGER.error("[GlobalErrorHandler] Serialization exception", throwable)
                 exchange.response.statusCode = HttpStatus.BAD_REQUEST
                 RestError.BAD_REQUEST
             }
