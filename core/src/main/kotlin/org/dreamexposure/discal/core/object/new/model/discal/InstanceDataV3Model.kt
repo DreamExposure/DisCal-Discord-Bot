@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.`object`.new.model.discal
 
 import org.dreamexposure.discal.Application
 import org.dreamexposure.discal.GitProperty
+import org.dreamexposure.discal.core.extensions.getHumanReadable
 import java.time.Duration
 import java.time.Instant
 
@@ -12,4 +13,7 @@ data class InstanceDataV3Model(
     val uptime: Duration = Application.getUptime(),
     val lastHeartbeat: Instant = Instant.now(),
     val memory: Double = Application.getMemoryUsedInMb(),
-)
+) {
+    val humanUptime: String
+        get() = uptime.getHumanReadable()
+}
