@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
+import java.time.Instant
 
 @RestController
 @RequestMapping("/v2/status")
@@ -49,7 +50,7 @@ class GetStatusEndpoint(
                                 version = it.version,
                                 d4jVersion = it.d4jVersion,
                                 uptime = it.uptime,
-                                lastHeartbeat = it.lastHeartbeat,
+                                lastHeartbeat = Instant.parse(it.lastHeartbeat),
                                 memory = it.memory
                             )
                         }.first(),
@@ -58,7 +59,7 @@ class GetStatusEndpoint(
                             version = data.websiteStatus!!.version,
                             d4jVersion = data.websiteStatus!!.d4jVersion,
                             uptime = data.websiteStatus!!.uptime,
-                            lastHeartbeat = data.websiteStatus!!.lastHeartbeat,
+                            lastHeartbeat = Instant.parse(data.websiteStatus!!.lastHeartbeat),
                             memory = data.websiteStatus!!.memory
                         ),
                         camStatus = data.camStatus.map {
@@ -67,7 +68,7 @@ class GetStatusEndpoint(
                                 version = it.version,
                                 d4jVersion = it.d4jVersion,
                                 uptime = it.uptime,
-                                lastHeartbeat = it.lastHeartbeat,
+                                lastHeartbeat = Instant.parse(it.lastHeartbeat),
                                 memory = it.memory
                             )
                         }.toMutableList(),
@@ -78,7 +79,7 @@ class GetStatusEndpoint(
                                     version = it.instanceData.version,
                                     d4jVersion = it.instanceData.d4jVersion,
                                     uptime = it.instanceData.uptime,
-                                    lastHeartbeat = it.instanceData.lastHeartbeat,
+                                    lastHeartbeat = Instant.parse(it.instanceData.lastHeartbeat),
                                     memory = it.instanceData.memory
                                 ),
                                 shardIndex = it.shardIndex,
