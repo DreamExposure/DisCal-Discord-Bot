@@ -11,7 +11,8 @@ data class InstanceDataV3Model(
     val version: String = GitProperty.DISCAL_VERSION.value,
     val d4jVersion: String = GitProperty.DISCAL_VERSION_D4J.value,
     val uptime: Duration = Application.getUptime(),
-    val lastHeartbeat: Instant = Instant.now(),
+    // TODO: This really should just be instant, but my custom jackson mapper doesn't seem to be working
+    val lastHeartbeat: String = Instant.now().toString(),
     val memory: Double = Application.getMemoryUsedInMb(),
 ) {
     val humanUptime: String
