@@ -170,6 +170,7 @@ DisCal uses a simple-to-understand permission scheme for handling access to comm
 | `/settings role`                | Sets the role required to use privileged commands                                 | elevated              |
 | `/settings announcement-style`  | Changes the style announcements will be posted as                                 | elevated              |
 | `/settings pause-announcements` | Allows pausing and unpausing all announcements for the guild for a period of time | elevated              |
+| `/settings show-rsvp-dropdown`  | Allows showing/hiding of the "RSVP" dropdown on all announcements and event posts | elevated              |
 | `/settings language`            | Changes the language the bot will use in responses                                | elevated              |
 | `/settings time-format`         | Changes what format to display date/time when needed                              | elevated              |
 | `/settings branding`            | Toggles between DisCal branding or the guild's name/image where possible          | elevated, patron-only |
