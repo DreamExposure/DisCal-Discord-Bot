@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.core.config
 
-import org.dreamexposure.discal.core.config.Config.entries
 import java.io.FileReader
 import java.util.*
 
@@ -16,6 +15,8 @@ enum class Config(private val key: String, private var value: Any? = null) {
     // Redis cache settings
     REDIS_HOST("spring.data.redis.host"),
     REDIS_PORT("spring.data.redis.port"),
+    REDIS_DATABASE("spring.data.redis.database", -1),
+    REDIS_USERNAME("spring.data.redis.username", ""),
     REDIS_PASSWORD("spring.data.redis.password", ""),
     CACHE_REDIS_IS_CLUSTER("redis.cluster", false),
     CACHE_USE_REDIS("bot.cache.redis", false),
