@@ -225,12 +225,12 @@ class   CalendarService(
         return event
     }
 
-    suspend fun getUpcomingEvents(guildId: Snowflake, calendarNumber: Int, amount: Int): List<Event> {
+    suspend fun getUpcomingEvents(guildId: Snowflake, calendarNumber: Int, amount: Int, maxDays: Int? = null): List<Event> {
         val calendar = getCalendar(guildId, calendarNumber) ?: return emptyList()
 
         val events = calendarProviders
             .first { it.host == calendar.metadata.host }
-            .getUpcomingEvents(calendar, amount)
+            .getUpcomingEvents(calendar, amount, maxDays)
         events.forEach { event -> eventCache.put(guildId, event.id, event) }
 
         return events

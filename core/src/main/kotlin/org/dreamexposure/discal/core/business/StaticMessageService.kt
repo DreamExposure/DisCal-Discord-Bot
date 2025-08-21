@@ -35,6 +35,7 @@ class StaticMessageService(
     private val discordClient: DiscordClient
         get() = beanFactory.getBean()
     private val OVERVIEW_EVENT_COUNT = Config.CALENDAR_OVERVIEW_DEFAULT_EVENT_COUNT.getInt()
+        private val MAX_CUTOFF_DAYS = Config.CALENDAR_OVERVIEW_DEFAULT_CUTOFF_DAYS.getInt()
 
     suspend fun getStaticMessageCount() = staticMessageRepository.count().awaitSingle()
 
@@ -127,7 +128,7 @@ class StaticMessageService(
         }
 
         val calendar = calendarService.getCalendar(guildId, old.calendarNumber) ?: throw NotFoundException("Calendar not found")
-        val events = calendarService.getUpcomingEvents(guildId, old.calendarNumber, OVERVIEW_EVENT_COUNT)
+        val events = calendarService.getUpcomingEvents(guildId, old.calendarNumber, OVERVIEW_EVENT_COUNT, MAX_CUTOFF_DAYS)
 
         // Finally update the message
         val embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)

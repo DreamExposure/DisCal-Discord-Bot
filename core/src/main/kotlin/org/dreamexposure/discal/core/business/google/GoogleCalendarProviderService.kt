@@ -143,7 +143,10 @@ class GoogleCalendarProviderService(
         return mapGoogleEventToDisCalEvent(calendar, baseEvent, metadata)
     }
 
-    override suspend fun getUpcomingEvents(calendar: Calendar, amount: Int): List<Event> {
+    override suspend fun getUpcomingEvents(calendar: Calendar, amount: Int, maxDays: Int?): List<Event> {
+        if (maxDays == null) googleCalendarApiWrapper.getEvents(calendar.metadata, amount, Instant.now())
+        else googleCalendarApiWrapper.getEvents(calendar.metadata, amount, Instant.now(), Instant.now().plus(maxDays.toLong(), ChronoUnit.DAYS))
+
         val response = googleCalendarApiWrapper.getEvents(calendar.metadata, amount, Instant.now())
         if (response.entity == null) return emptyList()
 
