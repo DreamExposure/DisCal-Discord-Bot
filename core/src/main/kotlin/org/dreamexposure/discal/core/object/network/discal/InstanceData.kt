@@ -13,6 +13,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+@Deprecated("Prefer to use new v3 impl")
 @Serializable
 data class InstanceData(
     @SerialName("instance_id")

@@ -33,6 +33,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     CACHE_TTL_ANNOUNCEMENT_MINUTES("bot.cache.ttl-minutes.announcements", 120),
     CACHE_TTL_CALENDAR_TOKEN_MINUTES("bot.cache.ttl-minutes.calendar", 60),
     CACHE_TTL_EVENTS_MINUTES("bot.cache.ttl-minutes.event", 15),
+    CACHE_TTL_NETWORK_STATUS_MINUTES("bot.cache.ttl-minutes.network-status", 30),
 
     // Security configuration
 
@@ -69,6 +70,7 @@ enum class Config(private val key: String, private var value: Any? = null) {
     // UI and UX
     EMBED_RSVP_WAITLIST_DISPLAY_LENGTH("bot.ui.embed.rsvp.waitlist.length", 3),
     CALENDAR_OVERVIEW_DEFAULT_EVENT_COUNT("bot.ui.embed.calendar.overview.event-count", 15),
+    CALENDAR_OVERVIEW_DEFAULT_CUTOFF_DAYS("bot.ui.embed.calendar.overview.cutoff-days", 365),
 
     // Everything else
     SHARD_COUNT("bot.sharding.count"),

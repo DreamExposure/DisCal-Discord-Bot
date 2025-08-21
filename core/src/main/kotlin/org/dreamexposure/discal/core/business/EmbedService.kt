@@ -101,7 +101,8 @@ class EmbedService(
             .addField(getEmbedMessage("settings", "view.field.dev", settings.locale), "${settings.devGuild}", true)
             .addField(getEmbedMessage("settings", "view.field.cal", settings.locale), "${settings.maxCalendars}", true)
             .addField(getEmbedMessage("settings", "view.field.brand", settings.locale), "${settings.interfaceStyle.branded}", false)
-            .addField(getEmbedMessage("settings", "view.field.pauseAnnouncements", settings.locale), announcementsPausedUntil, false)
+            .addField(getEmbedMessage("settings", "view.field.pauseAnnouncements", settings.locale), announcementsPausedUntil, true)
+            .addField(getEmbedMessage("settings", "view.field.showRsvpDropdown", settings.locale), "${settings.showRsvpDropdown}", true)
             .footer(getEmbedMessage("settings", "view.footer", settings.locale), null)
             .build()
     }
@@ -559,6 +560,7 @@ class EmbedService(
             FULL -> fullAnnouncementEmbed(announcement, event, settings)
             SIMPLE -> simpleAnnouncementEmbed(announcement, event, settings)
             EVENT -> eventAnnouncementEmbed(announcement, event, settings)
+            MINIMAL -> minimalAnnouncementEmbed(announcement, event, settings)
         }
     }
 
@@ -714,6 +716,44 @@ class EmbedService(
             builder.image(event.image)
 
         builder.footer(getEmbedMessage("announcement", "event.footer", settings.locale, announcement.id), null)
+
+        return builder.build()
+    }
+
+    suspend fun minimalAnnouncementEmbed(announcement: Announcement, event: Event, settings: GuildSettings): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .color(event.color.asColor())
+            .author(getEmbedMessage("announcement", "minimal.author.name", settings.locale), Config.URL_BASE.getString(), GlobalVal.iconUrl)
+
+
+        if (event.name.isNotBlank()) builder.title(event.name.embedTitleSafe())
+        if (event.description.isNotBlank()) builder.description(event.description.embedDescriptionSafe())
+
+        builder.addField(
+            getEmbedMessage("announcement", "minimal.field.start", settings.locale),
+            event.start.asDiscordTimestamp(LONG_DATETIME),
+            true
+        )
+        builder.addField(
+            getEmbedMessage("announcement", "minimal.field.end", settings.locale),
+            event.end.asDiscordTimestamp(LONG_DATETIME),
+            true
+        )
+
+        if (event.location.isNotBlank()) builder.addField(
+            getEmbedMessage("announcement", "minimal.field.location", settings.locale),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (!announcement.info.isNullOrBlank()) builder.addField(
+            getEmbedMessage("announcement", "minimal.field.info", settings.locale),
+            announcement.info.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (event.image.isNotBlank())
+            builder.image(event.image)
 
         return builder.build()
     }

@@ -27,7 +27,7 @@ interface CalendarProvider {
     /////////
     suspend fun getEvent(calendar: Calendar, id: String): Event?
 
-    suspend fun getUpcomingEvents(calendar: Calendar, amount: Int): List<Event>
+    suspend fun getUpcomingEvents(calendar: Calendar, amount: Int, maxDays: Int? = null): List<Event>
 
     suspend fun getOngoingEvents(calendar: Calendar): List<Event>
 

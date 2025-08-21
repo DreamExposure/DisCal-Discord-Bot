@@ -17,6 +17,7 @@ data class GuildSettings(
     val maxCalendars: Int = 1,
     val locale: Locale = Locale.ENGLISH,
     val eventKeepDuration: Boolean = false,
+    val showRsvpDropdown: Boolean = true,
     val pauseAnnouncementsUntil: Instant? = null,
 
     val interfaceStyle: InterfaceStyle = InterfaceStyle()
@@ -30,6 +31,7 @@ data class GuildSettings(
         maxCalendars = data.maxCalendars,
         locale = data.lang.asLocale(),
         eventKeepDuration = data.eventKeepDuration,
+        showRsvpDropdown = data.showRsvpDropdown,
         pauseAnnouncementsUntil = data.pauseAnnouncementsUntil,
 
         interfaceStyle = InterfaceStyle(
@@ -53,5 +55,6 @@ data class GuildSettings(
         FULL(1),
         SIMPLE(2),
         EVENT(3),
+        MINIMAL(4),
     }
 }

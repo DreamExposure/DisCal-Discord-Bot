@@ -329,6 +329,7 @@ class CalendarCommand(
                 )
             )
             calendarService.cancelCalendarWizard(settings.guildId, calendar.metadata.number)
+            calendarService.cancelCalendarWizard(existingWizard.guildId, event.interaction.user.id)
 
             val message = if (existingWizard.editing) getMessage("confirm.success.edit", settings)
             else getMessage("confirm.success.create", settings)

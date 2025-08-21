@@ -73,6 +73,7 @@ class WizardConfirmButton(
                 )
             )
             calendarService.cancelCalendarWizard(settings.guildId, calendar.metadata.number)
+            calendarService.cancelCalendarWizard(settings.guildId, event.interaction.user.id)
 
             val message = if (existingWizard.editing) getCmdMessage("calendar", "confirm.success.edit", settings.locale)
             else getCmdMessage("calendar", "confirm.success.create", settings.locale)
@@ -176,6 +177,8 @@ class WizardConfirmButton(
         val message = if (existingWizard.editing)
             getCmdMessage("event", "confirm.success.edit", settings.locale)
         else getCmdMessage("event", "confirm.success.create", settings.locale)
+
+        calendarService.cancelEventWizard(existingWizard.guildId, event.interaction.user.id)
 
         // Basically, since the first followup is just editing the original, what if I delete the original defer message and then create a non-ephemeral followup???
         event.interactionResponse.deleteInitialResponse().awaitSingleOrNull()

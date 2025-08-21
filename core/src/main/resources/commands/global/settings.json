@@ -45,6 +45,10 @@
             {
               "name": "Event Only",
               "value": 3
+            },
+            {
+              "name": "Minimal",
+              "value": 4
             }
           ]
         }
@@ -103,6 +107,19 @@
           "name": "value",
           "type": 5,
           "description": "Whether to keep an event's duration",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "show-rsvp-dropdown",
+      "type": 1,
+      "description": "Toggles whether a dropdown to RSVP to events is shown on all announcement and event posts",
+      "options": [
+        {
+          "name": "shown",
+          "type": 5,
+          "description": "Whether or not to show the RSVP dropdown",
           "required": true
         }
       ]

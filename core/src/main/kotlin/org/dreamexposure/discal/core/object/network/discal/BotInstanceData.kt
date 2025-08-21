@@ -7,9 +7,10 @@ import kotlinx.serialization.Serializable
 import org.dreamexposure.discal.Application
 import reactor.core.publisher.Mono
 
+@Deprecated("Prefer to use new v3 impl")
 @Suppress("DataClassPrivateConstructor")
 @Serializable
-data class BotInstanceData private constructor(
+data class BotInstanceData constructor(
         @SerialName("instance")
         @JsonProperty("instance")
         val instanceData: InstanceData,

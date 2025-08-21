@@ -621,6 +621,8 @@ class EventCommand(
             getMessage("confirm.success.edit", settings)
         else getMessage("confirm.success.create", settings)
 
+        calendarService.cancelEventWizard(existingWizard.guildId, event.interaction.user.id)
+
         // Basically, since the first followup is just editing the original, what if I delete the original defer message and then create a non-ephemeral followup???
         event.interactionResponse.deleteInitialResponse().awaitSingleOrNull()
 

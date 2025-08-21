@@ -6,6 +6,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.math.roundToInt
 
 @Serializable
+@Deprecated("Prefer to use new v3 implementation, this exists so I don't have to mess with the web module too much")
 data class NetworkData(
     @SerialName("total_calendars")
     var totalCalendars: Int = 0,
