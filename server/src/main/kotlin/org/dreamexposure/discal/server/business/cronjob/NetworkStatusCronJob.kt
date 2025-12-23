@@ -16,7 +16,7 @@ class NetworkStatusCronJob(
     private val networkStatusService: NetworkStatusService,
 ): ApplicationRunner {
 
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         Flux.interval(Duration.ofMinutes(1))
             .flatMap { mono { networkStatusService.doNetworkStatusHealthCheck() } }
             .doOnError { LOGGER.error(GlobalVal.DEFAULT, "[NetworkStatus] Network status cronjob failure", it) }

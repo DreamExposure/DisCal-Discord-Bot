@@ -2,7 +2,6 @@ package org.dreamexposure.discal.server.endpoints.v2.guild
 
 import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.mono
-import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
@@ -37,7 +36,7 @@ class GetWebGuildEndpoint(
     fun getSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
-                response.rawStatusCode = authState.status
+                response.setRawStatusCode(authState.status)
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
             }
 
@@ -78,20 +77,20 @@ class GetWebGuildEndpoint(
             }.map {
                 GlobalVal.JSON_FORMAT.encodeToString(it)
             }.doOnNext {
-                response.rawStatusCode = GlobalVal.STATUS_SUCCESS
+                response.setRawStatusCode(GlobalVal.STATUS_SUCCESS)
             }
         }.onErrorResume(BotNotInGuildException::class.java) {
-            response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND
+            response.setRawStatusCode(GlobalVal.STATUS_NOT_FOUND)
             return@onErrorResume responseMessage("Guild not connected to DisCal")
         }.onErrorResume(JSONException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
+            response.setRawStatusCode(GlobalVal.STATUS_BAD_REQUEST)
             return@onErrorResume responseMessage("Bad Request")
         }.onErrorResume {
             LOGGER.error(GlobalVal.DEFAULT, "[API-v2] get web guild error", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_INTERNAL_ERROR
+            response.setRawStatusCode(GlobalVal.STATUS_INTERNAL_ERROR)
             return@onErrorResume responseMessage("Internal Server Error")
         }
     }

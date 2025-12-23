@@ -1,8 +1,8 @@
 package org.dreamexposure.discal.client.config
 
 import org.dreamexposure.discal.core.utils.GlobalVal
+import org.springframework.boot.web.error.ErrorPage
 import org.springframework.boot.web.server.ConfigurableWebServerFactory
-import org.springframework.boot.web.server.ErrorPage
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -17,8 +17,8 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
 @EnableWebFlux
 class WebFluxConfig : WebFluxConfigurer, WebServerFactoryCustomizer<ConfigurableWebServerFactory> {
 
-    override fun customize(factory: ConfigurableWebServerFactory?) {
-        factory?.addErrorPages(ErrorPage(HttpStatus.NOT_FOUND, "/"))
+    override fun customize(factory: ConfigurableWebServerFactory) {
+        factory.addErrorPages(ErrorPage(HttpStatus.NOT_FOUND, "/"))
     }
 
     override fun addCorsMappings(registry: CorsRegistry) {

@@ -49,7 +49,7 @@ class StatusUpdateCronJob(
         "Now the real improvements begin"
     )
 
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         Flux.interval(Config.TIMING_BOT_STATUS_UPDATE_MINUTES.getLong().asMinutes())
             .onBackpressureDrop()
             .flatMap { update() }

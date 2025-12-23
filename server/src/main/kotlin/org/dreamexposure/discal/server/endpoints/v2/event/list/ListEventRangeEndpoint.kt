@@ -3,7 +3,6 @@ package org.dreamexposure.discal.server.endpoints.v2.event.list
 import com.fasterxml.jackson.databind.ObjectMapper
 import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.mono
-import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.logger.LOGGER
@@ -35,7 +34,7 @@ class ListEventRangeEndpoint(
     fun listByRange(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
-                response.rawStatusCode = authState.status
+                response.setRawStatusCode(authState.status)
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
             }
 
@@ -53,19 +52,19 @@ class ListEventRangeEndpoint(
             }
                 .map { EventListV2Model(it, "Success") }
                 .map { objectMapper.writeValueAsString(it) }
-                .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
+                .doOnNext { response.setRawStatusCode(GlobalVal.STATUS_SUCCESS) }
                 .switchIfEmpty(responseMessage("Calendar not found")
-                    .doOnNext { response.rawStatusCode = GlobalVal.STATUS_NOT_FOUND }
+                    .doOnNext { response.setRawStatusCode(GlobalVal.STATUS_NOT_FOUND) }
                 )
         }.onErrorResume(JSONException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
+            response.setRawStatusCode(GlobalVal.STATUS_BAD_REQUEST)
             return@onErrorResume responseMessage("Bad Request")
         }.onErrorResume {
             LOGGER.error(GlobalVal.DEFAULT, "[API-v2] list events by range error", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_INTERNAL_ERROR
+            response.setRawStatusCode(GlobalVal.STATUS_INTERNAL_ERROR)
             return@onErrorResume responseMessage("Internal Server Error")
         }
     }

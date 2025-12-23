@@ -3,7 +3,6 @@ package org.dreamexposure.discal.server.endpoints.v2.guild
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.discordjson.json.CurrentMemberModifyData
-import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.server.ServerWebExchange
 import reactor.core.publisher.Mono
-import java.util.*
 
 @RestController
 @RequestMapping("/v2/guild")
@@ -31,10 +29,10 @@ class UpdateWebGuildEndpoint(
     fun updateGuild(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
-                response.rawStatusCode = authState.status
+                response.setRawStatusCode(authState.status)
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
             } else if (authState.readOnly) {
-                response.rawStatusCode = GlobalVal.STATUS_AUTHORIZATION_DENIED
+                response.setRawStatusCode(GlobalVal.STATUS_AUTHORIZATION_DENIED)
                 return@flatMap responseMessage("Read-Only key not allowed")
             }
 
@@ -48,7 +46,7 @@ class UpdateWebGuildEndpoint(
             val nicknameMono = Mono.defer {
                 if (body.has("bot_nick")) {
                     return@defer guild.modifyCurrentMember(CurrentMemberModifyData.builder()
-                        .nick(Optional.ofNullable(body.getString("bot_nick")))
+                        .nickOrNull(body.getString("bot_nick"))
                         .build()
                     )
                 }
@@ -57,16 +55,16 @@ class UpdateWebGuildEndpoint(
 
             return@flatMap Mono.`when`(nicknameMono)
                     .then(responseMessage("Success"))
-                    .doOnNext { response.rawStatusCode = GlobalVal.STATUS_SUCCESS }
+                    .doOnNext { response.setRawStatusCode(GlobalVal.STATUS_SUCCESS) }
         }.onErrorResume(JSONException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
+            response.setRawStatusCode(GlobalVal.STATUS_BAD_REQUEST)
             return@onErrorResume responseMessage("Bad Request")
         }.onErrorResume {
             LOGGER.error(GlobalVal.DEFAULT, "[API-v2] Update web guild error", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_INTERNAL_ERROR
+            response.setRawStatusCode(GlobalVal.STATUS_INTERNAL_ERROR)
             return@onErrorResume responseMessage("Internal Server Error")
         }
     }

@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.server.endpoints.v2.account
 
-import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
@@ -24,27 +23,27 @@ class LogoutEndpoint(
     fun logoutOfAccount(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
-                response.rawStatusCode = authState.status
+                response.setRawStatusCode(authState.status)
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
             } else if (authState.readOnly) {
-                response.rawStatusCode = GlobalVal.STATUS_AUTHORIZATION_DENIED
+                response.setRawStatusCode(GlobalVal.STATUS_AUTHORIZATION_DENIED)
                 return@flatMap responseMessage("Unauthorized to use this endpoint")
             }
 
             //Handle request
             authentication.removeTempKey(authState.keyUsed)
 
-            response.rawStatusCode = GlobalVal.STATUS_SUCCESS
+            response.setRawStatusCode(GlobalVal.STATUS_SUCCESS)
             return@flatMap responseMessage("Logged out")
         }.onErrorResume(JSONException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
+            response.setRawStatusCode(GlobalVal.STATUS_BAD_REQUEST)
             return@onErrorResume responseMessage("Bad Request")
         }.onErrorResume {
             LOGGER.error(GlobalVal.DEFAULT, "[API-v2] Logout error / key error", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_INTERNAL_ERROR
+            response.setRawStatusCode(GlobalVal.STATUS_INTERNAL_ERROR)
             return@onErrorResume responseMessage("Internal Server Error")
         }
     }

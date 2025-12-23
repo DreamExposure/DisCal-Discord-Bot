@@ -23,7 +23,7 @@ class StaticMessageUpdateCronJob(
     private val staticMessageService: StaticMessageService,
     private val metricService: MetricService,
 ):ApplicationRunner {
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         Flux.interval(Config.TIMING_STATIC_MESSAGE_UPDATE_TASK_RUN_INTERVAL_MINUTES.getLong().asMinutes())
             .onBackpressureDrop()
             .flatMap { doUpdate() }

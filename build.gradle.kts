@@ -143,13 +143,19 @@ subprojects {
                 jvmTarget.set(JvmTarget.fromTarget(java.targetCompatibility.majorVersion))
             }
         }
+
+        withType<AbstractTestTask> {
+            configureEach {
+                failOnNoDiscoveredTests = false
+            }
+        }
     }
 }
 
 tasks {
     wrapper {
         distributionType = ALL
-        gradleVersion = "8.14.2"
+        gradleVersion = "9.2.1"
     }
 
     bootJar {

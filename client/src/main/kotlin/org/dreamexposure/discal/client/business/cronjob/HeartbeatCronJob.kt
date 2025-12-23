@@ -28,7 +28,7 @@ class HeartbeatCronJob(
 ): ApplicationRunner {
     private final val apiUrl = Config.URL_API.getString()
 
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         Flux.interval(Config.HEARTBEAT_INTERVAL.getLong().asSeconds())
             .flatMap { heartbeat() }
             .doOnError {  LOGGER.error(DEFAULT, "[Heartbeat] Failed to heartbeat", it) }

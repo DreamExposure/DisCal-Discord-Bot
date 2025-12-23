@@ -54,7 +54,7 @@ class UpdateDBotsData(
         }.awaitSingleOrNull()
     }
 
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         Flux.interval(Duration.ofHours(1))
             .flatMap { update() }
             .subscribe()

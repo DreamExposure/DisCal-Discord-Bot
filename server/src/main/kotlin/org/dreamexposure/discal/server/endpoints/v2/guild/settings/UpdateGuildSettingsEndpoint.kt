@@ -2,7 +2,6 @@ package org.dreamexposure.discal.server.endpoints.v2.guild.settings
 
 import discord4j.common.util.Snowflake
 import kotlinx.coroutines.reactor.mono
-import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.business.GuildSettingsService
 import org.dreamexposure.discal.core.enums.time.TimeFormat
@@ -33,10 +32,10 @@ class UpdateGuildSettingsEndpoint(
     fun updateSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
-                response.rawStatusCode = authState.status
+                response.setRawStatusCode(authState.status)
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
             } else if (authState.readOnly) {
-                response.rawStatusCode = GlobalVal.STATUS_AUTHORIZATION_DENIED
+                response.setRawStatusCode(GlobalVal.STATUS_AUTHORIZATION_DENIED)
                 return@flatMap responseMessage("Read-Only key not allowed")
             }
 
@@ -79,18 +78,18 @@ class UpdateGuildSettingsEndpoint(
                 mono { settingsService.upsertSettings(newSettings) }
                     .then(responseMessage("Success"))
                     .doOnNext {
-                        response.rawStatusCode = GlobalVal.STATUS_SUCCESS
+                        response.setRawStatusCode(GlobalVal.STATUS_SUCCESS)
                     }
             }
         }.onErrorResume(JSONException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
+            response.setRawStatusCode(GlobalVal.STATUS_BAD_REQUEST)
             return@onErrorResume responseMessage("Bad Request")
         }.onErrorResume {
             LOGGER.error(GlobalVal.DEFAULT, "[API-v2] Update settings error", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_INTERNAL_ERROR
+            response.setRawStatusCode(GlobalVal.STATUS_INTERNAL_ERROR)
             return@onErrorResume responseMessage("Internal Server Error")
         }
     }

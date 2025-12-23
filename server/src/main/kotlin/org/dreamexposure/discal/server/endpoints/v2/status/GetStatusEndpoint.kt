@@ -2,7 +2,6 @@ package org.dreamexposure.discal.server.endpoints.v2.status
 
 import kotlinx.coroutines.reactor.mono
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
@@ -32,12 +31,12 @@ class GetStatusEndpoint(
     fun getStatus(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {
-                response.rawStatusCode = authState.status
+                response.setRawStatusCode(authState.status)
                 return@flatMap Mono.just(GlobalVal.JSON_FORMAT.encodeToString(authState))
             }
 
             //Handle request
-            response.rawStatusCode = GlobalVal.STATUS_SUCCESS
+            response.setRawStatusCode(GlobalVal.STATUS_SUCCESS)
 
             // Build the legacy object
             return@flatMap mono { networkStatusService.getNetworkStatus() }
@@ -91,12 +90,12 @@ class GetStatusEndpoint(
         }.onErrorResume(SerializationException::class.java) {
             LOGGER.trace("[API-v2] JSON error. Bad request?", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_BAD_REQUEST
+            response.setRawStatusCode(GlobalVal.STATUS_BAD_REQUEST)
             return@onErrorResume responseMessage("Bad Request")
         }.onErrorResume {
             LOGGER.error(GlobalVal.DEFAULT, "[API-v2] get status error", it)
 
-            response.rawStatusCode = GlobalVal.STATUS_INTERNAL_ERROR
+            response.setRawStatusCode(GlobalVal.STATUS_INTERNAL_ERROR)
             return@onErrorResume responseMessage("Internal Server Error")
         }
     }

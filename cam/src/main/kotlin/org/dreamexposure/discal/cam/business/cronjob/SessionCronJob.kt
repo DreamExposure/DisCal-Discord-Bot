@@ -15,7 +15,7 @@ import java.time.Duration
 class SessionCronJob(
     val sessionService: SessionService,
 ) : ApplicationRunner {
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         Flux.interval(Duration.ofHours(1))
             .flatMap { justDoIt() }
             .doOnError { LOGGER.error(GlobalVal.DEFAULT, "Session cronjob error", it) }
