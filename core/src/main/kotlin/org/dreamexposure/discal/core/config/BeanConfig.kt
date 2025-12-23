@@ -8,7 +8,6 @@ import io.micrometer.core.instrument.binder.okhttp3.OkHttpObservationInterceptor
 import io.micrometer.observation.ObservationRegistry
 import okhttp3.OkHttpClient
 import org.dreamexposure.discal.core.serializers.SnowflakeMapper
-import org.dreamexposure.discal.core.serializers.SpringHttpStatusMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
@@ -24,7 +23,6 @@ class BeanConfig {
             .registerKotlinModule()
             .registerModule(JavaTimeModule())
             .registerModule(SnowflakeMapper())
-            .registerModule(SpringHttpStatusMapper())
     }
 
     @Bean

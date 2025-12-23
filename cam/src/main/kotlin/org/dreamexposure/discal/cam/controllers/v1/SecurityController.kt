@@ -26,6 +26,6 @@ class SecurityController(
             request.scopes,
         )
 
-        return SecurityValidateV1Response(result.first == HttpStatus.OK, result.first, result.second)
+        return SecurityValidateV1Response(result.first == HttpStatus.OK, result.first.value(), result.second)
     }
 }
