@@ -44,6 +44,7 @@ allprojects {
     // Serialization
     val kotlinxSerializationJsonVersion: String by properties
     val orgJsonVersion: String by properties
+    val okioVersion: String by properties
     // Observability
     val logbackContribVersion: String by properties
     // Google libs
@@ -78,6 +79,8 @@ allprojects {
         implementation("club.minnced:discord-webhooks:$discordWebhookVersion") {
             // Due to vulnerability in older versions: https://github.com/advisories/GHSA-rm7j-f5g5-27vv
             exclude(group = "org.json", module = "json")
+            // Due to vulnerability in older versions: https://www.mend.io/vulnerability-database/CVE-2023-3635
+            exclude(group = "com.squareup.okio", module = "okio")
         }
 
         // Spring
@@ -97,6 +100,7 @@ allprojects {
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
         implementation("org.json:json:$orgJsonVersion")
+        implementation("com.squareup.okio:okio:${okioVersion}")
 
         // Observability
         implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
