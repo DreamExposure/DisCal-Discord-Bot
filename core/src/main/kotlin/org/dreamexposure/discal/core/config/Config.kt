@@ -7,12 +7,10 @@ enum class Config(private val key: String, private var value: Any? = null) {
     // Basic spring settings
     APP_NAME("spring.application.name"),
 
-    // Database settings, to be removed once DatabaseManager is retired
-    SQL_URL("spring.r2dbc.url"),
-    SQL_USERNAME("spring.r2dbc.username"),
-    SQL_PASSWORD("spring.r2dbc.password"),
-
     // Redis cache settings
+    REDIS_SSL("spring.data.redis.ssl.enabled", true),
+    REDIS_SSL_TRUSTSTORE_FILE("bot.cache.redis.truststore.file", "ca-certificates.p12"),
+    REDIS_SSL_TRUSTSTORE_PASSWORD("bot.cache.redis.truststore.password", ""),
     REDIS_HOST("spring.data.redis.host"),
     REDIS_PORT("spring.data.redis.port"),
     REDIS_DATABASE("spring.data.redis.database", -1),
