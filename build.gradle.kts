@@ -50,6 +50,9 @@ allprojects {
     val googleApiClientVersion: String by properties
     val googleServicesCalendarVersion: String by properties
     val googleOauthClientVersion: String by properties
+    //Other calendar libs
+    val iCal4jVersion: String by properties
+    val iCal4jConnectorVersion: String by properties
     // Various libs
     val okhttpVersion: String by properties
     val copyDownVersion: String by properties
@@ -110,6 +113,10 @@ allprojects {
         implementation("com.google.oauth-client:google-oauth-client-jetty:$googleOauthClientVersion") {
             exclude(group = "org.mortbay.jetty", module = "servlet-api")
         }
+
+        // Other calendar libs
+        implementation("org.mnode.ical4j:ical4j:$iCal4jVersion")
+        implementation("org.ical4j:ical4j-connector-api:$iCal4jConnectorVersion")
 
         // Various Libs
         implementation("com.squareup.okhttp3:okhttp")

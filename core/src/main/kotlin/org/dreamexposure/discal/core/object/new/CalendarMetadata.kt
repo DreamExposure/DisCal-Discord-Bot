@@ -64,6 +64,6 @@ data class CalendarMetadata(
     )
 
     enum class Host {
-        GOOGLE,
+        GOOGLE, DISCAL_DAV
     }
 }
