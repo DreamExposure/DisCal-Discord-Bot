@@ -37,7 +37,7 @@ jobs:
           distribution: 'adopt'
 
       - name: Validate gradle
-        uses: gradle/wrapper-validation-action@v2
+        uses: gradle/actions/wrapper-validation@v3
 
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
