@@ -9,7 +9,7 @@ import org.springframework.data.r2dbc.config.AbstractR2dbcConfiguration
 class R2dbcConfiguration(
     private val connectionFactory: ConnectionFactory,
 ) : AbstractR2dbcConfiguration() {
-    override fun connectionFactory(): ConnectionFactory? = connectionFactory
+    override fun connectionFactory(): ConnectionFactory = connectionFactory
 
     /*
     Custom converter is currently needed for mariadb driver to support Instants
@@ -17,8 +17,8 @@ class R2dbcConfiguration(
 
     Credit to @JohnNiang for the code https://github.com/mariadb-corporation/mariadb-connector-r2dbc/issues/90#issuecomment-3731589316
     */
-    override fun getCustomConverters(): List<Any?>? {
-        val converters = ArrayList<Any?>()
+    override fun getCustomConverters(): List<Any> {
+        val converters = ArrayList<Any>()
         converters.add(InstantConverters.MariaDBReadingConverter.INSTANCE)
         converters.add(InstantConverters.MariaDBWritingConverter.INSTANCE)
         return converters

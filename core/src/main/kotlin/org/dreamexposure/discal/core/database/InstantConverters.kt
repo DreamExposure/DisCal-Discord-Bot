@@ -17,19 +17,19 @@ internal enum class InstantConverters {
     ;
 
     @ReadingConverter
-    internal enum class MariaDBReadingConverter : Converter<LocalDateTime?, Instant?> {
+    internal enum class MariaDBReadingConverter : Converter<LocalDateTime, Instant> {
         INSTANCE {
-            override fun convert(source: LocalDateTime?): Instant? {
+            override fun convert(source: LocalDateTime): Instant {
                 val zoneId = ZoneId.systemDefault()
-                return source?.atZone(zoneId)?.toInstant()
+                return source.atZone(zoneId).toInstant()
             }
         };
     }
 
     @WritingConverter
-    internal enum class MariaDBWritingConverter : Converter<Instant?, LocalDateTime?> {
+    internal enum class MariaDBWritingConverter : Converter<Instant, LocalDateTime> {
         INSTANCE {
-            override fun convert(source: Instant?): LocalDateTime? {
+            override fun convert(source: Instant): LocalDateTime {
                 val zoneId = ZoneId.systemDefault().normalized()
                 return LocalDateTime.ofInstant(source, zoneId)
             }
