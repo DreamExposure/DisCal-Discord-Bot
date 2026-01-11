@@ -66,6 +66,13 @@ class StaticMessageService(
             .awaitSingle()
     }
 
+    suspend fun getEnabledStaticMessagesForShard(shardIndex: Int, shardCount: Int): List<StaticMessage> {
+        return staticMessageRepository.findAllEnabledByShardIndex(shardIndex, shardCount)
+            .map(::StaticMessage)
+            .collectList()
+            .awaitSingle()
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////
     ////// TODO: Need to be able to break some of this out for when I support more types //////
     ///////////////////////////////////////////////////////////////////////////////////////////
@@ -102,6 +109,7 @@ class StaticMessageService(
                 type = StaticMessage.Type.CALENDAR_OVERVIEW.value,
                 lastUpdate = Instant.now(),
                 scheduledUpdate = nextUpdate,
+                enabled = true,
                 calendarNumber = calendarNumber,
             )
         ).map(::StaticMessage).awaitSingle()
@@ -127,6 +135,36 @@ class StaticMessageService(
             return
         }
 
+        // Check if the message is in a thread that is archived
+        val channelData = discordClient.getChannelById(old.channelId)
+            .data.onErrorResume(ClientException.isStatusCode(403, 404)) { Mono.empty() }
+                .awaitSingleOrNull()
+
+        if (channelData == null) {
+            // Somehow the message exists but the channel doesn't? this code should never be called, but just in case lol
+            deleteStaticMessage(guildId, old.messageId)
+            return
+        }
+
+        // Check if channel is archived - set as disabled
+         if (channelData.threadMetadata().isPresent && channelData.threadMetadata().get().archived()) {
+             val updated = old.copy(enabled = false)
+
+             staticMessageRepository.updateByGuildIdAndMessageId(
+                 guildId = updated.guildId.asLong(),
+                 messageId = updated.messageId.asLong(),
+                 channelId = updated.channelId.asLong(),
+                 type = updated.type.value,
+                 lastUpdate = updated.lastUpdate,
+                 scheduledUpdate = updated.scheduledUpdate,
+                 enabled = updated.enabled,
+                 calendarNumber = updated.calendarNumber,
+             ).awaitSingleOrNull()
+
+             staticMessageCache.put(guildId, key = updated.messageId, updated)
+             return
+         }
+
         val calendar = calendarService.getCalendar(guildId, old.calendarNumber) ?: throw NotFoundException("Calendar not found")
         val events = calendarService.getUpcomingEvents(guildId, old.calendarNumber, OVERVIEW_EVENT_COUNT, MAX_CUTOFF_DAYS)
 
@@ -136,7 +174,7 @@ class StaticMessageService(
         discordClient.getMessageById(old.channelId, old.messageId).edit(
             MessageEditRequest.builder()
                 .addEmbed(embed.asRequest())
-                .components(componentService.getStaticMessageComponents().map { it.data })
+                .componentsOrNull(componentService.getStaticMessageComponents().map { it.data })
                 .build()
         ).awaitSingleOrNull()
 
@@ -151,6 +189,7 @@ class StaticMessageService(
             type = updated.type.value,
             lastUpdate = updated.lastUpdate,
             scheduledUpdate = updated.scheduledUpdate,
+            enabled = updated.enabled,
             calendarNumber = updated.calendarNumber,
         ).awaitSingleOrNull()
 
@@ -165,7 +204,7 @@ class StaticMessageService(
         val taskTimer = StopWatch()
         taskTimer.start()
 
-        val oldVersions = getStaticMessagesForCalendar(guildId, calendarNumber)
+        val oldVersions = getStaticMessagesForCalendar(guildId, calendarNumber).filter { it.enabled }
         val calendar = calendarService.getCalendar(guildId, calendarNumber) ?: throw NotFoundException("Calendar not found")
         val events = calendarService.getUpcomingEvents(guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
         val embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
@@ -181,10 +220,40 @@ class StaticMessageService(
                 return@forEach
             }
 
+            // Check if the message is in a thread that is archived
+            val channelData = discordClient.getChannelById(old.channelId)
+                .data.onErrorResume(ClientException.isStatusCode(403, 404)) { Mono.empty() }
+                .awaitSingleOrNull()
+
+            if (channelData == null) {
+                // Somehow the message exists but the channel doesn't? this code should never be called, but just in case lol
+                deleteStaticMessage(guildId, old.messageId)
+                return@forEach
+            }
+
+            // Check if channel is archived - set as disabled
+            if (channelData.threadMetadata().isPresent && channelData.threadMetadata().get().archived()) {
+                val updated = old.copy(enabled = false)
+
+                staticMessageRepository.updateByGuildIdAndMessageId(
+                    guildId = updated.guildId.asLong(),
+                    messageId = updated.messageId.asLong(),
+                    channelId = updated.channelId.asLong(),
+                    type = updated.type.value,
+                    lastUpdate = updated.lastUpdate,
+                    scheduledUpdate = updated.scheduledUpdate,
+                    enabled = updated.enabled,
+                    calendarNumber = updated.calendarNumber,
+                ).awaitSingleOrNull()
+
+                staticMessageCache.put(guildId, key = updated.messageId, updated)
+                return@forEach
+            }
+
             discordClient.getMessageById(old.channelId, old.messageId).edit(
                 MessageEditRequest.builder()
                     .addEmbed(embed.asRequest())
-                    .components(componentService.getStaticMessageComponents().map { it.data })
+                    .componentsOrNull(componentService.getStaticMessageComponents().map { it.data })
                     .build()
             ).awaitSingleOrNull()
 
@@ -199,6 +268,7 @@ class StaticMessageService(
                 type = updated.type.value,
                 lastUpdate = updated.lastUpdate,
                 scheduledUpdate = updated.scheduledUpdate,
+                enabled = updated.enabled,
                 calendarNumber = updated.calendarNumber,
             ).awaitSingleOrNull()
 

@@ -20,6 +20,7 @@ interface StaticMessageRepository: R2dbcRepository<StaticMessageData, Long> {
             type,
             last_update,
             scheduled_update,
+            enabled,
             calendar_number
         FROM static_messages
         WHERE MOD(guild_id >> 22, :shardCount) = :shardIndex
@@ -27,11 +28,26 @@ interface StaticMessageRepository: R2dbcRepository<StaticMessageData, Long> {
     fun findAllByShardIndex(shardIndex: Int, shardCount: Int): Flux<StaticMessageData>
 
     @Query("""
+        SELECT guild_id,
+            message_id,
+            channel_id,
+            type,
+            last_update,
+            scheduled_update,
+            enabled,
+            calendar_number
+        FROM static_messages
+        WHERE MOD(guild_id >> 22, :shardCount) = :shardIndex AND enabled = 1
+    """)
+    fun findAllEnabledByShardIndex(shardIndex: Int, shardCount: Int): Flux<StaticMessageData>
+
+    @Query("""
     UPDATE static_messages
     SET channel_id = :channelId,
         type = :type,
         last_update = :lastUpdate,
         scheduled_update = :scheduledUpdate,
+        enabled = :enabled,
         calendar_number = :calendarNumber
     WHERE guild_id = :guildId AND message_id = :messageId
     """)
@@ -42,6 +58,7 @@ interface StaticMessageRepository: R2dbcRepository<StaticMessageData, Long> {
         type: Int,
         lastUpdate: Instant,
         scheduledUpdate: Instant,
+        enabled: Boolean,
         calendarNumber: Int,
     ): Mono<Int>
 

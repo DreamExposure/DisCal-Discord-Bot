@@ -11,5 +11,6 @@ data class StaticMessageData(
     val type: Int,
     val lastUpdate: Instant,
     val scheduledUpdate: Instant,
+    val enabled: Boolean,
     val calendarNumber: Int,
 )

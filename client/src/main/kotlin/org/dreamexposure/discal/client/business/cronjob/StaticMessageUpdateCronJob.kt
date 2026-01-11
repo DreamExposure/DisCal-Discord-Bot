@@ -36,7 +36,7 @@ class StaticMessageUpdateCronJob(
         taskTimer.start()
 
         try {
-            val messages = staticMessageService.getStaticMessagesForShard(getShardIndex(), getShardCount())
+            val messages = staticMessageService.getEnabledStaticMessagesForShard(getShardIndex(), getShardCount())
                 //We have no interest in updating the message so close to its last update
                 .filter { Duration.between(Instant.now(), it.lastUpdate).abs().toMinutes() >= 30 }
                 // Only update messages in range
