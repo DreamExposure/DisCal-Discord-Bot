@@ -23,6 +23,7 @@ kotlin {
     sourceSets {
         all {
             kotlin.srcDir("server/src/main/kotlin")
+            resources.srcDir("core/src/main/resources")
         }
     }
 }
