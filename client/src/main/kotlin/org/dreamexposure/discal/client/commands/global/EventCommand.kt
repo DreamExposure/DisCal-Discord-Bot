@@ -9,10 +9,9 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.*
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.enums.event.EventFrequency
 import org.dreamexposure.discal.core.logger.LOGGER
-import org.dreamexposure.discal.core.`object`.event.Recurrence
 import org.dreamexposure.discal.core.`object`.new.Event
+import org.dreamexposure.discal.core.`object`.new.EventRecurrence
 import org.dreamexposure.discal.core.`object`.new.EventWizardState
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
 import org.dreamexposure.discal.core.utils.getCommonMsg
@@ -484,8 +483,8 @@ class EventCommand(
         val frequency = event.options[0].getOption("frequency")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
-            .map(EventFrequency.Companion::fromValue)
-            .orElse(EventFrequency.WEEKLY)
+            .map(EventRecurrence.Frequency::valueOf)
+            .orElse(EventRecurrence.Frequency.WEEKLY)
         val interval = event.options[0].getOption("interval")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -510,7 +509,7 @@ class EventCommand(
             .awaitSingle()
 
         val modifiedWizard = if (shouldRecur)
-            existingWizard.copy(entity = existingWizard.entity.copy(recur = true, recurrence = Recurrence(frequency, interval, count)))
+            existingWizard.copy(entity = existingWizard.entity.copy(recur = true, recurrence = EventRecurrence(frequency, interval, count)))
         else existingWizard.copy(entity = existingWizard.entity.copy(recur = false, recurrence = null))
         calendarService.putEventWizard(modifiedWizard)
 

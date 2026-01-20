@@ -400,7 +400,7 @@ class EmbedService(
 
         if (wizard.entity.recurrence != null) builder.addField(
             getEmbedMessage("event", "wizard.field.recurrence", settings.locale),
-            wizard.entity.recurrence.toHumanReadable(),
+            wizard.entity.recurrence.asHumanReadable(),
             true
         ) else if (wizard.editing && wizard.entity.id != null && wizard.entity.id.contains("_")) builder.addField(
             getEmbedMessage("event", "wizard.field.recurrence", settings.locale),

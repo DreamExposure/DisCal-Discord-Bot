@@ -11,11 +11,7 @@ import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.exceptions.ApiException
 import org.dreamexposure.discal.core.extensions.google.asInstant
-import org.dreamexposure.discal.core.`object`.event.Recurrence
-import org.dreamexposure.discal.core.`object`.new.Calendar
-import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
-import org.dreamexposure.discal.core.`object`.new.Event
-import org.dreamexposure.discal.core.`object`.new.EventMetadata
+import org.dreamexposure.discal.core.`object`.new.*
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.ZoneId
@@ -197,7 +193,7 @@ class GoogleCalendarProviderService(
             event.colorId = spec.color.id.toString()
 
         if (spec.recur && spec.recurrence != null)
-            event.recurrence = listOf(spec.recurrence.toRRule())
+            event.recurrence = listOf(spec.recurrence.asRRule())
 
         // Create event in google
         val response = googleCalendarApiWrapper.createEvent(calendar.metadata, event)
@@ -240,11 +236,11 @@ class GoogleCalendarProviderService(
         if (spec.recur != null) {
             if (spec.recur) {
                 //event now recurs, add the RRUle.
-                spec.recurrence?.let { event.recurrence = listOf(it.toRRule()) }
+                spec.recurrence?.let { event.recurrence = listOf(it.asRRule()) }
             }
         } else {
             //Recur equals null, so it's not changing whether its recurring, so handle if RRule changes only
-            spec.recurrence?.let { event.recurrence = listOf(it.toRRule()) }
+            spec.recurrence?.let { event.recurrence = listOf(it.asRRule()) }
         }
 
         // Okay, all values are set, let's patch this event now
@@ -320,7 +316,7 @@ class GoogleCalendarProviderService(
                 .atZone(calendar.timezone)
                 .toInstant(),
             recur = !baseEvent.recurrence.isNullOrEmpty(),
-            recurrence = if (baseEvent.recurrence.isNullOrEmpty()) Recurrence() else Recurrence.fromRRule(baseEvent.recurrence[0]),
+            recurrence = if (baseEvent.recurrence.isNullOrEmpty()) EventRecurrence() else EventRecurrence.fromRRule(baseEvent.recurrence[0]),
             image = metadata.imageLink,
             timezone = calendar.timezone,
         )

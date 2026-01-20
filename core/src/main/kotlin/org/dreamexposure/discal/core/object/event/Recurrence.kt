@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.`object`.event
 import kotlinx.serialization.Serializable
 import org.dreamexposure.discal.core.enums.event.EventFrequency
 
+@Deprecated("Use new EventRecurrence class")
 @Serializable
 data class Recurrence(
         val frequency: EventFrequency = EventFrequency.DAILY,
@@ -25,14 +26,14 @@ data class Recurrence(
                         val inter = c.replace("INTERVAL=", "")
                         try {
                             recur = recur.copy(interval = inter.toInt())
-                        } catch (ignore: NumberFormatException) {
+                        } catch (_: NumberFormatException) {
                         }
                     }
                     c.contains("COUNT=") -> {
                         val con = c.replaceAfter("COUNT=", "")
                         try {
                             recur = recur.copy(count = con.toInt())
-                        } catch (ignore: NumberFormatException) {
+                        } catch (_: NumberFormatException) {
                         }
                     }
                 }
