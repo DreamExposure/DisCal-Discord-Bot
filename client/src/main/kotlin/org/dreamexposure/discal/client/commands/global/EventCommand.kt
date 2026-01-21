@@ -609,6 +609,7 @@ class EventCommand(
                     .withCustomId("event-wizard.recurrence.day-of-week")
                     .withTitle(getCommonMsg("modal.event-recurrence.day-of-week.title", settings.locale))
                     .withComponents(*componentService.getEventRecurrenceWeeklyModalComponents(settings, modifiedWizard.entity))
+                    .awaitSingleOrNull()
             }
             EventRecurrence.Frequency.MONTHLY -> {
                 TODO("Not yet implemented")
