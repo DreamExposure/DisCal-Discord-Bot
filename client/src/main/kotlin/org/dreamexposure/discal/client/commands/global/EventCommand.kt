@@ -46,7 +46,7 @@ class EventCommand(
                     .map(EventRecurrence.Frequency::valueOf)
                     .orElse(EventRecurrence.Frequency.WEEKLY)
 
-                shouldRecur && (frequency != EventRecurrence.Frequency.WEEKLY)
+                !shouldRecur && (frequency != EventRecurrence.Frequency.WEEKLY)
             }
             else -> true
         }
@@ -581,8 +581,7 @@ class EventCommand(
             return
         }
 
-        val modifiedWizard = if (shouldRecur)
-            existingWizard.copy(entity = existingWizard.entity.copy(recur = true, recurrence = EventRecurrence(frequency, interval, count)))
+        val modifiedWizard = if (shouldRecur) existingWizard.copy(entity = existingWizard.entity.copy(recur = true, recurrence = EventRecurrence(frequency, interval, count)))
         else existingWizard.copy(entity = existingWizard.entity.copy(recur = false, recurrence = null))
         calendarService.putEventWizard(modifiedWizard)
 
