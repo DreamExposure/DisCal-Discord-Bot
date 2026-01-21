@@ -35,7 +35,7 @@ data class EventRecurrence(
                     it.contains("BYSETPOS=") -> try {
                         bySetPos = SetPos.entries.firstOrNull { v -> v.value == it.replace("BYSETPOS=", "").toInt() }
                     } catch (_: NumberFormatException) {}
-                    it.contains("BYDAY=") -> byDay = it.replace("BYDAY=", "").split(",").map { dv -> Day.valueOf(dv) }
+                    it.contains("BYDAY=") -> byDay = it.replace("BYDAY=", "").split(",").map { dv -> Day.entries.first { de -> de.value == dv } }
                     it.contains("BYMONTHDAY=") -> try {
                         byMonthDay = it.replace("BYMONTHDAY=", "").toInt()
                     } catch (_: NumberFormatException) {}
