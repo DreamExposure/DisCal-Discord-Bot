@@ -3,7 +3,6 @@ package org.dreamexposure.discal.client.commands.global
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
-import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.*
@@ -25,8 +24,8 @@ class RsvpCommand(
     override val ephemeral = true
 
 
-    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
-        return when (event.options[0].name) {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings) {
+        when (event.options[0].name) {
             "ontime" -> onTime(event, settings)
             "late" -> late(event, settings)
             "not-going" -> notGoing(event, settings)
@@ -39,7 +38,7 @@ class RsvpCommand(
         }
     }
 
-    private suspend fun onTime(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun onTime(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -55,22 +54,28 @@ class RsvpCommand(
         val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
-        if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+        if (calendar == null) {
+            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
+            return
+        }
+        if (calendarEvent == null) {
+            event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
+            return
+        }
+        if (calendarEvent.isOver()) {
+            event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
-        return if (rsvp.hasRoom(userId)) {
+        if (rsvp.hasRoom(userId)) {
             rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, goingOnTime = rsvp.goingOnTime + userId))
 
             event.createFollowup(getMessage("onTime.success", settings))
@@ -89,7 +94,7 @@ class RsvpCommand(
         }
     }
 
-    private suspend fun late(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun late(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -105,22 +110,28 @@ class RsvpCommand(
         val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
-        if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+        if (calendar == null) {
+            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
+            return
+        }
+        if (calendarEvent == null) {
+            event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
+            return
+        }
+        if (calendarEvent.isOver()) {
+            event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
-        return if (rsvp.hasRoom(userId)) {
+        if (rsvp.hasRoom(userId)) {
             rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, goingLate = rsvp.goingLate + userId))
 
             event.createFollowup(getMessage("late.success", settings))
@@ -139,7 +150,7 @@ class RsvpCommand(
         }
     }
 
-    private suspend fun unsure(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun unsure(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -155,31 +166,37 @@ class RsvpCommand(
         val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
-        if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+        if (calendar == null) {
+            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
+            return
+        }
+        if (calendarEvent == null) {
+            event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
+            return
+        }
+        if (calendarEvent.isOver()) {
+            event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
         rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, undecided = rsvp.undecided + userId))
 
-        return event.createFollowup(getMessage("unsure.success", settings))
+        event.createFollowup(getMessage("unsure.success", settings))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
             .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
 
-    private suspend fun notGoing(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun notGoing(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -195,31 +212,37 @@ class RsvpCommand(
         val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
-        if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+        if (calendar == null) {
+            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
+            return
+        }
+        if (calendarEvent == null) {
+            event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
+            return
+        }
+        if (calendarEvent.isOver()) {
+            event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
         rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId, notGoing = rsvp.notGoing + userId))
 
-        return event.createFollowup(getMessage("notGoing.success", settings))
+        event.createFollowup(getMessage("notGoing.success", settings))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
             .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
 
-    private suspend fun remove(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun remove(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -235,31 +258,37 @@ class RsvpCommand(
         val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
-        if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+        if (calendar == null) {
+            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
+            return
+        }
+        if (calendarEvent == null) {
+            event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
+            return
+        }
+        if (calendarEvent.isOver()) {
+            event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
         rsvp = rsvpService.upsertRsvp(rsvp.copyWithUserStatus(userId))
 
-        return event.createFollowup(getMessage("remove.success", settings))
+        event.createFollowup(getMessage("remove.success", settings))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
             .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
 
-    private suspend fun list(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun list(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -274,25 +303,29 @@ class RsvpCommand(
         val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
-        if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+        if (calendar == null) {
+            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
+            return
+        }
+        if (calendarEvent == null) {
+            event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         val rsvp = rsvpService.getRsvp(settings.guildId, eventId)
 
-        return event.createFollowup()
+        event.createFollowup()
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
             .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
 
-    private suspend fun limit(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun limit(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -312,45 +345,55 @@ class RsvpCommand(
 
         // Validate control role first to reduce work
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
-        if (!hasControlRole)
-            return event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+        if (!hasControlRole) {
+            event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
 
         val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
         val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
-        if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+        if (calendar == null) {
+            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
+            return
+        }
+        if (calendarEvent == null) {
+            event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
+            return
+        }
+        if (calendarEvent.isOver()) {
+            event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
         rsvp = rsvpService.upsertRsvp(rsvp.copy(limit = limit))
 
 
-        return event.createFollowup(getMessage("limit.success", settings, limit.toString()))
+        event.createFollowup(getMessage("limit.success", settings, limit.toString()))
             .withEmbeds(embedService.rsvpListEmbed(calendarEvent, rsvp, settings))
             .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
 
-    private suspend fun role(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
-        if (!settings.patronGuild)
-            return event.createFollowup(getCommonMsg("error.patronOnly", settings.locale))
+    private suspend fun role(event: ChatInputInteractionEvent, settings: GuildSettings) {
+        if (!settings.patronGuild) {
+            event.createFollowup(getCommonMsg("error.patronOnly", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
@@ -368,27 +411,35 @@ class RsvpCommand(
 
         // Validate control role first to reduce work
         val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
-        if (!hasElevatedPerms)
-            return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+        if (!hasElevatedPerms) {
+            event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
         val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
 
         // Validate required conditions
-        if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+        if (calendar == null) {
+            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent == null)
-            return event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
+            return
+        }
+        if (calendarEvent == null) {
+            event.createFollowup(getCommonMsg("error.notFound.event", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
-        if (calendarEvent.isOver())
-            return event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
+            return
+        }
+        if (calendarEvent.isOver()) {
+            event.createFollowup(getCommonMsg("error.event.ended", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
 
         var rsvp = rsvpService.getRsvp(settings.guildId, eventId)
@@ -397,7 +448,7 @@ class RsvpCommand(
         val embed = embedService.rsvpListEmbed(calendarEvent, rsvp, settings)
         val message = if (role.isEveryone) getMessage("role.success.remove", settings) else getMessage("role.success.set", settings, role.name)
 
-        return event.createFollowup(message)
+        event.createFollowup(message)
             .withEmbeds(embed)
             .withComponents(*componentService.getEventRsvpComponents(calendarEvent, settings, alwaysShow = true))
             .withEphemeral(ephemeral)
