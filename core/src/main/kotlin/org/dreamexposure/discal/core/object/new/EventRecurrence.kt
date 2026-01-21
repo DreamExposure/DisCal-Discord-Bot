@@ -66,7 +66,7 @@ data class EventRecurrence(
 
     fun asHumanReadable(): String {
         val builder = StringBuilder()
-            .append("Repeat ${frequency.name} every $count ")
+            .append("Repeat ${frequency.name} every $interval ")
 
         when (frequency) {
             Frequency.DAILY -> builder.append("day(s) ")
