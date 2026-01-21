@@ -17,6 +17,7 @@ import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import java.time.*
 import java.time.temporal.ChronoUnit
+import kotlin.jvm.optionals.getOrNull
 
 @Suppress("DuplicatedCode")
 @Component
@@ -561,7 +562,7 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(-1)
+            .getOrNull()
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
