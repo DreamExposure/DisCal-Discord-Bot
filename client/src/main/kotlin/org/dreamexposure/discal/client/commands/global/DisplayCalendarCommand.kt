@@ -3,7 +3,6 @@ package org.dreamexposure.discal.client.commands.global
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
-import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.CalendarService
@@ -24,14 +23,14 @@ class DisplayCalendarCommand(
     override val ephemeral = true
 
 
-    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
-        return when (event.options[0].name) {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings) {
+        when (event.options[0].name) {
             "new" -> new(event, settings)
             else -> throw IllegalStateException("Invalid subcommand specified")
         }
     }
 
-    private suspend fun new(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun new(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val hour = event.options[0].getOption("time")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -44,22 +43,26 @@ class DisplayCalendarCommand(
 
         // Validate control role
         val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
-        if (!hasElevatedPerms)
-            return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+        if (!hasElevatedPerms) {
+            event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         // Validate calendar exists
         val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
-        if (calendar == null)
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+        if (calendar == null) {
+            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         // Create and respond
         staticMessageService.createStaticMessage(settings.guildId, event.interaction.channelId, calendarNumber, hour)
 
-        return event.createFollowup(getCommonMsg("success.generic", settings.locale))
+        event.createFollowup(getCommonMsg("success.generic", settings.locale))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
