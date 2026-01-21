@@ -71,8 +71,9 @@ data class EventRecurrence(
 
         when (frequency) {
             Frequency.DAILY -> builder.append("day(s) ")
+            Frequency.WEEKLY -> builder.append("week(s) ")
             Frequency.MONTHLY -> builder.append("month(s) ")
-            else -> {}
+            Frequency.YEARLY -> builder.append("year(s) ")
         }
 
         if (byMonth != null && byMonthDay != null) builder.append("on ${byMonth.name} $byMonthDay ")
