@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.`object`.new
 
+import java.time.DayOfWeek
 import java.time.Month
 
 data class EventRecurrence(
@@ -104,13 +105,13 @@ data class EventRecurrence(
         LAST(-1),
     }
 
-    enum class Day(val value: String) {
-        SUNDAY("SU"),
-        MONDAY("MO"),
-        TUESDAY("TU"),
-        WEDNESDAY("WE"),
-        THURSDAY("TH"),
-        FRIDAY("FR"),
-        SATURDAY("SA"),
+    enum class Day(val value: String, val dayOfWeek: DayOfWeek) {
+        SUNDAY("SU", DayOfWeek.SUNDAY),
+        MONDAY("MO", DayOfWeek.MONDAY),
+        TUESDAY("TU", DayOfWeek.TUESDAY),
+        WEDNESDAY("WE", DayOfWeek.WEDNESDAY),
+        THURSDAY("TH", DayOfWeek.THURSDAY),
+        FRIDAY("FR", DayOfWeek.FRIDAY),
+        SATURDAY("SA", DayOfWeek.SATURDAY),
     }
 }

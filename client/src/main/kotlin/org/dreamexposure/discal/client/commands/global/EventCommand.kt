@@ -31,6 +31,26 @@ class EventCommand(
     override val hasSubcommands = true
     override val ephemeral = true
 
+    override fun shouldDefer(event: ChatInputInteractionEvent): Boolean {
+        // check if this is the recur command, if so, check if modal will get sent
+        return when (event.options[0].name) {
+            "recur" -> {
+                val shouldRecur = event.options[0].getOption("recur")
+                    .flatMap(ApplicationCommandInteractionOption::getValue)
+                    .map(ApplicationCommandInteractionOptionValue::asBoolean)
+                    .orElse(true)
+                val frequency = event.options[0].getOption("frequency")
+                    .flatMap(ApplicationCommandInteractionOption::getValue)
+                    .map(ApplicationCommandInteractionOptionValue::asString)
+                    .map(EventRecurrence.Frequency::valueOf)
+                    .orElse(EventRecurrence.Frequency.WEEKLY)
+
+                shouldRecur && (frequency != EventRecurrence.Frequency.WEEKLY)
+            }
+            else -> true
+        }
+    }
+
     override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings) {
         when (event.options[0].name) {
             "create" -> create(event, settings)
@@ -565,16 +585,38 @@ class EventCommand(
         else existingWizard.copy(entity = existingWizard.entity.copy(recur = false, recurrence = null))
         calendarService.putEventWizard(modifiedWizard)
 
-        // Handle message
-        val message = if (shouldRecur)
-            getMessage("recur.success.enable", settings)
-        else getMessage("recur.success.disable", settings)
+        if (!shouldRecur) {
+            event.createFollowup(getMessage("recur.success.disable", settings))
+                .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
+                .withComponents(*componentService.getWizardComponents(modifiedWizard, settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+            return
+        }
 
-        event.createFollowup(message)
-            .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
-            .withComponents(*componentService.getWizardComponents(modifiedWizard, settings))
-            .withEphemeral(ephemeral)
-            .awaitSingle()
+        when (frequency) {
+            EventRecurrence.Frequency.DAILY -> {
+                // The simplest to handle, respond how we used to
+                event.createFollowup(getMessage("recur.success.enable", settings))
+                    .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
+                    .withComponents(*componentService.getWizardComponents(modifiedWizard, settings))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
+            }
+            EventRecurrence.Frequency.WEEKLY -> {
+                // Pop modal and ask which days it should repeat
+                event.presentModal()
+                    .withCustomId("event-wizard.recurrence.day-of-week")
+                    .withTitle(getCommonMsg("modal.event-recurrence.day-of-week.title", settings.locale))
+                    .withComponents(*componentService.getEventRecurrenceWeeklyModalComponents(settings, modifiedWizard.entity))
+            }
+            EventRecurrence.Frequency.MONTHLY -> {
+                TODO("Not yet implemented")
+            }
+            EventRecurrence.Frequency.YEARLY -> {
+                TODO("Not yet implemented")
+            }
+        }
     }
 
     private suspend fun review(event: ChatInputInteractionEvent, settings: GuildSettings) {

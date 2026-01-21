@@ -1,14 +1,12 @@
 package org.dreamexposure.discal.core.business
 
 import discord4j.common.util.Snowflake
-import discord4j.core.`object`.component.ActionRow
-import discord4j.core.`object`.component.Button
-import discord4j.core.`object`.component.LayoutComponent
-import discord4j.core.`object`.component.SelectMenu
+import discord4j.core.`object`.component.*
 import discord4j.core.`object`.emoji.Emoji
 import org.dreamexposure.discal.core.`object`.new.*
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
+import java.time.DayOfWeek
 
 @Component
 class ComponentService {
@@ -68,5 +66,26 @@ class ComponentService {
         )
 
         return arrayOf(ActionRow.of(confirmButton, cancelButton))
+    }
+
+    fun getEventRecurrenceWeeklyModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+        // Determine pre-selected days
+        val selectedDays = emptyList<DayOfWeek>().toMutableList()
+        event.recurrence?.byDay?.forEach { selectedDays.add(it.dayOfWeek) }
+
+        if (selectedDays.isEmpty() && event.start != null) selectedDays.add(event.start.atZone(event.timezone).dayOfWeek)
+
+        // Generate the list of days able to be selected
+        val dayOptions = DayOfWeek.entries.map { day ->
+            SelectMenu.Option.of(day.name, day.name)
+                .withDefault(selectedDays.contains(day))
+        }
+
+        val select = SelectMenu.of("select.event.recurrence.days", dayOptions)
+            .withMinValues(1)
+            .withMaxValues(dayOptions.size)
+            .required(true)
+
+       return arrayOf(Label.of(getCommonMsg("select.event.recurrence.days.label", settings.locale), select))
     }
 }
