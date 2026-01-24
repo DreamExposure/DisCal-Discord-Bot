@@ -89,11 +89,11 @@ class ComponentService {
        return arrayOf(Label.of(getCommonMsg("select.event.recurrence.days.label", settings.locale), select))
     }
 
-    fun getEventRecurrenceMonthlyDropdownComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+    fun getEventRecurrenceMonthlyDropdownComponents(settings: GuildSettings): Array<LayoutComponent> {
         // dropdown with wizard to ask "on specific day of month (ex 15th)", or "Nth day of month (ex first Tuesday)"
         val dateOption = SelectMenu.Option.of(getCommonMsg("select.event.recurrence.month.option.date.label", settings.locale), "monthly_date")
             .withDescription(getCommonMsg("select.event.recurrence.month.option.date.description", settings.locale))
-            .withDefault(true) // Default behavior of monthly recurrence
+            .withDefault(true) // Default behavior of monthly recurrence without additional rules
         val variableOption = SelectMenu.Option.of(getCommonMsg("select.event.recurrence.month.option.variable.label", settings.locale), "monthly_variable")
             .withDescription(getCommonMsg("select.event.recurrence.month.option.variable.description", settings.locale))
 

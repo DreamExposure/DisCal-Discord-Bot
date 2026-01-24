@@ -421,7 +421,7 @@ class EmbedService(
         if (wizard.entity.image != null)
             builder.image(wizard.entity.image)
 
-        // Handle displaying warnings
+        // Handle displaying warnings // TODO: Add warning for event WEEKLY recurrence set to wrong day (eg, start date is a tuesday, rrule says only wednesday)
         val warnings = mutableListOf<String>()
 
         if (wizard.entity.name.isNullOrBlank()) {
