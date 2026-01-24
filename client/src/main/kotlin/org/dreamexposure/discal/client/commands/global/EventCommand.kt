@@ -613,6 +613,8 @@ class EventCommand(
             }
             EventRecurrence.Frequency.MONTHLY -> {
                 TODO("Not yet implemented")
+                // Show dropdown with wizard to ask "on specific day of month (ex 15th)", or "Nth day of month (ex first Tuesday)"
+                // On selection, modal should be popped for either
             }
             EventRecurrence.Frequency.YEARLY -> {
                 TODO("Not yet implemented")
