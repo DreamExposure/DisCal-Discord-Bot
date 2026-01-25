@@ -70,8 +70,8 @@ class EventRecurrenceYearlyDateModal(
         calendarService.putEventWizard(modifiedWizard)
 
         event.createFollowup(getCommonMsg("modal.event.recurrence.yearly.success.date", settings.locale, selectedMonth.name, selectedDate.toString()))
-            .withEmbeds(embedService.eventWizardEmbed(existingWizard, settings))
-            .withComponents(*componentService.getWizardComponents(existingWizard, settings))
+            .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
+            .withComponents(*componentService.getWizardComponents(modifiedWizard, settings))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
