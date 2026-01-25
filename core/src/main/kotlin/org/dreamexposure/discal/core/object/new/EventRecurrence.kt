@@ -77,7 +77,7 @@ data class EventRecurrence(
         }
 
         if (byMonth != null && byMonthDay != null) builder.append("on ${byMonth.name} $byMonthDay ")
-        else if (byMonthDay != null) builder.append("$byMonthDay ")
+        else if (byMonthDay != null) builder.append("on the $byMonthDay ")
 
         if (byMonth != null && bySetPos != null && byDay.isNotEmpty()) builder.append("on the ${bySetPos.name} ${byDay.joinToString(",")} of ${byMonth.name} ")
         else if (bySetPos != null && byDay.isNotEmpty()) builder.append("on the ${bySetPos.name} ${byDay.joinToString(",")} ")
