@@ -7,6 +7,7 @@ import org.dreamexposure.discal.core.`object`.new.*
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import java.time.DayOfWeek
+import java.time.Month
 
 @Component
 class ComponentService {
@@ -130,6 +131,72 @@ class ComponentService {
         )
     }
 
+    fun getEventRecurrenceYearlyDateModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+        // Determine if there should be a prefilled date
+        val prefilledMonth = event.start?.atZone(event.timezone)?.month
+        val prefilledDate = event.start?.atZone(event.timezone)?.dayOfMonth
+
+        // Generate list of months
+        val monthOptions = Month.entries.map { month ->
+            SelectMenu.Option.of(month.name, month.name)
+                .withDefault(month == prefilledMonth)
+        }
+        val selectMonth = SelectMenu.of("select.event.recurrence.month", monthOptions)
+            .withPlaceholder(getCommonMsg("modal.event.recurrence.yearly.date.month.placeholder", settings.locale))
+            .required(true)
+
+        val dateInput = TextInput.small("event-recurrence-yearly-date", 1, 2)
+            .placeholder(getCommonMsg("modal.event.recurrence.yearly.date.date.placeholder", settings.locale))
+            .required(true)
+            .prefilled(prefilledDate?.toString() ?: "")
+
+        return arrayOf(
+            Label.of(getCommonMsg("modal.event.recurrence.yearly.date.month.label", settings.locale), selectMonth),
+            Label.of(getCommonMsg("modal.event.recurrence.yearly.date.date.label", settings.locale), dateInput),
+        )
+    }
+
+    fun getEventRecurrenceYearlyVariableModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+        // Determine preselected day and month
+        val selectedDay = event.start?.atZone(event.timezone)?.dayOfWeek
+        val prefilledMonth = event.start?.atZone(event.timezone)?.month
+
+
+        // Generate the list of day positions
+        val dayPositions = EventRecurrence.SetPos.entries.map {
+            SelectMenu.Option.of(it.name, it.name)
+                .withDefault(it == EventRecurrence.SetPos.FIRST)
+        }
+        val selectPosition = SelectMenu.of("select.event.recurrence.position", dayPositions)
+            .withPlaceholder(getCommonMsg("modal.event.recurrence.yearly.variable.position.placeholder", settings.locale))
+            .required(true)
+
+        // Generate the list of days able to be selected
+        val dayOptions = DayOfWeek.entries.map { day ->
+            SelectMenu.Option.of(day.name, day.name)
+                .withDefault(selectedDay == day)
+        }
+        val selectDay = SelectMenu.of("select.event.recurrence.day", dayOptions)
+            .withPlaceholder(getCommonMsg("modal.event.recurrence.yearly.variable.day.placeholder", settings.locale))
+            .required(true)
+
+        // Generate list of months
+        val monthOptions = Month.entries.map { month ->
+            SelectMenu.Option.of(month.name, month.name)
+                .withDefault(month == prefilledMonth)
+        }
+        val selectMonth = SelectMenu.of("select.event.recurrence.month", monthOptions)
+            .withPlaceholder(getCommonMsg("modal.event.recurrence.yearly.variable.month.placeholder", settings.locale))
+            .required(true)
+
+
+        return arrayOf(
+            Label.of(getCommonMsg("modal.event.recurrence.yearly.variable.position.label", settings.locale), selectPosition),
+            Label.of(getCommonMsg("modal.event.recurrence.yearly.variable.day.label", settings.locale), selectDay),
+            Label.of(getCommonMsg("modal.event.recurrence.yearly.variable.month.label", settings.locale), selectMonth),
+        )
+    }
+
     fun getEventRecurrenceMonthlyDropdownComponents(settings: GuildSettings): Array<LayoutComponent> {
         // dropdown with wizard to ask "on specific day of month (ex 15th)", or "Nth day of month (ex first Tuesday)"
         val dateOption = SelectMenu.Option.of(getCommonMsg("select.event.recurrence.month.option.date.label", settings.locale), "monthly_date")
@@ -140,6 +207,20 @@ class ComponentService {
 
         val selectMenu = SelectMenu.of("select.event.recurrence.month-option", dateOption, variableOption)
             .withPlaceholder(getCommonMsg("select.event.recurrence.month.placeholder", settings.locale))
+
+        return arrayOf(ActionRow.of(selectMenu))
+    }
+
+    fun getEventRecurrenceYearlyDropdownComponents(settings: GuildSettings): Array<LayoutComponent> {
+        // dropdown with wizard to ask "on specific date or nth day of x month:
+        val dateOption = SelectMenu.Option.of(getCommonMsg("select.event.recurrence.yearly.option.date.label", settings.locale), "yearly_date")
+            .withDescription(getCommonMsg("select.event.recurrence.yearly.option.date.description", settings.locale))
+            .withDefault(true) // Default behavior of yearly recurrence without additional rules
+        val variableOption = SelectMenu.Option.of(getCommonMsg("select.event.recurrence.yearly.option.variable.label", settings.locale), "yearly_variable")
+            .withDescription(getCommonMsg("select.event.recurrence.yearly.option.variable.description", settings.locale))
+
+        val selectMenu = SelectMenu.of("select.event.recurrence.yearly-option", dateOption, variableOption)
+            .withPlaceholder(getCommonMsg("select.event.recurrence.yearly.placeholder", settings.locale))
 
         return arrayOf(ActionRow.of(selectMenu))
     }

@@ -615,14 +615,20 @@ class EventCommand(
             EventRecurrence.Frequency.MONTHLY -> {
                 // Show dropdown with wizard to ask "on specific day of month (ex 15th)", or "Nth day of month (ex first Tuesday)"
                 // On selection, modal should be popped for either
-                event.createFollowup(getMessage("recur.success.enable.monthly", settings))
+                event.createFollowup(getMessage("recur.success.enable.with-options", settings))
                     .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
                     .withComponents(*componentService.getEventRecurrenceMonthlyDropdownComponents(settings) + componentService.getWizardComponents(modifiedWizard, settings))
                     .withEphemeral(ephemeral)
                     .awaitSingle()
             }
             EventRecurrence.Frequency.YEARLY -> {
-                TODO("Not yet implemented")
+                // Show dropdown with wizard to ask "on specific date" or "Nth day of specific month (ex first Tuesday of April)
+                // On selection, modal should be popped for either
+                event.createFollowup(getMessage("recur.success.enable.with-options", settings))
+                    .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
+                    .withComponents(*componentService.getEventRecurrenceYearlyDropdownComponents(settings) + componentService.getWizardComponents(modifiedWizard, settings))
+                    .withEphemeral(ephemeral)
+                    .awaitSingle()
             }
         }
     }
