@@ -617,7 +617,7 @@ class EventCommand(
                 // On selection, modal should be popped for either
                 event.createFollowup(getMessage("recur.success.enable.monthly", settings))
                     .withEmbeds(embedService.eventWizardEmbed(modifiedWizard, settings))
-                    .withComponents(*componentService.getWizardComponents(modifiedWizard, settings) + componentService.getEventRecurrenceMonthlyDropdownComponents(settings))
+                    .withComponents(*componentService.getEventRecurrenceMonthlyDropdownComponents(settings) + componentService.getWizardComponents(modifiedWizard, settings))
                     .withEphemeral(ephemeral)
                     .awaitSingle()
             }
