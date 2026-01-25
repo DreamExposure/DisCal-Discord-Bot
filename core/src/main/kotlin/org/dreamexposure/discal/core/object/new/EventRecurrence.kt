@@ -57,7 +57,7 @@ data class EventRecurrence(
             .append("INTERVAL=${interval};")
 
         if (count != null) rrule.append("COUNT=${count};")
-        if (bySetPos != null) rrule.append("BYSETPOS=${bySetPos};")
+        if (bySetPos != null) rrule.append("BYSETPOS=${bySetPos.value};")
         if (byDay.isNotEmpty()) rrule.append("BYDAY=${byDay.joinToString(",") { it.value }};")
         if (byMonthDay != null) rrule.append("BYMONTHDAY=${byMonthDay};")
         if (byMonth != null) rrule.append("BYMONTH=${byMonth.value};")
