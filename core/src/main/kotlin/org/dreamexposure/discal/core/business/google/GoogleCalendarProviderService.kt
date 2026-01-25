@@ -11,6 +11,7 @@ import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.exceptions.ApiException
 import org.dreamexposure.discal.core.extensions.google.asInstant
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.*
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -194,6 +195,9 @@ class GoogleCalendarProviderService(
 
         if (spec.recur && spec.recurrence != null)
             event.recurrence = listOf(spec.recurrence.asRRule())
+
+        // TODO: Remove after debugging
+        LOGGER.debug("Event recurrence rule for ${spec.name} | ${spec.recurrence?.asRRule()}")
 
         // Create event in google
         val response = googleCalendarApiWrapper.createEvent(calendar.metadata, event)
