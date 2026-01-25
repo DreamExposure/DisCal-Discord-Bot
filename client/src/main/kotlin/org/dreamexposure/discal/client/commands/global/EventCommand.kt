@@ -46,7 +46,8 @@ class EventCommand(
                     .map(EventRecurrence.Frequency::valueOf)
                     .orElse(EventRecurrence.Frequency.WEEKLY)
 
-                !shouldRecur && (frequency != EventRecurrence.Frequency.WEEKLY)
+                if (!shouldRecur) true
+                else (frequency != EventRecurrence.Frequency.WEEKLY)
             }
             else -> true
         }
