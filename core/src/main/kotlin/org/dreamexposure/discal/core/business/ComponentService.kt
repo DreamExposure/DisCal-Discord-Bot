@@ -89,6 +89,47 @@ class ComponentService {
        return arrayOf(Label.of(getCommonMsg("select.event.recurrence.days.label", settings.locale), select))
     }
 
+    fun getEventRecurrenceMonthlyDateModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+        // determine if there should be prefilled date
+        val prefilledDayNumber = event.start?.atZone(event.timezone)?.dayOfMonth
+
+        val dateInput = TextInput.small("event-recurrence-monthly-date", 1, 2)
+            .placeholder(getCommonMsg("modal.event.recurrence.monthly.date.placeholder", settings.locale))
+            .required(true)
+            .prefilled(prefilledDayNumber?.toString() ?: "")
+
+        return arrayOf(Label.of(getCommonMsg("modal.event.recurrence.monthly.date.label", settings.locale), dateInput))
+    }
+
+    fun getEventRecurrenceMonthlyVariableModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+        // Generate the list of day positions
+        val dayPositions = EventRecurrence.SetPos.entries.map {
+            SelectMenu.Option.of(it.name, it.name)
+                .withDefault(it == EventRecurrence.SetPos.FIRST)
+        }
+        val selectPosition = SelectMenu.of("select.event.recurrence.position", dayPositions)
+            .withPlaceholder(getCommonMsg("modal.event.recurrence.monthly.position.placeholder", settings.locale))
+            .required(true)
+
+
+        // Determine pre-selected day
+        val selectedDay = event.start?.atZone(event.timezone)?.dayOfWeek
+
+        // Generate the list of days able to be selected
+        val dayOptions = DayOfWeek.entries.map { day ->
+            SelectMenu.Option.of(day.name, day.name)
+                .withDefault(selectedDay == day)
+        }
+        val selectDay = SelectMenu.of("select.event.recurrence.day", dayOptions)
+            .withPlaceholder(getCommonMsg("modal.event.recurrence.monthly.day.placeholder", settings.locale))
+            .required(true)
+
+        return arrayOf(
+            Label.of(getCommonMsg("modal.event.recurrence.monthly.position.label", settings.locale), selectPosition),
+            Label.of(getCommonMsg("modal.event.recurrence.monthly.day.label", settings.locale), selectDay),
+        )
+    }
+
     fun getEventRecurrenceMonthlyDropdownComponents(settings: GuildSettings): Array<LayoutComponent> {
         // dropdown with wizard to ask "on specific day of month (ex 15th)", or "Nth day of month (ex first Tuesday)"
         val dateOption = SelectMenu.Option.of(getCommonMsg("select.event.recurrence.month.option.date.label", settings.locale), "monthly_date")

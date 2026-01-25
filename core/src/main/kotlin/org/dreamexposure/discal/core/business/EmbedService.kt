@@ -421,7 +421,7 @@ class EmbedService(
         if (wizard.entity.image != null)
             builder.image(wizard.entity.image)
 
-        // Handle displaying warnings // TODO: Add warning for event WEEKLY recurrence set to wrong day (eg, start date is a tuesday, rrule says only wednesday)
+        // Handle displaying warnings
         val warnings = mutableListOf<String>()
 
         if (wizard.entity.name.isNullOrBlank()) {
@@ -437,6 +437,14 @@ class EmbedService(
             }
 
         }
+        // Check if event recurs on day of week but scheduled on different day of week
+        if (wizard.entity.start != null && wizard.entity.recurrence != null && wizard.entity.recurrence.byDay.isNotEmpty()) {
+            val eventOnDay = wizard.entity.start.atZone(wizard.entity.timezone).dayOfWeek
+            if (!wizard.entity.recurrence.byDay.map(EventRecurrence.Day::dayOfWeek).contains(eventOnDay)) {
+                warnings.add(getEmbedMessage("event", "warning.wizard.recurrence.onDifferentDay", settings.locale, eventOnDay.name, wizard.entity.recurrence.byDay.joinToString(",") { it.dayOfWeek.name }, eventOnDay.name))
+            }
+        }
+        // Check if announcements paused
         if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isAfter(Instant.now())) {
             warnings.add(getEmbedMessage("event", "warning.wizard.announcementsPaused", settings.locale))
         }

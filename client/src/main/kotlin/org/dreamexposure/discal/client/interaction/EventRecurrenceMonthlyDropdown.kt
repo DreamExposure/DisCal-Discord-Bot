@@ -2,6 +2,7 @@ package org.dreamexposure.discal.client.interaction
 
 import discord4j.core.event.domain.interaction.SelectMenuInteractionEvent
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.ComponentService
 import org.dreamexposure.discal.core.business.PermissionService
@@ -40,16 +41,21 @@ class EventRecurrenceMonthlyDropdown(
 
         when (selected) {
             "monthly_date" -> {
-                // TODO Pop modal
+                event.presentModal()
+                    .withCustomId("event-wizard.recurrence.monthly_date")
+                    .withTitle(getCommonMsg("modal.event.recurrence.monthly.title", settings.locale))
+                    .withComponents(*componentService.getEventRecurrenceMonthlyDateModalComponents(settings, existingWizard.entity))
+                    .awaitSingleOrNull()
             }
             "monthly_variable" -> {
-                // TODO Pop modal
+                event.presentModal()
+                    .withCustomId("event-wizard.recurrence.monthly_variable")
+                    .withTitle(getCommonMsg("modal.event.recurrence.monthly.title", settings.locale))
+                    .withComponents(*componentService.getEventRecurrenceMonthlyVariableModalComponents(settings, existingWizard.entity))
+                    .awaitSingleOrNull()
+
             }
             else -> throw IllegalStateException("Unknown selected monthly recurrence option: $selected")
         }
-
-
-
-        TODO("Not yet implemented")
     }
 }
