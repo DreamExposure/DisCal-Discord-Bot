@@ -19,13 +19,15 @@ class EventRecurrenceMonthlyDropdown(
     override val ids = arrayOf("select.event.recurrence.month-option")
     override val ephemeral = true
 
+    override suspend fun shouldDefer(event: SelectMenuInteractionEvent) = false
+
     override suspend fun handle(event: SelectMenuInteractionEvent, settings: GuildSettings) {
         val selected = event.values[0]
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
         if (!hasControlRole) {
-            event.createFollowup(getCommonMsg("error.perms.privileged", settings.locale))
+            event.reply(getCommonMsg("error.perms.privileged", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
             return
@@ -33,7 +35,7 @@ class EventRecurrenceMonthlyDropdown(
         // Check if wizard not started
         val existingWizard = calendarService.getEventWizard(settings.guildId, event.interaction.user.id)
         if (existingWizard == null) {
-            event.createFollowup(getCommonMsg("error.event.wizard.notStarted", settings.locale))
+            event.reply(getCommonMsg("error.event.wizard.notStarted", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
             return
