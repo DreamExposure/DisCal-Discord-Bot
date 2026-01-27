@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.business
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.component.*
 import discord4j.core.`object`.emoji.Emoji
+import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.extensions.autocompleteSafe
 import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.`object`.new.*
@@ -84,6 +85,16 @@ class ComponentService {
             .placeholder(getCommonMsg("modal.event.create.location.placeholder", settings.locale))
             .required(false)
 
+        // Generate color options
+        val colorOptions = EventColor.entries.map {
+            SelectMenu.Option.of(it.name, it.name)
+                .withEmoji(it.emoji)
+                .withDefault(it == EventColor.NONE)
+        }
+        val colorSelect = SelectMenu.of("event.create.color", colorOptions)
+            .withPlaceholder(getCommonMsg("modal.event.create.color.placeholder", settings.locale))
+            .required(false)
+
         // Generate calendar options
         val calendarOptions = calendars.subList(0, 25.coerceAtMost(calendars.size)).map {
             SelectMenu.Option.of("[${it.metadata.number}] ${it.name.toMarkdown().autocompleteSafe(6)}", it.metadata.number.toString())
@@ -98,6 +109,7 @@ class ComponentService {
             Label.of(getCommonMsg("modal.event.create.name.label", settings.locale), nameInput),
             Label.of(getCommonMsg("modal.event.create.description.label", settings.locale), descriptionInput),
             Label.of(getCommonMsg("modal.event.create.location.label", settings.locale), locationInput),
+            Label.of(getCommonMsg("modal.event.create.color.label", settings.locale), colorSelect),
             Label.of(getCommonMsg("modal.event.create.calendar.label", settings.locale), calendarSelect),
         )
     }

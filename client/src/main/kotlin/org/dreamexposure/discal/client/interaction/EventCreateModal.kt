@@ -38,6 +38,11 @@ class EventCreateModal(
         val location = textInputs.first { it.customId == "event.create.location" }
             .value
             .orElse("")
+        val color = selectInputs.first { it.customId == "event.create.color" }
+            .values
+            .get()
+            .map { EventColor.valueOf(it) }
+            .firstOrNull() ?: EventColor.NONE
         val calendarNumber = selectInputs.first { it.customId == "event.create.calendar" }
             .values
             .get()
@@ -85,7 +90,7 @@ class EventCreateModal(
                 name = name,
                 description = description,
                 location = location,
-                color = EventColor.NONE,
+                color = color,
                 start = null,
                 end = null,
                 recur = false,
