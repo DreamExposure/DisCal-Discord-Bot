@@ -1,6 +1,5 @@
 package org.dreamexposure.discal.core.business
 
-import discord4j.common.util.Snowflake
 import discord4j.core.`object`.component.*
 import discord4j.core.`object`.emoji.Emoji
 import org.dreamexposure.discal.core.enums.event.EventColor
@@ -18,7 +17,7 @@ class ComponentService {
     fun getStaticMessageComponents(): Array<LayoutComponent> {
         val refreshButton = Button.secondary(
             "refresh-static-message",
-            Emoji.custom(Snowflake.of(1175580426585247815), "refresh_ts", false)
+            Emoji.of(1465798960483668122, "refresh", false)
         )
 
         return arrayOf(ActionRow.of(refreshButton))
@@ -28,16 +27,16 @@ class ComponentService {
         if (!alwaysShow && !settings.showRsvpDropdown) return emptyArray() // This way we don't need the message UI code to get cluttered
 
         val goingOnTime = SelectMenu.Option.of(getCommonMsg("dropdown.rsvp.option.on-time.label", settings.locale), "rsvp_on_time")
-            .withEmoji(Emoji.custom(Snowflake.of(1390911034708988025), "rsvp_on_time_ts", false))
+            .withEmoji(Emoji.of(1465796203013734490, "rsvp_on_time", false))
 
         val goingLate = SelectMenu.Option.of(getCommonMsg("dropdown.rsvp.option.late.label", settings.locale), "rsvp_late")
-            .withEmoji(Emoji.custom(Snowflake.of(1390911037074833489), "rsvp_late_ts", false))
+            .withEmoji(Emoji.of(1465796205635309578, "rsvp_late", false))
 
         val notGoing = SelectMenu.Option.of(getCommonMsg("dropdown.rsvp.option.not-going.label", settings.locale), "rsvp_not_going")
-            .withEmoji(Emoji.custom(Snowflake.of(1390911044515397733), "rsvp_not_going_ts", false))
+            .withEmoji(Emoji.of(1465796207564554485, "rsvp_not_going", false))
 
         val undecided = SelectMenu.Option.of(getCommonMsg("dropdown.rsvp.option.undecided.label", settings.locale), "rsvp_undecided")
-            .withEmoji(Emoji.custom(Snowflake.of(1390911039331237968), "rsvp_undecided", false))
+            .withEmoji(Emoji.of(1465796206566309888, "rsvp_undecided", false))
 
         // So, I checked the DBs and there seem to be no event IDs longer than 75 characters, so I'm just gonna not worry until it becomes a problem
         val selectMenu = SelectMenu.of("rsvp|${event.calendarNumber}|${event.id}", goingOnTime, goingLate, notGoing, undecided)
