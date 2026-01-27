@@ -253,6 +253,13 @@
           "max_value": 59
         },
         {
+          "name": "duration",
+          "type": 4,
+          "description": "The length of the event, in hours",
+          "required": false,
+          "min_value": 0
+        },
+        {
           "name": "keep-duration",
           "type": 5,
           "description": "Adjusts the end time to keep the same duration (overrides guild-level setting)",

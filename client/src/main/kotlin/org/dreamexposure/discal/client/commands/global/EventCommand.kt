@@ -251,6 +251,10 @@ class EventCommand(
             .map(Long::toInt)
             .map { it.coerceAtLeast(0).coerceAtMost(59) }
             .orElse(0)
+        val duration = event.options[0].getOption("duration")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .getOrNull()
         val keepDuration = event.options[0].getOption("keep-duration")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
@@ -280,7 +284,7 @@ class EventCommand(
         ).toInstant()
 
         if (existingWizard.entity.end == null) {
-            val modifiedWizard = existingWizard.copy(entity = existingWizard.entity.copy(start = start, end = start.plus(1, ChronoUnit.HOURS)))
+            val modifiedWizard = existingWizard.copy(entity = existingWizard.entity.copy(start = start, end = start.plus(duration ?: 1, ChronoUnit.HOURS)))
             calendarService.putEventWizard(modifiedWizard)
 
             // Handle special messaging if event is scheduled for the past
@@ -299,7 +303,7 @@ class EventCommand(
             val shouldChangeDuration = keepDuration && originalDuration != null
 
             if (existingWizard.entity.end!!.isAfter(start) || shouldChangeDuration) {
-                val modifiedEnd = if (shouldChangeDuration) start.plus(originalDuration) else existingWizard.entity.end
+                val modifiedEnd = if (duration != null) start.plus(duration, ChronoUnit.HOURS) else if (shouldChangeDuration) start.plus(originalDuration) else existingWizard.entity.end
                 val modifiedWizard = existingWizard.copy(entity = existingWizard.entity.copy(start = start, end = modifiedEnd))
                 calendarService.putEventWizard(modifiedWizard)
 
