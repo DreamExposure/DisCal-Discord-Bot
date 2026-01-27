@@ -35,6 +35,7 @@ class EventCommand(
     override fun shouldDefer(event: ChatInputInteractionEvent): Boolean {
         // check if this is the recur command, if so, check if modal will get sent
         return when (event.options[0].name) {
+            "create" -> false
             "recur" -> {
                 val shouldRecur = event.options[0].getOption("recur")
                     .flatMap(ApplicationCommandInteractionOption::getValue)
@@ -76,24 +77,6 @@ class EventCommand(
     }
 
     private suspend fun create(event: ChatInputInteractionEvent, settings: GuildSettings) {
-        val name = event.options[0].getOption("name")
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asString)
-            .orElse("")
-        val description = event.options[0].getOption("description")
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asString)
-            .orElse("")
-        val location = event.options[0].getOption("location")
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asString)
-            .orElse("")
-        val calendarNumber = event.options[0].getOption("calendar")
-            .flatMap(ApplicationCommandInteractionOption::getValue)
-            .map(ApplicationCommandInteractionOptionValue::asLong)
-            .map(Long::toInt)
-            .orElse(1)
-
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
         if (!hasControlRole) {
@@ -114,42 +97,12 @@ class EventCommand(
             return
         }
 
-        // Make sure calendar exists
-        val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
-        if (calendar == null) {
-            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
-                .withEphemeral(ephemeral)
-                .awaitSingle()
-            return
-        }
-
-        val newWizard = EventWizardState(
-            guildId = settings.guildId,
-            userId = event.interaction.user.id,
-            editing = false,
-            entity = Event.PartialEvent(
-                id = null,
-                guildId = settings.guildId,
-                calendarNumber = calendarNumber,
-                name = name,
-                description = description,
-                location = location,
-                color = EventColor.NONE,
-                start = null,
-                end = null,
-                recur = false,
-                recurrence = null,
-                image = null,
-                timezone = calendar.timezone,
-            )
-        )
-        calendarService.putEventWizard(newWizard)
-
-        event.createFollowup(getMessage("create.success", settings))
-            .withEphemeral(ephemeral)
-            .withEmbeds(embedService.eventWizardEmbed(newWizard, settings))
-            .withComponents(*componentService.getWizardComponents(newWizard, settings))
-            .awaitSingle()
+        // Pop modal
+        event.presentModal()
+            .withCustomId("event-wizard.create-event")
+            .withTitle(getCommonMsg("modal.event.create.title", settings.locale))
+            .withComponents(*componentService.getEventCreateModalComponents(settings, calendarService.getAllCalendars(settings.guildId)))
+            .awaitSingleOrNull()
     }
 
     private suspend fun name(event: ChatInputInteractionEvent, settings: GuildSettings) {

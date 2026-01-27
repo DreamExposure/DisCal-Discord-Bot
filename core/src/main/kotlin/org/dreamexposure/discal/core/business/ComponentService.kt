@@ -3,6 +3,8 @@ package org.dreamexposure.discal.core.business
 import discord4j.common.util.Snowflake
 import discord4j.core.`object`.component.*
 import discord4j.core.`object`.emoji.Emoji
+import org.dreamexposure.discal.core.extensions.autocompleteSafe
+import org.dreamexposure.discal.core.extensions.toMarkdown
 import org.dreamexposure.discal.core.`object`.new.*
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
@@ -67,6 +69,37 @@ class ComponentService {
         )
 
         return arrayOf(ActionRow.of(confirmButton, cancelButton))
+    }
+
+    fun getEventCreateModalComponents(settings: GuildSettings, calendars: List<Calendar>): Array<LayoutComponent> {
+        val nameInput = TextInput.small("event.create.name")
+            .placeholder(getCommonMsg("modal.event.create.name.placeholder", settings.locale))
+            .required(false)
+
+        val descriptionInput = TextInput.paragraph("event.create.description")
+            .placeholder(getCommonMsg("modal.event.create.description.placeholder", settings.locale))
+            .required(false)
+
+        val locationInput = TextInput.small("event.create.location")
+            .placeholder(getCommonMsg("modal.event.create.location.placeholder", settings.locale))
+            .required(false)
+
+        // Generate calendar options
+        val calendarOptions = calendars.subList(0, 25.coerceAtMost(calendars.size)).map {
+            SelectMenu.Option.of("[${it.metadata.number}] ${it.name.toMarkdown().autocompleteSafe(6)}", it.metadata.number.toString())
+                .withDefault(it.metadata.number == 1)
+        }
+        val calendarSelect = SelectMenu.of("event.create.calendar", calendarOptions)
+            .withPlaceholder(getCommonMsg("modal.event.create.calendar.placeholder", settings.locale))
+            .required(true)
+
+
+        return arrayOf(
+            Label.of(getCommonMsg("modal.event.create.name.label", settings.locale), nameInput),
+            Label.of(getCommonMsg("modal.event.create.description.label", settings.locale), descriptionInput),
+            Label.of(getCommonMsg("modal.event.create.location.label", settings.locale), locationInput),
+            Label.of(getCommonMsg("modal.event.create.calendar.label", settings.locale), calendarSelect),
+        )
     }
 
     fun getEventRecurrenceWeeklyModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
