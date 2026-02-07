@@ -180,7 +180,8 @@ class StaticMessageService(
 
         val updated = old.copy(
             lastUpdate = Instant.now(),
-            scheduledUpdate = if (old.scheduledUpdate.isBefore(Instant.now())) old.scheduledUpdate.plus(1, ChronoUnit.DAYS) else old.scheduledUpdate
+            scheduledUpdate = if (old.scheduledUpdate.isBefore(Instant.now())) old.scheduledUpdate.plus(1, ChronoUnit.DAYS) else old.scheduledUpdate,
+            enabled = true,
         )
         staticMessageRepository.updateByGuildIdAndMessageId(
             guildId = updated.guildId.asLong(),
@@ -259,7 +260,8 @@ class StaticMessageService(
 
             val updated = old.copy(
                 lastUpdate = Instant.now(),
-                scheduledUpdate = if (old.scheduledUpdate.isBefore(Instant.now())) old.scheduledUpdate.plus(1, ChronoUnit.DAYS) else old.scheduledUpdate
+                scheduledUpdate = if (old.scheduledUpdate.isBefore(Instant.now())) old.scheduledUpdate.plus(1, ChronoUnit.DAYS) else old.scheduledUpdate,
+                enabled = true,
             )
             staticMessageRepository.updateByGuildIdAndMessageId(
                 guildId = updated.guildId.asLong(),
