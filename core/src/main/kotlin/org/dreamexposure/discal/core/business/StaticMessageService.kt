@@ -112,7 +112,7 @@ class StaticMessageService(
                 guildId = guildId.asLong(),
                 messageId = message.id().asLong(),
                 channelId = channelId.asLong(),
-                type = StaticMessage.Type.CALENDAR_OVERVIEW.value,
+                type = type.value,
                 lastUpdate = Instant.now(),
                 scheduledUpdate = nextUpdate,
                 enabled = true,
