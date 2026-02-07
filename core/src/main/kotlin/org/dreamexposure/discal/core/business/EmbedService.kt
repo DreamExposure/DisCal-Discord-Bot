@@ -208,6 +208,96 @@ class EmbedService(
             .build()
     }
 
+    suspend fun calendarWeekOverviewEmbed(calendar: Calendar, events: List<Event>, showUpdate: Boolean): EmbedCreateSpec {
+        val settings = settingsService.getSettings(calendar.metadata.guildId)
+        val builder = defaultEmbedBuilder(settings)
+
+        // This is used to truncate how many events are displayed to prevent going over the 6000 character count limit
+        var calculatedEmbedCharacterLength = 0
+
+        // Get events sorted and grouped
+        val groupedEvents = events.groupByDate(filterEmptyDates = false) // We want to display the days of the week with no events
+
+        //Handle optional fields
+        if (calendar.name.isNotBlank()) {
+            builder.title(calendar.name.toMarkdown().embedTitleSafe())
+            calculatedEmbedCharacterLength += calendar.name.toMarkdown().embedTitleSafe().length
+        }
+        if (calendar.description.isNotBlank()) {
+            builder.description(calendar.description.toMarkdown().embedDescriptionSafe())
+            calculatedEmbedCharacterLength += calendar.description.toMarkdown().embedDescriptionSafe().length
+        }
+
+        // Show events
+        groupedEvents.forEach { date ->
+            val title = date.key.toInstant().humanReadableDate(calendar.timezone, settings.interfaceStyle.timeFormat, longDay = true)
+
+            // sort events
+            val sortedEvents = date.value.sortedBy { it.start }
+
+            val content = StringBuilder()
+
+            sortedEvents.forEach {
+                // Start event
+                content.append("```\n")
+
+                // determine time length
+                val timeDisplayLen = ("${it.start.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} -" +
+                    " ${it.end.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} ").length
+
+                // Displaying time
+                if (it.isAllDay()) {
+                    content.append(getCommonMsg("generic.time.allDay", settings.locale).padCenter(timeDisplayLen))
+                        .append("| ")
+                } else {
+                    // Add start text
+                    var str = if (it.start.isBefore(date.key.toInstant())) {
+                        "${getCommonMsg("generic.time.continued", settings.locale)} - "
+                    } else {
+                        "${it.start.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} - "
+                    }
+                    // Add end text
+                    str += if (it.end.isAfter(date.key.toInstant().plus(1, ChronoUnit.DAYS))) {
+                        getCommonMsg("generic.time.continued", settings.locale)
+                    } else {
+                        "${it.end.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} "
+                    }
+                    content.append(str.padCenter(timeDisplayLen))
+                        .append("| ")
+                }
+                // Display name or ID if not set
+                if (it.name.isNotBlank()) content.append(it.name)
+                else content.append(getEmbedMessage("calendar", "link.field.id", settings.locale)).append(" ${it.id}")
+                content.append("\n")
+                if (it.location.isNotBlank()) content.append("    Location: ")
+                    .append(it.location.embedFieldSafe())
+                    .append("\n")
+
+                // Finish event
+                content.append("```\n")
+            }
+            calculatedEmbedCharacterLength += title.length + content.toString().embedFieldSafe().length
+
+            // max embed length is 6000 characters, we are going to go a bit under that in just for extra safety
+            if (content.isNotBlank() && calculatedEmbedCharacterLength <= 5750)
+                builder.addField(title, content.toString().embedFieldSafe(), false)
+        }
+
+        // set footer
+        if (showUpdate) {
+            val lastUpdate = Instant.now().asDiscordTimestamp(DiscordTimestampFormat.RELATIVE_TIME)
+            builder.footer(getEmbedMessage("calendar", "link.footer.update", settings.locale, lastUpdate), null)
+                .timestamp(Instant.now())
+        } else builder.footer(getEmbedMessage("calendar", "link.footer.default", settings.locale), null)
+
+        // finish and return
+        return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings.locale), calendar.timezone.id, true)
+            .addField(getEmbedMessage("calendar", "link.field.number", settings.locale), "${calendar.metadata.number}", true)
+            .url(calendar.link)
+            .color(GlobalVal.discalColor)
+            .build()
+    }
+
     suspend fun linkCalendarEmbed(calendar: Calendar, events: List<Event>?): EmbedCreateSpec {
         return if (events != null) calendarOverviewEmbed(calendar, events, showUpdate = false)
         else linkCalendarEmbed(calendar)

@@ -9,6 +9,7 @@ import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.business.StaticMessageService
 import org.dreamexposure.discal.core.`object`.new.GuildSettings
+import org.dreamexposure.discal.core.`object`.new.StaticMessage
 import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 
@@ -31,6 +32,12 @@ class DisplayCalendarCommand(
     }
 
     private suspend fun new(event: ChatInputInteractionEvent, settings: GuildSettings) {
+        val type = event.options[0].getOption("type")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asLong)
+            .map(Long::toInt)
+            .map(StaticMessage.Type::getByValue)
+            .get()
         val hour = event.options[0].getOption("time")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -60,7 +67,7 @@ class DisplayCalendarCommand(
         }
 
         // Create and respond
-        staticMessageService.createStaticMessage(settings.guildId, event.interaction.channelId, calendarNumber, hour)
+        staticMessageService.createStaticMessage(settings.guildId, event.interaction.channelId, calendarNumber, type, hour)
 
         event.createFollowup(getCommonMsg("success.generic", settings.locale))
             .withEphemeral(ephemeral)

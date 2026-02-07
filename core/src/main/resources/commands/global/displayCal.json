@@ -8,6 +8,22 @@
       "description": "Create a new static calendar overview message",
       "options": [
         {
+          "name": "type",
+          "type": 4,
+          "description": "The type of display to create",
+          "required": true,
+          "choices": [
+            {
+              "name": "Calendar Overview",
+              "value": 1
+            },
+            {
+              "name": "Weekly Overview",
+              "value": 2
+            }
+          ]
+        },
+        {
           "name": "time",
           "type": 4,
           "description": "The hour of the day to update the message (in the calendar's timezone). Default midnight.",

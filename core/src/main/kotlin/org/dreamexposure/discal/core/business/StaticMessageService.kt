@@ -73,25 +73,31 @@ class StaticMessageService(
             .awaitSingle()
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    ////// TODO: Need to be able to break some of this out for when I support more types //////
-    ///////////////////////////////////////////////////////////////////////////////////////////
     suspend fun createStaticMessage(
         guildId: Snowflake,
         channelId: Snowflake,
         calendarNumber: Int,
+        type: StaticMessage.Type,
         updateHour: Long
     ): StaticMessage {
-
         // Gather everything we need
         val calendar = calendarService.getCalendar(guildId, calendarNumber) ?: throw NotFoundException("Calendar not found")
-        val events = calendarService.getUpcomingEvents(guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
         val channel = discordClient.getChannelById(channelId)
-        val embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
         val nextUpdate = ZonedDateTime.now(calendar.timezone)
             .truncatedTo(ChronoUnit.DAYS)
             .plusHours(updateHour + 24)
             .toInstant()
+
+        val embed = when (type) {
+            StaticMessage.Type.CALENDAR_OVERVIEW -> {
+                val events = calendarService.getUpcomingEvents(guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
+                embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
+            }
+            StaticMessage.Type.CALENDAR_WEEKLY -> {
+                val events = calendarService.getEventsInNextNDays(guildId, calendarNumber, 7)
+                embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
+            }
+        }
 
 
         // Finally create the message
@@ -166,10 +172,18 @@ class StaticMessageService(
          }
 
         val calendar = calendarService.getCalendar(guildId, old.calendarNumber) ?: throw NotFoundException("Calendar not found")
-        val events = calendarService.getUpcomingEvents(guildId, old.calendarNumber, OVERVIEW_EVENT_COUNT, MAX_CUTOFF_DAYS)
 
         // Finally update the message
-        val embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
+        val embed = when (old.type) {
+            StaticMessage.Type.CALENDAR_OVERVIEW -> {
+                val events = calendarService.getUpcomingEvents(guildId, old.calendarNumber, OVERVIEW_EVENT_COUNT, MAX_CUTOFF_DAYS)
+                embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
+            }
+            StaticMessage.Type.CALENDAR_WEEKLY -> {
+                val events = calendarService.getEventsInNextNDays(guildId, old.calendarNumber, 7)
+                embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
+            }
+        }
 
         discordClient.getMessageById(old.channelId, old.messageId).edit(
             MessageEditRequest.builder()
@@ -207,8 +221,6 @@ class StaticMessageService(
 
         val oldVersions = getStaticMessagesForCalendar(guildId, calendarNumber).filter { it.enabled }
         val calendar = calendarService.getCalendar(guildId, calendarNumber) ?: throw NotFoundException("Calendar not found")
-        val events = calendarService.getUpcomingEvents(guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
-        val embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
 
         oldVersions.forEach { old ->
             val existingData = discordClient.getMessageById(old.channelId, old.messageId)
@@ -249,6 +261,17 @@ class StaticMessageService(
 
                 staticMessageCache.put(guildId, key = updated.messageId, updated)
                 return@forEach
+            }
+
+            val embed = when (old.type) {
+                StaticMessage.Type.CALENDAR_OVERVIEW -> {
+                    val events = calendarService.getUpcomingEvents(guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
+                    embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
+                }
+                StaticMessage.Type.CALENDAR_WEEKLY -> {
+                    val events = calendarService.getEventsInNextNDays(guildId, calendarNumber, 7)
+                    embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
+                }
             }
 
             discordClient.getMessageById(old.channelId, old.messageId).edit(
