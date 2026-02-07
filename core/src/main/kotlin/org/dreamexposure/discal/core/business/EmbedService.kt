@@ -195,8 +195,7 @@ class EmbedService(
 
         // set footer
         if (showUpdate) {
-            val lastUpdate = Instant.now().asDiscordTimestamp(DiscordTimestampFormat.RELATIVE_TIME)
-            builder.footer(getEmbedMessage("calendar", "link.footer.update", settings.locale, lastUpdate), null)
+            builder.footer(getEmbedMessage("calendar", "link.footer.update", settings.locale), null)
                 .timestamp(Instant.now())
         } else builder.footer(getEmbedMessage("calendar", "link.footer.default", settings.locale), null)
 
@@ -378,6 +377,54 @@ class EmbedService(
     //////////////////////////
     ////// Event Embeds //////
     //////////////////////////
+    suspend fun nextUpcomingEventEmbed(event: Event?, guildId: Snowflake, showUpdate: Boolean): EmbedCreateSpec {
+        val settings = settingsService.getSettings(guildId)
+        val builder = defaultEmbedBuilder(settings)
+            .color(event?.color?.asColor() ?: GlobalVal.discalColor)
+            .title(getEmbedMessage("event", "upcoming.title", settings.locale))
+
+        // Add footer info
+        if (showUpdate) {
+            builder.footer(getEmbedMessage("event", "upcoming.footer", settings.locale), null)
+                .timestamp(Instant.now())
+        }
+
+        // If event is null, turn this into a stub
+        if (event == null) {
+            builder.description(getEmbedMessage("event", "upcoming.description.no-event", settings.locale))
+
+            return builder.build()
+        }
+
+        // Handle adding name and description + info about this event
+        val descriptionBuilder = StringBuilder()
+        if (event.name.isNotBlank()) descriptionBuilder.append(event.name.toMarkdown()).append("\n\n")
+        if (event.description.isNotBlank()) descriptionBuilder.append(event.description.toMarkdown())
+
+        if (descriptionBuilder.isNotBlank()) builder.description(descriptionBuilder.toString().embedDescriptionSafe())
+
+
+        builder.addField(
+            getEmbedMessage("event", "upcoming.field.start", settings.locale),
+            event.start.asDiscordTimestamp(LONG_DATETIME),
+            true)
+        builder.addField(
+            getEmbedMessage("event", "upcoming.field.end", settings.locale),
+            event.end.asDiscordTimestamp(LONG_DATETIME),
+            true
+        )
+
+        if (event.location.isNotBlank()) builder.addField(
+            getEmbedMessage("event", "upcoming.field.location", settings.locale),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (event.image.isNotEmpty()) builder.image(event.image)
+
+        return builder.build()
+    }
+
     suspend fun fullEventEmbed(event: Event, settings: GuildSettings): EmbedCreateSpec {
         val builder = defaultEmbedBuilder(settings)
             .footer(getEmbedMessage("event", "full.footer", settings.locale, event.id), null)

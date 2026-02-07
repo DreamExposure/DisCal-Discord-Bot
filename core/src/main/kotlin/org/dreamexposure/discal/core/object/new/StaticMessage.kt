@@ -36,7 +36,9 @@ data class StaticMessage(
 
     enum class Type(val value: Int) {
         CALENDAR_OVERVIEW(1),
-        CALENDAR_WEEKLY(2);
+        CALENDAR_WEEKLY(2),
+        NEXT_EVENT(3),
+        ;
 
         companion object {
             fun getByValue(value: Int) = entries.first { it.value == value }

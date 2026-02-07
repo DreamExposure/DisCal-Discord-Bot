@@ -20,6 +20,10 @@
             {
               "name": "Weekly Overview",
               "value": 2
+            },
+            {
+              "name": "Next Upcoming Event",
+              "value": 3
             }
           ]
         },

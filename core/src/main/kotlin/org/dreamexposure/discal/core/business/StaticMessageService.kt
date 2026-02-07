@@ -97,6 +97,10 @@ class StaticMessageService(
                 val events = calendarService.getEventsInNextNDays(guildId, calendarNumber, 6)
                 embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
             }
+            StaticMessage.Type.NEXT_EVENT -> {
+                val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
+                embedService.nextUpcomingEventEmbed(event, guildId, showUpdate = true)
+            }
         }
 
 
@@ -182,6 +186,10 @@ class StaticMessageService(
             StaticMessage.Type.CALENDAR_WEEKLY -> {
                 val events = calendarService.getEventsInNextNDays(guildId, old.calendarNumber, 6)
                 embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
+            }
+            StaticMessage.Type.NEXT_EVENT -> {
+                val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 1).firstOrNull()
+                embedService.nextUpcomingEventEmbed(event, guildId, showUpdate = true)
             }
         }
 
@@ -271,6 +279,10 @@ class StaticMessageService(
                 StaticMessage.Type.CALENDAR_WEEKLY -> {
                     val events = calendarService.getEventsInNextNDays(guildId, calendarNumber, 6)
                     embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
+                }
+                StaticMessage.Type.NEXT_EVENT -> {
+                    val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
+                    embedService.nextUpcomingEventEmbed(event, guildId, showUpdate = true)
                 }
             }
 
