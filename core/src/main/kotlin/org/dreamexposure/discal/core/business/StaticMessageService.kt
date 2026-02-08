@@ -122,7 +122,7 @@ class StaticMessageService(
         val message = channel.createMessage(
             MessageCreateRequest.builder()
                 .addEmbed(embed.asRequest())
-                .components(componentService.getStaticMessageComponents().map { it.data })
+                .components((additionalComponents + componentService.getStaticMessageComponents()).map { it.data })
                 .build()
         ).awaitSingle()
         val saved = staticMessageRepository.save(
@@ -221,7 +221,7 @@ class StaticMessageService(
         discordClient.getMessageById(old.channelId, old.messageId).edit(
             MessageEditRequest.builder()
                 .addEmbed(embed.asRequest())
-                .componentsOrNull(componentService.getStaticMessageComponents().map { it.data })
+                .componentsOrNull((additionalComponents + componentService.getStaticMessageComponents()).map { it.data })
                 .build()
         ).awaitSingleOrNull()
 
@@ -325,7 +325,7 @@ class StaticMessageService(
             discordClient.getMessageById(old.channelId, old.messageId).edit(
                 MessageEditRequest.builder()
                     .addEmbed(embed.asRequest())
-                    .componentsOrNull(componentService.getStaticMessageComponents().map { it.data })
+                    .componentsOrNull((additionalComponents + componentService.getStaticMessageComponents()).map { it.data })
                     .build()
             ).awaitSingleOrNull()
 
