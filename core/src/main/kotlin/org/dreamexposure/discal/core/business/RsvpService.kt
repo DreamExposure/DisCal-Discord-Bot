@@ -23,11 +23,12 @@ class RsvpService(
     private val rsvpCache: RsvpCache,
     private val embedService: EmbedService,
     private val calendarService: CalendarService,
-    private val staticMessageService: StaticMessageService,
     private val beanFactory: BeanFactory,
 ) {
     private val discordClient: DiscordClient
         get() = beanFactory.getBean(DiscordClient::class.java)
+    private val staticMessageService: StaticMessageService
+        get() = beanFactory.getBean(StaticMessageService::class.java)
 
     suspend fun getRsvp(guildId: Snowflake, eventId: String): Rsvp {
         var rsvp = rsvpCache.get(guildId, eventId)
