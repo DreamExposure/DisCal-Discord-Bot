@@ -23,6 +23,7 @@ class RsvpService(
     private val rsvpCache: RsvpCache,
     private val embedService: EmbedService,
     private val calendarService: CalendarService,
+    private val staticMessageService: StaticMessageService,
     private val beanFactory: BeanFactory,
 ) {
     private val discordClient: DiscordClient
@@ -64,6 +65,9 @@ class RsvpService(
         ).map(::Rsvp).awaitSingle()
 
         rsvpCache.put(rsvp.guildId, rsvp.eventId, saved)
+
+        staticMessageService.updateStaticMessages(rsvp.guildId, rsvp.calendarNumber)
+
         return saved
     }
 
@@ -141,6 +145,7 @@ class RsvpService(
 
 
         // Do Discord actions
+        staticMessageService.updateStaticMessages(new.guildId, new.calendarNumber)
 
         // Do role removal
         removeOldRoleFrom.forEach { userId ->
