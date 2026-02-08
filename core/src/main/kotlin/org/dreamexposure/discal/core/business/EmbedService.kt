@@ -377,8 +377,7 @@ class EmbedService(
     //////////////////////////
     ////// Event Embeds //////
     //////////////////////////
-    suspend fun nextUpcomingEventEmbed(event: Event?, guildId: Snowflake, showUpdate: Boolean): EmbedCreateSpec {
-        val settings = settingsService.getSettings(guildId)
+    suspend fun nextUpcomingEventEmbed(event: Event?, rsvp: Rsvp?, settings: GuildSettings, includeRsvp: Boolean, showUpdate: Boolean): EmbedCreateSpec {
         val builder = defaultEmbedBuilder(settings)
             .color(event?.color?.asColor() ?: GlobalVal.discalColor)
             .title(getEmbedMessage("event", "upcoming.title", settings.locale))
@@ -422,8 +421,51 @@ class EmbedService(
 
         if (event.image.isNotEmpty()) builder.image(event.image)
 
+        // Add RSVP info
+        if (includeRsvp && rsvp != null) {
+            val waitlistDisplayLimit = Config.EMBED_RSVP_WAITLIST_DISPLAY_LENGTH.getInt()
+
+            val goingOnTime = rsvp.goingOnTime.map {
+                discordClient.getUserById(it).data.awaitSingle()
+            }.joinToString(", ") {
+                it.globalName().orElse(it.username())
+            }.ifEmpty { "N/a" }
+
+            val late = rsvp.goingLate.map {
+                discordClient.getUserById(it).data.awaitSingle()
+            }.joinToString(", ") {
+                it.globalName().orElse(it.username())
+            }.ifEmpty { "N/a" }
+
+            val waitList = if (rsvp.waitlist.size > waitlistDisplayLimit) {
+                rsvp.waitlist.map {
+                    discordClient.getUserById(it).data.awaitSingle()
+                }.joinToString(", ") {
+                    it.globalName().orElse(it.username())
+                }.plus("+${rsvp.waitlist.size - waitlistDisplayLimit} more")
+            } else {
+                rsvp.waitlist.map {
+                    discordClient.getUserById(it).data.awaitSingle()
+                }.joinToString(", ") {
+                    it.globalName().orElse(it.username())
+                }
+            }
+
+            val limitValue = if (rsvp.limit < 0) {
+                getEmbedMessage("event", "upcoming.field.limit.value", settings.locale, "${rsvp.getCurrentCount()}")
+            } else "${rsvp.getCurrentCount()}/${rsvp.limit}"
+
+            builder.addField(getEmbedMessage("event", "upcoming.field.onTime", settings.locale), goingOnTime, false)
+                .addField(getEmbedMessage("event", "upcoming.field.late", settings.locale), late, false)
+
+            if (waitList.isNotEmpty()) builder.addField(getEmbedMessage("event", "upcoming.field.waitList", settings.locale), waitList, false)
+            if (rsvp.limit > 0) builder.addField(getEmbedMessage("event", "upcoming.field.limit", settings.locale), limitValue, true)
+        }
+
         return builder.build()
     }
+
+
 
     suspend fun fullEventEmbed(event: Event, settings: GuildSettings): EmbedCreateSpec {
         val builder = defaultEmbedBuilder(settings)

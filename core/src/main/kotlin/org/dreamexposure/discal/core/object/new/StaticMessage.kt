@@ -38,6 +38,7 @@ data class StaticMessage(
         CALENDAR_OVERVIEW(1),
         CALENDAR_WEEKLY(2),
         NEXT_EVENT(3),
+        NEXT_EVENT_WITH_RSVP(4),
         ;
 
         companion object {

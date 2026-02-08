@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
+import discord4j.core.`object`.component.LayoutComponent
 import discord4j.discordjson.json.MessageCreateRequest
 import discord4j.discordjson.json.MessageEditRequest
 import discord4j.rest.http.client.ClientException
@@ -24,9 +25,11 @@ import java.time.temporal.ChronoUnit
 
 @Component
 class StaticMessageService(
+    private val settingsService: GuildSettingsService,
     private val staticMessageRepository: StaticMessageRepository,
     private val staticMessageCache: StaticMessageCache,
     private val calendarService: CalendarService,
+    private val rsvpService: RsvpService,
     private val embedService: EmbedService,
     private val componentService: ComponentService,
     private val metricService: MetricService,
@@ -81,12 +84,14 @@ class StaticMessageService(
         updateHour: Long
     ): StaticMessage {
         // Gather everything we need
+        val settings = settingsService.getSettings(guildId)
         val calendar = calendarService.getCalendar(guildId, calendarNumber) ?: throw NotFoundException("Calendar not found")
         val channel = discordClient.getChannelById(channelId)
         val nextUpdate = ZonedDateTime.now(calendar.timezone)
             .truncatedTo(ChronoUnit.DAYS)
             .plusHours(updateHour + 24)
             .toInstant()
+        val additionalComponents = mutableListOf<LayoutComponent>()
 
         val embed = when (type) {
             StaticMessage.Type.CALENDAR_OVERVIEW -> {
@@ -99,7 +104,16 @@ class StaticMessageService(
             }
             StaticMessage.Type.NEXT_EVENT -> {
                 val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
-                embedService.nextUpcomingEventEmbed(event, guildId, showUpdate = true)
+                if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
+
+                embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
+            }
+            StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
+                val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
+                val rsvp = if (event == null) null else rsvpService.getRsvp(guildId, event.id)
+                if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
+
+                embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
             }
         }
 
@@ -176,8 +190,10 @@ class StaticMessageService(
          }
 
         val calendar = calendarService.getCalendar(guildId, old.calendarNumber) ?: throw NotFoundException("Calendar not found")
+        val settings = settingsService.getSettings(guildId)
 
         // Finally update the message
+        val additionalComponents = mutableListOf<LayoutComponent>()
         val embed = when (old.type) {
             StaticMessage.Type.CALENDAR_OVERVIEW -> {
                 val events = calendarService.getUpcomingEvents(guildId, old.calendarNumber, OVERVIEW_EVENT_COUNT, MAX_CUTOFF_DAYS)
@@ -189,7 +205,16 @@ class StaticMessageService(
             }
             StaticMessage.Type.NEXT_EVENT -> {
                 val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 1).firstOrNull()
-                embedService.nextUpcomingEventEmbed(event, guildId, showUpdate = true)
+                if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
+
+                embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
+            }
+            StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
+                val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 1).firstOrNull()
+                val rsvp = if (event == null) null else rsvpService.getRsvp(guildId, event.id)
+                if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
+
+                embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
             }
         }
 
@@ -229,6 +254,7 @@ class StaticMessageService(
 
         val oldVersions = getStaticMessagesForCalendar(guildId, calendarNumber).filter { it.enabled }
         val calendar = calendarService.getCalendar(guildId, calendarNumber) ?: throw NotFoundException("Calendar not found")
+        val settings = settingsService.getSettings(guildId)
 
         oldVersions.forEach { old ->
             val existingData = discordClient.getMessageById(old.channelId, old.messageId)
@@ -271,6 +297,7 @@ class StaticMessageService(
                 return@forEach
             }
 
+            val additionalComponents = mutableListOf<LayoutComponent>()
             val embed = when (old.type) {
                 StaticMessage.Type.CALENDAR_OVERVIEW -> {
                     val events = calendarService.getUpcomingEvents(guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
@@ -282,7 +309,16 @@ class StaticMessageService(
                 }
                 StaticMessage.Type.NEXT_EVENT -> {
                     val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
-                    embedService.nextUpcomingEventEmbed(event, guildId, showUpdate = true)
+                    if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
+
+                    embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
+                }
+                StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
+                    val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
+                    val rsvp = if (event == null) null else rsvpService.getRsvp(guildId, event.id)
+                    if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
+
+                    embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
                 }
             }
 
