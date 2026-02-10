@@ -20,6 +20,7 @@ interface StaticMessageRepository: R2dbcRepository<StaticMessageData, Long> {
             type,
             last_update,
             scheduled_update,
+            forced_update,
             enabled,
             calendar_number
         FROM static_messages
@@ -34,6 +35,7 @@ interface StaticMessageRepository: R2dbcRepository<StaticMessageData, Long> {
             type,
             last_update,
             scheduled_update,
+            forced_update,
             enabled,
             calendar_number
         FROM static_messages
@@ -47,6 +49,7 @@ interface StaticMessageRepository: R2dbcRepository<StaticMessageData, Long> {
         type = :type,
         last_update = :lastUpdate,
         scheduled_update = :scheduledUpdate,
+        forced_update = :forcedUpdate,
         enabled = :enabled,
         calendar_number = :calendarNumber
     WHERE guild_id = :guildId AND message_id = :messageId
@@ -58,6 +61,7 @@ interface StaticMessageRepository: R2dbcRepository<StaticMessageData, Long> {
         type: Int,
         lastUpdate: Instant,
         scheduledUpdate: Instant,
+        forcedUpdate: Instant?,
         enabled: Boolean,
         calendarNumber: Int,
     ): Mono<Int>

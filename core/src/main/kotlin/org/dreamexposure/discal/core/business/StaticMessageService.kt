@@ -92,6 +92,7 @@ class StaticMessageService(
             .plusHours(updateHour + 24)
             .toInstant()
         val additionalComponents = mutableListOf<LayoutComponent>()
+        var forcedUpdate: Instant? = null
 
         val embed = when (type) {
             StaticMessage.Type.CALENDAR_OVERVIEW -> {
@@ -104,14 +105,20 @@ class StaticMessageService(
             }
             StaticMessage.Type.NEXT_EVENT -> {
                 val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
-                if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
+                if (event != null) {
+                    additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
+                    forcedUpdate = event.end
+                }
 
                 embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
             }
             StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
                 val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
                 val rsvp = if (event == null) null else rsvpService.getRsvp(guildId, event.id)
-                if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
+                if (event != null) {
+                    additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
+                    forcedUpdate = event.end
+                }
 
                 embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
             }
@@ -133,6 +140,7 @@ class StaticMessageService(
                 type = type.value,
                 lastUpdate = Instant.now(),
                 scheduledUpdate = nextUpdate,
+                forcedUpdate = forcedUpdate,
                 enabled = true,
                 calendarNumber = calendarNumber,
             )
@@ -181,6 +189,7 @@ class StaticMessageService(
                  type = updated.type.value,
                  lastUpdate = updated.lastUpdate,
                  scheduledUpdate = updated.scheduledUpdate,
+                 forcedUpdate = updated.forcedUpdate,
                  enabled = updated.enabled,
                  calendarNumber = updated.calendarNumber,
              ).awaitSingleOrNull()
@@ -193,6 +202,7 @@ class StaticMessageService(
         val settings = settingsService.getSettings(guildId)
 
         // Finally update the message
+        var forcedUpdate: Instant? = null
         val additionalComponents = mutableListOf<LayoutComponent>()
         val embed = when (old.type) {
             StaticMessage.Type.CALENDAR_OVERVIEW -> {
@@ -205,14 +215,20 @@ class StaticMessageService(
             }
             StaticMessage.Type.NEXT_EVENT -> {
                 val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 1).firstOrNull()
-                if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
+                if (event != null) {
+                    additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
+                    forcedUpdate = event.end
+                }
 
                 embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
             }
             StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
                 val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 1).firstOrNull()
                 val rsvp = if (event == null) null else rsvpService.getRsvp(guildId, event.id)
-                if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
+                if (event != null) {
+                    additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
+                    forcedUpdate = event.end
+                }
 
                 embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
             }
@@ -228,6 +244,7 @@ class StaticMessageService(
         val updated = old.copy(
             lastUpdate = Instant.now(),
             scheduledUpdate = if (old.scheduledUpdate.isBefore(Instant.now())) old.scheduledUpdate.plus(1, ChronoUnit.DAYS) else old.scheduledUpdate,
+            forcedUpdate = forcedUpdate,
             enabled = true,
         )
         staticMessageRepository.updateByGuildIdAndMessageId(
@@ -237,6 +254,7 @@ class StaticMessageService(
             type = updated.type.value,
             lastUpdate = updated.lastUpdate,
             scheduledUpdate = updated.scheduledUpdate,
+            forcedUpdate = updated.forcedUpdate,
             enabled = updated.enabled,
             calendarNumber = updated.calendarNumber,
         ).awaitSingleOrNull()
@@ -248,11 +266,13 @@ class StaticMessageService(
         metricService.incrementStaticMessagesUpdated(updated.type)
     }
 
-    suspend fun updateStaticMessages(guildId: Snowflake, calendarNumber: Int) {
+    suspend fun updateStaticMessages(guildId: Snowflake, calendarNumber: Int, eventOnly: Boolean = false) {
         val taskTimer = StopWatch()
         taskTimer.start()
 
-        val oldVersions = getStaticMessagesForCalendar(guildId, calendarNumber).filter { it.enabled }
+        val oldVersions = getStaticMessagesForCalendar(guildId, calendarNumber)
+            .filter { it.enabled }
+            .filter { if (eventOnly) it.type.isEventSpecific() else true }
         val calendar = calendarService.getCalendar(guildId, calendarNumber) ?: throw NotFoundException("Calendar not found")
         val settings = settingsService.getSettings(guildId)
 
@@ -289,6 +309,7 @@ class StaticMessageService(
                     type = updated.type.value,
                     lastUpdate = updated.lastUpdate,
                     scheduledUpdate = updated.scheduledUpdate,
+                    forcedUpdate = updated.forcedUpdate,
                     enabled = updated.enabled,
                     calendarNumber = updated.calendarNumber,
                 ).awaitSingleOrNull()
@@ -297,6 +318,7 @@ class StaticMessageService(
                 return@forEach
             }
 
+            var forcedUpdate: Instant? = null
             val additionalComponents = mutableListOf<LayoutComponent>()
             val embed = when (old.type) {
                 StaticMessage.Type.CALENDAR_OVERVIEW -> {
@@ -309,14 +331,20 @@ class StaticMessageService(
                 }
                 StaticMessage.Type.NEXT_EVENT -> {
                     val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
-                    if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
+                    if (event != null) {
+                        additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
+                        forcedUpdate = event.end
+                    }
 
                     embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
                 }
                 StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
                     val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
                     val rsvp = if (event == null) null else rsvpService.getRsvp(guildId, event.id)
-                    if (event != null) additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
+                    if (event != null) {
+                        additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
+                        forcedUpdate = event.end
+                    }
 
                     embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
                 }
@@ -332,6 +360,7 @@ class StaticMessageService(
             val updated = old.copy(
                 lastUpdate = Instant.now(),
                 scheduledUpdate = if (old.scheduledUpdate.isBefore(Instant.now())) old.scheduledUpdate.plus(1, ChronoUnit.DAYS) else old.scheduledUpdate,
+                forcedUpdate = forcedUpdate,
                 enabled = true,
             )
             staticMessageRepository.updateByGuildIdAndMessageId(
@@ -341,6 +370,7 @@ class StaticMessageService(
                 type = updated.type.value,
                 lastUpdate = updated.lastUpdate,
                 scheduledUpdate = updated.scheduledUpdate,
+                forcedUpdate = updated.forcedUpdate,
                 enabled = updated.enabled,
                 calendarNumber = updated.calendarNumber,
             ).awaitSingleOrNull()

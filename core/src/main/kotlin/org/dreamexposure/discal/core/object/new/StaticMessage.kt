@@ -14,6 +14,7 @@ data class StaticMessage(
 
     val lastUpdate: Instant,
     val scheduledUpdate: Instant,
+    val forcedUpdate: Instant?,
     val enabled: Boolean,
 
     val calendarNumber: Int
@@ -27,6 +28,7 @@ data class StaticMessage(
 
         lastUpdate = data.lastUpdate,
         scheduledUpdate = data.scheduledUpdate,
+        forcedUpdate = data.forcedUpdate,
         enabled = data.enabled,
 
         calendarNumber = data.calendarNumber,
@@ -40,6 +42,8 @@ data class StaticMessage(
         NEXT_EVENT(3),
         NEXT_EVENT_WITH_RSVP(4),
         ;
+
+        fun isEventSpecific() = this == NEXT_EVENT || this == NEXT_EVENT_WITH_RSVP
 
         companion object {
             fun getByValue(value: Int) = entries.first { it.value == value }

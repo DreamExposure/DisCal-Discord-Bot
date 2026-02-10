@@ -14,6 +14,7 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.Rsvp
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.beans.factory.BeanFactory
+import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
 import reactor.core.publisher.Mono
 
@@ -26,9 +27,9 @@ class RsvpService(
     private val beanFactory: BeanFactory,
 ) {
     private val discordClient: DiscordClient
-        get() = beanFactory.getBean(DiscordClient::class.java)
+        get() = beanFactory.getBean<DiscordClient>()
     private val staticMessageService: StaticMessageService
-        get() = beanFactory.getBean(StaticMessageService::class.java)
+        get() = beanFactory.getBean<StaticMessageService>()
 
     suspend fun getRsvp(guildId: Snowflake, eventId: String): Rsvp {
         var rsvp = rsvpCache.get(guildId, eventId)
@@ -67,7 +68,7 @@ class RsvpService(
 
         rsvpCache.put(rsvp.guildId, rsvp.eventId, saved)
 
-        staticMessageService.updateStaticMessages(rsvp.guildId, rsvp.calendarNumber)
+        staticMessageService.updateStaticMessages(rsvp.guildId, rsvp.calendarNumber, eventOnly = true)
 
         return saved
     }
@@ -146,7 +147,7 @@ class RsvpService(
 
 
         // Do Discord actions
-        staticMessageService.updateStaticMessages(new.guildId, new.calendarNumber)
+        staticMessageService.updateStaticMessages(new.guildId, new.calendarNumber, eventOnly = true)
 
         // Do role removal
         removeOldRoleFrom.forEach { userId ->

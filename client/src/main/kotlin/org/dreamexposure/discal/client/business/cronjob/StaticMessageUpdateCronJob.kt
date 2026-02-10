@@ -40,7 +40,10 @@ class StaticMessageUpdateCronJob(
                 //We have no interest in updating the message so close to its last update
                 .filter { Duration.between(Instant.now(), it.lastUpdate).abs().toMinutes() >= 30 }
                 // Only update messages in range
-                .filter { Duration.between(Instant.now(), it.scheduledUpdate).toMinutes() <= 60 }
+                .filter {
+                    Duration.between(Instant.now(), it.scheduledUpdate).toMinutes() <= 60
+                        || (it.forcedUpdate != null && Duration.between(Instant.now(), it.forcedUpdate).toMinutes() <= 60)
+                }
 
             LOGGER.debug("StaticMessageUpdateCronJob | Found ${messages.size} messages to update for shard ${getShardIndex()}")
 
