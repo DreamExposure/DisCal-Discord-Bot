@@ -280,6 +280,12 @@ class EmbedService(
                 // Finish event
                 content.append("```\n")
             }
+            if (content.isBlank()) {
+                content.append("```\n")
+                    .append("[ No Upcoming Scheduled Events ]")
+                    .append("\n```")
+            }
+
             calculatedEmbedCharacterLength += title.length + content.toString().embedFieldSafe().length
 
             // max embed length is 6000 characters, we are going to go a bit under that in just for extra safety
