@@ -139,11 +139,16 @@ class EmbedService(
         }
 
         // Show events
-        truncatedEvents.forEach { date ->
-            val title = date.key.toInstant().humanReadableDate(calendar.timezone, settings.interfaceStyle.timeFormat, longDay = true)
+        val today = Instant.now().atZone(calendar.timezone).truncatedTo(ChronoUnit.DAYS)
+
+        for (i in 0..6) {
+            val dateToDisplay = today.plusDays(i.toLong())
+            val events = truncatedEvents[dateToDisplay].orEmpty()
+
+            val title = dateToDisplay.toInstant().humanReadableDate(calendar.timezone, settings.interfaceStyle.timeFormat, longDay = true)
 
             // sort events
-            val sortedEvents = date.value.sortedBy { it.start }
+            val sortedEvents = events.sortedBy { it.start }
 
             val content = StringBuilder()
 
@@ -161,13 +166,13 @@ class EmbedService(
                         .append("| ")
                 } else {
                     // Add start text
-                    var str = if (it.start.isBefore(date.key.toInstant())) {
+                    var str = if (it.start.isBefore(dateToDisplay.toInstant())) {
                         "${getCommonMsg("generic.time.continued", settings.locale)} - "
                     } else {
                         "${it.start.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} - "
                     }
                     // Add end text
-                    str += if (it.end.isAfter(date.key.toInstant().plus(1, ChronoUnit.DAYS))) {
+                    str += if (it.end.isAfter(dateToDisplay.toInstant().plus(1, ChronoUnit.DAYS))) {
                         getCommonMsg("generic.time.continued", settings.locale)
                     } else {
                         "${it.end.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} "

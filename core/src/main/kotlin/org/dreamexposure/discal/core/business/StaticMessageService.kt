@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.business
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.core.`object`.component.LayoutComponent
+import discord4j.core.spec.EmbedCreateSpec
 import discord4j.discordjson.json.MessageCreateRequest
 import discord4j.discordjson.json.MessageEditRequest
 import discord4j.rest.http.client.ClientException
@@ -91,17 +92,20 @@ class StaticMessageService(
             .truncatedTo(ChronoUnit.DAYS)
             .plusHours(updateHour + 24)
             .toInstant()
+
+        val embed: EmbedCreateSpec
         val additionalComponents = mutableListOf<LayoutComponent>()
         var forcedUpdate: Instant? = null
 
-        val embed = when (type) {
+        // Handle type specific behavior and rendering
+        when (type) {
             StaticMessage.Type.CALENDAR_OVERVIEW -> {
                 val events = calendarService.getUpcomingEvents(guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
-                embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
+                embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
             }
             StaticMessage.Type.CALENDAR_WEEKLY -> {
-                val events = calendarService.getEventsInNextNDays(guildId, calendarNumber, 6)
-                embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
+                val events = calendarService.getEventsInNextNDays(guildId, calendarNumber, 7)
+                embed = embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
             }
             StaticMessage.Type.NEXT_EVENT -> {
                 val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
@@ -110,7 +114,7 @@ class StaticMessageService(
                     forcedUpdate = event.end
                 }
 
-                embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
+                embed = embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
             }
             StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
                 val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
@@ -120,7 +124,7 @@ class StaticMessageService(
                     forcedUpdate = event.end
                 }
 
-                embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
+                embed = embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
             }
         }
 
@@ -204,14 +208,17 @@ class StaticMessageService(
         // Finally update the message
         var forcedUpdate: Instant? = null
         val additionalComponents = mutableListOf<LayoutComponent>()
-        val embed = when (old.type) {
+        val embed: EmbedCreateSpec
+
+        // Handle type specific behavior and rendering
+        when (old.type) {
             StaticMessage.Type.CALENDAR_OVERVIEW -> {
                 val events = calendarService.getUpcomingEvents(guildId, old.calendarNumber, OVERVIEW_EVENT_COUNT, MAX_CUTOFF_DAYS)
-                embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
+                embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
             }
             StaticMessage.Type.CALENDAR_WEEKLY -> {
-                val events = calendarService.getEventsInNextNDays(guildId, old.calendarNumber, 6)
-                embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
+                val events = calendarService.getEventsInNextNDays(guildId, old.calendarNumber, 7)
+                embed = embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
             }
             StaticMessage.Type.NEXT_EVENT -> {
                 val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 1).firstOrNull()
@@ -220,7 +227,7 @@ class StaticMessageService(
                     forcedUpdate = event.end
                 }
 
-                embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
+                embed = embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
             }
             StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
                 val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 1).firstOrNull()
@@ -230,7 +237,7 @@ class StaticMessageService(
                     forcedUpdate = event.end
                 }
 
-                embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
+                embed = embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
             }
         }
 
@@ -320,14 +327,17 @@ class StaticMessageService(
 
             var forcedUpdate: Instant? = null
             val additionalComponents = mutableListOf<LayoutComponent>()
-            val embed = when (old.type) {
+            val embed: EmbedCreateSpec
+
+            // Handle type specific behavior and rendering
+            when (old.type) {
                 StaticMessage.Type.CALENDAR_OVERVIEW -> {
                     val events = calendarService.getUpcomingEvents(guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
-                    embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
+                    embed = embedService.calendarOverviewEmbed(calendar, events, showUpdate = true)
                 }
                 StaticMessage.Type.CALENDAR_WEEKLY -> {
-                    val events = calendarService.getEventsInNextNDays(guildId, calendarNumber, 6)
-                    embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
+                    val events = calendarService.getEventsInNextNDays(guildId, calendarNumber, 7)
+                    embed = embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
                 }
                 StaticMessage.Type.NEXT_EVENT -> {
                     val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
@@ -336,7 +346,7 @@ class StaticMessageService(
                         forcedUpdate = event.end
                     }
 
-                    embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
+                    embed = embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
                 }
                 StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
                     val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
@@ -346,7 +356,7 @@ class StaticMessageService(
                         forcedUpdate = event.end
                     }
 
-                    embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
+                    embed = embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
                 }
             }
 
