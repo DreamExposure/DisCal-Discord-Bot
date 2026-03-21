@@ -107,8 +107,9 @@ class StaticMessageService(
                 val events = calendarService.getEventsInNextNDays(guildId, calendarNumber, 7)
                 embed = embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
             }
+
             StaticMessage.Type.NEXT_EVENT -> {
-                val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
+                val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 5).firstOrNull { !it.isOngoing() }
                 if (event != null) {
                     additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
                     forcedUpdate = event.end
@@ -117,7 +118,7 @@ class StaticMessageService(
                 embed = embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
             }
             StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
-                val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
+                val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 5).firstOrNull { !it.isOngoing() }
                 val rsvp = if (event == null) null else rsvpService.getRsvp(guildId, event.id)
                 if (event != null) {
                     additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
@@ -221,7 +222,7 @@ class StaticMessageService(
                 embed = embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
             }
             StaticMessage.Type.NEXT_EVENT -> {
-                val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 1).firstOrNull()
+                val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 5).firstOrNull { !it.isOngoing() }
                 if (event != null) {
                     additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
                     forcedUpdate = event.end
@@ -230,7 +231,7 @@ class StaticMessageService(
                 embed = embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
             }
             StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
-                val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 1).firstOrNull()
+                val event = calendarService.getUpcomingEvents(guildId, old.calendarNumber, 5).firstOrNull { !it.isOngoing() }
                 val rsvp = if (event == null) null else rsvpService.getRsvp(guildId, event.id)
                 if (event != null) {
                     additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
@@ -340,7 +341,7 @@ class StaticMessageService(
                     embed = embedService.calendarWeekOverviewEmbed(calendar, events, showUpdate = true)
                 }
                 StaticMessage.Type.NEXT_EVENT -> {
-                    val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
+                    val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 5).firstOrNull { !it.isOngoing() }
                     if (event != null) {
                         additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings))
                         forcedUpdate = event.end
@@ -349,7 +350,7 @@ class StaticMessageService(
                     embed = embedService.nextUpcomingEventEmbed(event, null, settings, includeRsvp = false, showUpdate = true)
                 }
                 StaticMessage.Type.NEXT_EVENT_WITH_RSVP -> {
-                    val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()
+                    val event = calendarService.getUpcomingEvents(guildId, calendarNumber, 5).firstOrNull { !it.isOngoing() }
                     val rsvp = if (event == null) null else rsvpService.getRsvp(guildId, event.id)
                     if (event != null) {
                         additionalComponents.addAll(componentService.getEventRsvpComponents(event, settings, true))
