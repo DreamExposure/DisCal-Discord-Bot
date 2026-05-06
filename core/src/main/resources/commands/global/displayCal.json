@@ -28,6 +28,10 @@
             {
               "name": "Next Upcoming Event With RSVP Info",
               "value": 4
+            },
+            {
+              "name": "Ongoing Events",
+              "value": 5
             }
           ]
         },

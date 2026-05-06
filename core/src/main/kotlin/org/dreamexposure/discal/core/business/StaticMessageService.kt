@@ -127,6 +127,11 @@ class StaticMessageService(
 
                 embed = embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
             }
+            StaticMessage.Type.ONGOING_EVENTS -> {
+                val events = calendarService.getOngoingEvents(guildId, calendarNumber)
+                embed = embedService.ongoingEventsEmbed(calendar, events, settings, showUpdate = true)
+                forcedUpdate = events.minByOrNull { it.end }?.end
+            }
         }
 
 
@@ -239,6 +244,11 @@ class StaticMessageService(
                 }
 
                 embed = embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
+            }
+            StaticMessage.Type.ONGOING_EVENTS -> {
+                val events = calendarService.getOngoingEvents(guildId, old.calendarNumber)
+                embed = embedService.ongoingEventsEmbed(calendar, events, settings, showUpdate = true)
+                forcedUpdate = events.minByOrNull { it.end }?.end
             }
         }
 
@@ -358,6 +368,11 @@ class StaticMessageService(
                     }
 
                     embed = embedService.nextUpcomingEventEmbed(event, rsvp, settings, includeRsvp = true, showUpdate = true)
+                }
+                StaticMessage.Type.ONGOING_EVENTS -> {
+                    val events = calendarService.getOngoingEvents(guildId, calendarNumber)
+                    embed = embedService.ongoingEventsEmbed(calendar, events, settings, showUpdate = true)
+                    forcedUpdate = events.minByOrNull { it.end }?.end
                 }
             }
 

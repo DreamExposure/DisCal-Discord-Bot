@@ -397,7 +397,9 @@ class EmbedService(
         if (event == null) {
             builder.description(getEmbedMessage("event", "upcoming.description.no-event", settings.locale))
 
-            return builder.build()
+            return builder
+                .color(GlobalVal.discalColor)
+                .build()
         }
 
         // Handle adding name and description + info about this event
@@ -470,6 +472,102 @@ class EmbedService(
         return builder.build()
     }
 
+    suspend fun ongoingEventsEmbed(calendar: Calendar, events: List<Event>, settings: GuildSettings, showUpdate: Boolean): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .title(getEmbedMessage("event", "ongoing.title", settings.locale))
+
+        // If no events, turn this into a stub
+        if (events.isEmpty()) {
+            builder.description(getEmbedMessage("event", "ongoing.description.no-events", settings.locale))
+
+            return builder.url(calendar.link)
+                .color(GlobalVal.discalColor)
+                .build()
+        }
+
+        // This is used to truncate how many days/events are displayed to prevent going over the 6000 character count limit
+        var calculatedEmbedCharacterLength = 0
+
+        val groupedEvents = events.groupByDate()
+
+        // Truncate dates to 24 due to discord enforcing the field limit
+        val truncatedEvents = mutableMapOf<ZonedDateTime, List<Event>>()
+        for (event in groupedEvents) {
+            if (truncatedEvents.size < 24) {
+                truncatedEvents[event.key] = event.value
+            } else break
+        }
+
+        // Show events
+        truncatedEvents.forEach { date ->
+            val title = date.key.toInstant().humanReadableDate(calendar.timezone, settings.interfaceStyle.timeFormat, longDay = true)
+
+            // sort events
+            val sortedEvents = date.value.sortedBy { it.start }
+
+            val content = StringBuilder()
+
+            sortedEvents.forEach {
+                // Start event
+                content.append("```\n")
+
+                // determine time length
+                val timeDisplayLen = ("${it.start.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} -" +
+                        " ${it.end.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} ").length
+
+                // Displaying time
+                if (it.isAllDay()) {
+                    content.append(getCommonMsg("generic.time.allDay", settings.locale).padCenter(timeDisplayLen))
+                        .append("| ")
+                } else {
+                    // Add start text
+                    var str = if (it.start.isBefore(date.key.toInstant())) {
+                        "${getCommonMsg("generic.time.continued", settings.locale)} - "
+                    } else {
+                        "${it.start.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} - "
+                    }
+                    // Add end text
+                    str += if (it.end.isAfter(date.key.toInstant().plus(1, ChronoUnit.DAYS))) {
+                        getCommonMsg("generic.time.continued", settings.locale)
+                    } else {
+                        "${it.end.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} "
+                    }
+                    content.append(str.padCenter(timeDisplayLen))
+                        .append("| ")
+                }
+                // Display name or ID if not set
+                if (it.name.isNotBlank()) content.append(it.name)
+                else content.append(getEmbedMessage("calendar", "link.field.id", settings.locale)).append(" ${it.id}")
+                content.append("\n")
+                if (it.location.isNotBlank()) content.append("    Location: ")
+                    .append(it.location.embedFieldSafe())
+                    .append("\n")
+
+                // Finish event
+                content.append("```\n")
+            }
+            calculatedEmbedCharacterLength += title.length + content.toString().embedFieldSafe().length
+
+            // max embed length is 6000 characters, we are going to go a bit under that in just for extra safety
+            if (content.isNotBlank() && calculatedEmbedCharacterLength <= 5750)
+                builder.addField(title, content.toString().embedFieldSafe(), false)
+        }
+
+
+
+        // Add footer info
+        if (showUpdate) {
+            builder.footer(getEmbedMessage("event", "ongoing.footer", settings.locale), null)
+                .timestamp(Instant.now())
+        }
+
+        // finish and return
+        return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings.locale), calendar.timezone.id, true)
+            .addField(getEmbedMessage("calendar", "link.field.number", settings.locale), "${calendar.metadata.number}", true)
+            .url(calendar.link)
+            .color(GlobalVal.discalColor)
+            .build()
+    }
 
 
     suspend fun fullEventEmbed(event: Event, settings: GuildSettings): EmbedCreateSpec {

@@ -41,6 +41,8 @@ data class StaticMessage(
         CALENDAR_WEEKLY(2),
         NEXT_EVENT(3),
         NEXT_EVENT_WITH_RSVP(4),
+
+        ONGOING_EVENTS(5),
         ;
 
         fun isEventSpecific() = this == NEXT_EVENT || this == NEXT_EVENT_WITH_RSVP
