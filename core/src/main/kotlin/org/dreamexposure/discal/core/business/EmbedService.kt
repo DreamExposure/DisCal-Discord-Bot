@@ -476,6 +476,12 @@ class EmbedService(
         val builder = defaultEmbedBuilder(settings)
             .title(getEmbedMessage("event", "ongoing.title", settings.locale))
 
+        // Add footer info
+        if (showUpdate) {
+            builder.footer(getEmbedMessage("event", "ongoing.footer", settings.locale), null)
+                .timestamp(Instant.now())
+        }
+
         // If no events, turn this into a stub
         if (events.isEmpty()) {
             builder.description(getEmbedMessage("event", "ongoing.description.no-events", settings.locale))
@@ -551,14 +557,6 @@ class EmbedService(
             // max embed length is 6000 characters, we are going to go a bit under that in just for extra safety
             if (content.isNotBlank() && calculatedEmbedCharacterLength <= 5750)
                 builder.addField(title, content.toString().embedFieldSafe(), false)
-        }
-
-
-
-        // Add footer info
-        if (showUpdate) {
-            builder.footer(getEmbedMessage("event", "ongoing.footer", settings.locale), null)
-                .timestamp(Instant.now())
         }
 
         // finish and return
