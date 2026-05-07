@@ -23,8 +23,10 @@ class StaticMessageUpdateCronJob(
     private val staticMessageService: StaticMessageService,
     private val metricService: MetricService,
 ):ApplicationRunner {
+    private final val intervalMinutes = Config.TIMING_STATIC_MESSAGE_UPDATE_TASK_RUN_INTERVAL_MINUTES.getLong().asMinutes()
+
     override fun run(args: ApplicationArguments) {
-        Flux.interval(Config.TIMING_STATIC_MESSAGE_UPDATE_TASK_RUN_INTERVAL_MINUTES.getLong().asMinutes())
+        Flux.interval(intervalMinutes)
             .onBackpressureDrop()
             .flatMap { doUpdate() }
             .onErrorResume { Mono.empty() }
@@ -38,11 +40,11 @@ class StaticMessageUpdateCronJob(
         try {
             val messages = staticMessageService.getEnabledStaticMessagesForShard(getShardIndex(), getShardCount())
                 //We have no interest in updating the message so close to its last update
-                .filter { Duration.between(Instant.now(), it.lastUpdate).abs().toMinutes() >= 30 }
+                .filter { Duration.between(Instant.now(), it.lastUpdate).abs() >= intervalMinutes.minusMinutes(1) }
                 // Only update messages in range
                 .filter {
-                    Duration.between(Instant.now(), it.scheduledUpdate).toMinutes() <= 60
-                        || (it.forcedUpdate != null && Duration.between(Instant.now(), it.forcedUpdate).toMinutes() <= 60)
+                    Duration.between(Instant.now(), it.scheduledUpdate) <= intervalMinutes
+                        || (it.forcedUpdate != null && Duration.between(Instant.now(), it.forcedUpdate) <= intervalMinutes)
                 }
 
             LOGGER.debug("StaticMessageUpdateCronJob | Found ${messages.size} messages to update for shard ${getShardIndex()}")
