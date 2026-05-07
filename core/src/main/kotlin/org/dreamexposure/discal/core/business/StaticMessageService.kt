@@ -130,7 +130,8 @@ class StaticMessageService(
             StaticMessage.Type.ONGOING_EVENTS -> {
                 val events = calendarService.getOngoingEvents(guildId, calendarNumber)
                 embed = embedService.ongoingEventsEmbed(calendar, events, settings, showUpdate = true)
-                forcedUpdate = events.minByOrNull { it.end }?.end
+                // Update when first ongoing event ends or at the start of the next known upcoming event
+                forcedUpdate = events.minByOrNull { it.end }?.end ?: calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()?.start
             }
         }
 
@@ -248,7 +249,8 @@ class StaticMessageService(
             StaticMessage.Type.ONGOING_EVENTS -> {
                 val events = calendarService.getOngoingEvents(guildId, old.calendarNumber)
                 embed = embedService.ongoingEventsEmbed(calendar, events, settings, showUpdate = true)
-                forcedUpdate = events.minByOrNull { it.end }?.end
+                // Update when first ongoing event ends or at the start of the next known upcoming event
+                forcedUpdate = events.minByOrNull { it.end }?.end ?: calendarService.getUpcomingEvents(guildId, old.calendarNumber, 1).firstOrNull()?.start
             }
         }
 
@@ -372,7 +374,8 @@ class StaticMessageService(
                 StaticMessage.Type.ONGOING_EVENTS -> {
                     val events = calendarService.getOngoingEvents(guildId, calendarNumber)
                     embed = embedService.ongoingEventsEmbed(calendar, events, settings, showUpdate = true)
-                    forcedUpdate = events.minByOrNull { it.end }?.end
+                    // Update when first ongoing event ends or at the start of the next known upcoming event
+                    forcedUpdate = events.minByOrNull { it.end }?.end ?: calendarService.getUpcomingEvents(guildId, calendarNumber, 1).firstOrNull()?.start
                 }
             }
 
