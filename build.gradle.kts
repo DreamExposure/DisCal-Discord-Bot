@@ -1,3 +1,4 @@
+
 import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -19,7 +20,7 @@ plugins {
 }
 
 buildscript {
-    val kotlinPoetVersion: String by properties
+    val kotlinPoetVersion = providers.gradleProperty("kotlinPoetVersion").get()
     dependencies {
         classpath("com.squareup:kotlinpoet:$kotlinPoetVersion")
     }
@@ -38,23 +39,23 @@ allprojects {
 
     // Versions --- found in gradle.properties
     // Discord
-    val discord4jVersion: String by properties
-    val discord4jStoresVersion: String by properties
-    val discordWebhookVersion: String by properties
+    val discord4jVersion = providers.gradleProperty("discord4jVersion").get()
+    val discord4jStoresVersion = providers.gradleProperty("discord4jStoresVersion").get()
+    val discordWebhookVersion = providers.gradleProperty("discordWebhookVersion").get()
     // Serialization
-    val kotlinxSerializationJsonVersion: String by properties
-    val orgJsonVersion: String by properties
-    val okioVersion: String by properties
+    val kotlinxSerializationJsonVersion = providers.gradleProperty("kotlinxSerializationJsonVersion").get()
+    val orgJsonVersion = providers.gradleProperty("orgJsonVersion").get()
+    val okioVersion = providers.gradleProperty("okioVersion").get()
     // Observability
-    val logbackContribVersion: String by properties
+    val logbackContribVersion = providers.gradleProperty("logbackContribVersion").get()
     // Google libs
-    val googleApiClientVersion: String by properties
-    val googleServicesCalendarVersion: String by properties
-    val googleOauthClientVersion: String by properties
+    val googleApiClientVersion = providers.gradleProperty("googleApiClientVersion").get()
+    val googleServicesCalendarVersion = providers.gradleProperty("googleServicesCalendarVersion").get()
+    val googleOauthClientVersion = providers.gradleProperty("googleOauthClientVersion").get()
     // Various libs
-    val okhttpVersion: String by properties
-    val copyDownVersion: String by properties
-    val jsoupVersion: String by properties
+    val okhttpVersion = providers.gradleProperty("okhttpVersion").get()
+    val copyDownVersion = providers.gradleProperty("copyDownVersion").get()
+    val jsoupVersion = providers.gradleProperty("jsoupVersion").get()
 
     repositories {
         mavenCentral()
@@ -161,7 +162,7 @@ subprojects {
 tasks {
     wrapper {
         distributionType = ALL
-        gradleVersion = "9.2.1"
+        gradleVersion = "9.8.0"
     }
 
     bootJar {

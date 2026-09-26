@@ -35,7 +35,7 @@ jib {
         tags = mutableSetOf("latest", buildVersion)
     }
 
-    val baseImage: String by properties
+    val baseImage = providers.gradleProperty("baseImage").get()
     from.image = baseImage
 }
 

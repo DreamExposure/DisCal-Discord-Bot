@@ -1,9 +1,9 @@
 pluginManagement {
-    val kotlinVersion: String by settings
-    val springVersion: String by settings
-    val gitPropertiesVersion: String by settings
-    val jibVersion: String by settings
-    val springDependencyManagementVersion: String by settings
+    val kotlinVersion = providers.gradleProperty("kotlinVersion").get()
+    val springVersion = providers.gradleProperty("springVersion").get()
+    val gitPropertiesVersion = providers.gradleProperty("gitPropertiesVersion").get()
+    val jibVersion = providers.gradleProperty("jibVersion").get()
+    val springDependencyManagementVersion = providers.gradleProperty("springDependencyManagementVersion").get()
 
     repositories {
         gradlePluginPortal()

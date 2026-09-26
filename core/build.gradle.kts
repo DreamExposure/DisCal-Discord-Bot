@@ -19,7 +19,7 @@ plugins {
     id("com.gorylenko.gradle-git-properties")
 }
 
-val discord4jVersion: String by properties
+val discord4jVersion = providers.gradleProperty("discord4jVersion").get()
 val kotlinSrcDir: File = layout.buildDirectory.dir("core/src/main/kotlin").map(Directory::getAsFile).get()
 
 kotlin {
