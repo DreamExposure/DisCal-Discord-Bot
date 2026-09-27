@@ -14,7 +14,7 @@ import java.time.Month
 @Component
 class ComponentService {
 
-    fun getStaticMessageComponents(): Array<LayoutComponent> {
+    fun getStaticMessageComponents(): Array<TopLevelMessageComponent> {
         val refreshButton = Button.secondary(
             "refresh-static-message",
             Emoji.of(1465798960483668122, "refresh", false)
@@ -23,7 +23,7 @@ class ComponentService {
         return arrayOf(ActionRow.of(refreshButton))
     }
 
-    fun getEventRsvpComponents(event: Event, settings: GuildSettings, alwaysShow: Boolean = false): Array<LayoutComponent> {
+    fun getEventRsvpComponents(event: Event, settings: GuildSettings, alwaysShow: Boolean = false): Array<TopLevelMessageComponent> {
         if (!alwaysShow && !settings.showRsvpDropdown) return emptyArray() // This way we don't need the message UI code to get cluttered
 
         val goingOnTime = SelectMenu.Option.of(getCommonMsg("dropdown.rsvp.option.on-time.label", settings.locale), "rsvp_on_time")
@@ -45,7 +45,7 @@ class ComponentService {
         return arrayOf(ActionRow.of(selectMenu))
     }
 
-    fun <T> getWizardComponents(wizard: WizardState<T>, settings: GuildSettings): Array<LayoutComponent> {
+    fun <T> getWizardComponents(wizard: WizardState<T>, settings: GuildSettings): Array<TopLevelMessageComponent> {
         val wizardType = when (wizard) {
             is CalendarWizardState -> "calendar"
             is EventWizardState -> "event"
@@ -71,7 +71,7 @@ class ComponentService {
         return arrayOf(ActionRow.of(confirmButton, cancelButton))
     }
 
-    fun getEventCreateModalComponents(settings: GuildSettings, calendars: List<Calendar>): Array<LayoutComponent> {
+    fun getEventCreateModalComponents(settings: GuildSettings, calendars: List<Calendar>): Array<TopLevelModalComponent> {
         val nameInput = TextInput.small("event.create.name")
             .placeholder(getCommonMsg("modal.event.create.name.placeholder", settings.locale))
             .required(false)
@@ -113,7 +113,7 @@ class ComponentService {
         )
     }
 
-    fun getEventRecurrenceWeeklyModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+    fun getEventRecurrenceWeeklyModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<TopLevelModalComponent> {
         // Determine pre-selected days
         val selectedDays = emptyList<DayOfWeek>().toMutableList()
         event.recurrence?.byDay?.forEach { selectedDays.add(it.dayOfWeek) }
@@ -134,7 +134,7 @@ class ComponentService {
        return arrayOf(Label.of(getCommonMsg("select.event.recurrence.days.label", settings.locale), select))
     }
 
-    fun getEventRecurrenceMonthlyDateModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+    fun getEventRecurrenceMonthlyDateModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<TopLevelModalComponent> {
         // determine if there should be prefilled date
         val prefilledDayNumber = event.start?.atZone(event.timezone)?.dayOfMonth
 
@@ -146,7 +146,7 @@ class ComponentService {
         return arrayOf(Label.of(getCommonMsg("modal.event.recurrence.monthly.date.label", settings.locale), dateInput))
     }
 
-    fun getEventRecurrenceMonthlyVariableModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+    fun getEventRecurrenceMonthlyVariableModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<TopLevelModalComponent> {
         // Generate the list of day positions
         val dayPositions = EventRecurrence.SetPos.entries.map {
             SelectMenu.Option.of(it.name, it.name)
@@ -175,7 +175,7 @@ class ComponentService {
         )
     }
 
-    fun getEventRecurrenceYearlyDateModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+    fun getEventRecurrenceYearlyDateModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<TopLevelModalComponent> {
         // Determine if there should be a prefilled date
         val prefilledMonth = event.start?.atZone(event.timezone)?.month
         val prefilledDate = event.start?.atZone(event.timezone)?.dayOfMonth
@@ -200,7 +200,7 @@ class ComponentService {
         )
     }
 
-    fun getEventRecurrenceYearlyVariableModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<LayoutComponent> {
+    fun getEventRecurrenceYearlyVariableModalComponents(settings: GuildSettings, event: Event.PartialEvent): Array<TopLevelModalComponent> {
         // Determine preselected day and month
         val selectedDay = event.start?.atZone(event.timezone)?.dayOfWeek
         val prefilledMonth = event.start?.atZone(event.timezone)?.month
@@ -241,7 +241,7 @@ class ComponentService {
         )
     }
 
-    fun getEventRecurrenceMonthlyDropdownComponents(settings: GuildSettings): Array<LayoutComponent> {
+    fun getEventRecurrenceMonthlyDropdownComponents(settings: GuildSettings): Array<TopLevelMessageComponent> {
         // dropdown with wizard to ask "on specific day of month (ex 15th)", or "Nth day of month (ex first Tuesday)"
         val dateOption = SelectMenu.Option.of(getCommonMsg("select.event.recurrence.month.option.date.label", settings.locale), "monthly_date")
             .withDescription(getCommonMsg("select.event.recurrence.month.option.date.description", settings.locale))
@@ -255,7 +255,7 @@ class ComponentService {
         return arrayOf(ActionRow.of(selectMenu))
     }
 
-    fun getEventRecurrenceYearlyDropdownComponents(settings: GuildSettings): Array<LayoutComponent> {
+    fun getEventRecurrenceYearlyDropdownComponents(settings: GuildSettings): Array<TopLevelMessageComponent> {
         // dropdown with wizard to ask "on specific date or nth day of x month:
         val dateOption = SelectMenu.Option.of(getCommonMsg("select.event.recurrence.yearly.option.date.label", settings.locale), "yearly_date")
             .withDescription(getCommonMsg("select.event.recurrence.yearly.option.date.description", settings.locale))

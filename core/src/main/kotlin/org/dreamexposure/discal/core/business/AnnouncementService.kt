@@ -2,7 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
-import discord4j.core.`object`.component.LayoutComponent
+import discord4j.core.`object`.component.TopLevelMessageComponent
 import discord4j.discordjson.json.MessageCreateRequest
 import discord4j.rest.http.client.ClientException
 import kotlinx.coroutines.reactor.awaitSingle
@@ -180,7 +180,7 @@ class AnnouncementService(
             val message = channel.createMessage(MessageCreateRequest.builder()
                 .content(announcement.subscribers.buildMentions().messageContentSafe())
                 .addEmbed(embed.asRequest())
-                .addAllComponents(componentService.getEventRsvpComponents(event, settings).map(LayoutComponent::getData))
+                .addAllComponents(componentService.getEventRsvpComponents(event, settings).map(TopLevelMessageComponent::getData))
                 .build()
             ).awaitSingle()
 

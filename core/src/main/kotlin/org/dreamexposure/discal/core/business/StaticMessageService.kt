@@ -2,7 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
-import discord4j.core.`object`.component.LayoutComponent
+import discord4j.core.`object`.component.TopLevelMessageComponent
 import discord4j.core.spec.EmbedCreateSpec
 import discord4j.discordjson.json.MessageCreateRequest
 import discord4j.discordjson.json.MessageEditRequest
@@ -94,7 +94,7 @@ class StaticMessageService(
             .toInstant()
 
         val embed: EmbedCreateSpec
-        val additionalComponents = mutableListOf<LayoutComponent>()
+        val additionalComponents = mutableListOf<TopLevelMessageComponent>()
         var forcedUpdate: Instant? = null
 
         // Handle type specific behavior and rendering
@@ -214,7 +214,7 @@ class StaticMessageService(
 
         // Finally update the message
         var forcedUpdate: Instant? = null
-        val additionalComponents = mutableListOf<LayoutComponent>()
+        val additionalComponents = mutableListOf<TopLevelMessageComponent>()
         val embed: EmbedCreateSpec
 
         // Handle type specific behavior and rendering
@@ -339,7 +339,7 @@ class StaticMessageService(
             }
 
             var forcedUpdate: Instant? = null
-            val additionalComponents = mutableListOf<LayoutComponent>()
+            val additionalComponents = mutableListOf<TopLevelMessageComponent>()
             val embed: EmbedCreateSpec
 
             // Handle type specific behavior and rendering
