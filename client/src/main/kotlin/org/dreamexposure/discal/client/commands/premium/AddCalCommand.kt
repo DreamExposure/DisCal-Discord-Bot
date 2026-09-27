@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.client.commands.premium
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.CalendarService
@@ -20,25 +19,32 @@ class AddCalCommand(
     override val hasSubcommands = false
     override val ephemeral = true
 
-    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings) {
         //TODO: Remove dev-only and switch to patron-only once this is completed
-        if (!settings.devGuild) return event.createFollowup(getCommonMsg("error.disabled", settings.locale))
-            .withEphemeral(ephemeral)
-            .awaitSingle()
+        if (!settings.devGuild) {
+            event.createFollowup(getCommonMsg("error.disabled", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+        }
 
         // Validate permissions
         val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
-        if (!hasElevatedPerms)
-            return event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+        if (!hasElevatedPerms) {
+            event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
+        }
 
         val canAddCalendar = calendarService.canAddNewCalendar(settings.guildId)
-        if (!canAddCalendar) return event.createFollowup(getCommonMsg("error.calendar.max", settings.locale))
-            .withEphemeral(ephemeral)
-            .awaitSingle()
+        if (!canAddCalendar) {
+            event.createFollowup(getCommonMsg("error.calendar.max", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+            return
+        }
 
-        return event.createFollowup(getMessage("response.start", settings, getLink(settings)))
+        event.createFollowup(getMessage("response.start", settings, getLink(settings)))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }

@@ -72,7 +72,7 @@ class SecurityWebFilter(
         }
 
         if (!response.entity!!.valid) {
-            exchange.response.statusCode = response.entity.code
+            exchange.response.statusCode = HttpStatus.valueOf(response.entity.code)
             exchange.response.writeJsonString(
                 objectMapper.writeValueAsString(ErrorResponse(response.entity.message))
             ).awaitFirstOrNull()

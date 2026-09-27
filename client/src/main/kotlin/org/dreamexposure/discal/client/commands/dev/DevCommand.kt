@@ -4,7 +4,6 @@ import discord4j.common.util.Snowflake
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
-import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.EmbedService
@@ -22,14 +21,16 @@ class DevCommand(
     override val hasSubcommands = true
     override val ephemeral = true
 
-    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings) {
         // Validate this user is actually a dev
-        if (!GlobalVal.devUserIds.contains(event.interaction.user.id))
-            return event.createFollowup(getMessage("error.notDeveloper", settings))
-            .withEphemeral(ephemeral)
-            .awaitSingle()
+        if (!GlobalVal.devUserIds.contains(event.interaction.user.id)) {
+            event.createFollowup(getMessage("error.notDeveloper", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+            return
+        }
 
-        return when (event.options[0].name) {
+        when (event.options[0].name) {
             "patron" -> patron(event, settings)
             "dev" -> dev(event, settings)
             "maxcal" -> maxCalendars(event, settings)
@@ -38,7 +39,7 @@ class DevCommand(
         }
     }
 
-    private suspend fun patron(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun patron(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val guildId = event.options[0].getOption("guild")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
@@ -48,13 +49,13 @@ class DevCommand(
         val oldTargetSettings = settingsService.getSettings(guildId)
         val newTargetSettings = settingsService.upsertSettings(oldTargetSettings.copy(patronGuild = !oldTargetSettings.patronGuild))
 
-        return event.createFollowup(getMessage("patron.success", settings, "${newTargetSettings.patronGuild}"))
+        event.createFollowup(getMessage("patron.success", settings, "${newTargetSettings.patronGuild}"))
             .withEmbeds(embedService.settingsEmbeds(newTargetSettings, debug = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
 
-    private suspend fun dev(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun dev(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val guildId = event.options[0].getOption("guild")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
@@ -64,13 +65,13 @@ class DevCommand(
         val oldTargetSettings = settingsService.getSettings(guildId)
         val newTargetSettings = settingsService.upsertSettings(oldTargetSettings.copy(devGuild = !oldTargetSettings.devGuild))
 
-        return event.createFollowup(getMessage("dev.success", settings, newTargetSettings.devGuild.toString()))
+        event.createFollowup(getMessage("dev.success", settings, newTargetSettings.devGuild.toString()))
             .withEmbeds(embedService.settingsEmbeds(newTargetSettings, debug = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
 
-    private suspend fun maxCalendars(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    private suspend fun maxCalendars(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val guildId = event.options[0].getOption("guild")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
@@ -85,13 +86,13 @@ class DevCommand(
         val oldTargetSettings = settingsService.getSettings(guildId)
         val newTargetSettings = settingsService.upsertSettings(oldTargetSettings.copy(maxCalendars = amount))
 
-        return event.createFollowup(getMessage("maxcal.success", newTargetSettings, "$amount"))
+        event.createFollowup(getMessage("maxcal.success", settings, "$amount"))
             .withEmbeds(embedService.settingsEmbeds(newTargetSettings, debug = true))
             .withEphemeral(ephemeral)
             .awaitSingle()
     }
 
-    private suspend fun settings(event: ChatInputInteractionEvent): Message {
+    private suspend fun settings(event: ChatInputInteractionEvent) {
         val guildId = event.options[0].getOption("guild")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
@@ -100,7 +101,7 @@ class DevCommand(
 
         val targetSettings = settingsService.getSettings(guildId)
 
-        return event.createFollowup()
+        event.createFollowup()
             .withEmbeds(embedService.settingsEmbeds(targetSettings, debug = true))
             .withEphemeral(ephemeral)
             .awaitSingle()

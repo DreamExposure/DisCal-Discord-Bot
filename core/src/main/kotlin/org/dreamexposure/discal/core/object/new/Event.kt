@@ -2,7 +2,6 @@ package org.dreamexposure.discal.core.`object`.new
 
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.`object`.event.Recurrence
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -20,7 +19,7 @@ data class Event(
     val start: Instant,
     val end: Instant,
     val recur: Boolean,
-    val recurrence: Recurrence,
+    val recurrence: EventRecurrence,
     val image: String,
     val timezone: ZoneId,
 ) {
@@ -67,7 +66,7 @@ data class Event(
         val start: Instant?,
         val end: Instant?,
         val recur: Boolean,
-        val recurrence: Recurrence?,
+        val recurrence: EventRecurrence?,
         val image: String?,
         val timezone: ZoneId,
     )
@@ -81,7 +80,7 @@ data class Event(
         val location: String?,
         val image: String?,
         val recur: Boolean,
-        val recurrence: Recurrence?,
+        val recurrence: EventRecurrence?,
     )
 
     data class UpdateSpec(
@@ -94,7 +93,7 @@ data class Event(
         val location: String?,
         val image: String?,
         val recur: Boolean?,
-        val recurrence: Recurrence?,
+        val recurrence: EventRecurrence?,
     )
 }
 

@@ -3,7 +3,6 @@ package org.dreamexposure.discal.client.commands.global
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
-import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.CalendarService
@@ -25,7 +24,7 @@ class LinkCalendarCommand(
     private val OVERVIEW_EVENT_COUNT = Config.CALENDAR_OVERVIEW_DEFAULT_EVENT_COUNT.getInt()
 
 
-    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val showOverview = event.getOption("overview")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asBoolean)
@@ -38,16 +37,17 @@ class LinkCalendarCommand(
 
         val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
         if (calendar == null) {
-            return event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
+            event.createFollowup(getCommonMsg("error.notFound.calendar", settings.locale))
                 .withEphemeral(ephemeral)
                 .awaitSingle()
+            return
         }
 
         val events = if (showOverview)
             calendarService.getUpcomingEvents(settings.guildId, calendarNumber, OVERVIEW_EVENT_COUNT)
         else null
 
-        return event.createFollowup()
+        event.createFollowup()
             .withEmbeds(embedService.linkCalendarEmbed(calendar, events))
             .withEphemeral(ephemeral)
             .awaitSingle()

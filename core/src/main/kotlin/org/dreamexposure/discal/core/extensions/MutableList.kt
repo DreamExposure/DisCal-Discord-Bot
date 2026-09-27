@@ -19,7 +19,7 @@ fun List<String>.asStringList(): String {
     return builder.toString()
 }
 
-fun List<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
+fun List<Event>.groupByDate(filterEmptyDates: Boolean = true): Map<ZonedDateTime, List<Event>> {
     if (this.isEmpty()) return emptyMap()
 
     // Get a list of all distinct days events take place on (the first start date and the last end date)
@@ -60,5 +60,7 @@ fun List<Event>.groupByDate(): Map<ZonedDateTime, List<Event>> {
         }
         multi[it] = events.sortedBy(Event::start)
     }
-    return multi.filter { it.value.isNotEmpty() }.toSortedMap()
+
+    return if (filterEmptyDates) multi.filter { it.value.isNotEmpty() }.toSortedMap()
+    else multi.toSortedMap()
 }

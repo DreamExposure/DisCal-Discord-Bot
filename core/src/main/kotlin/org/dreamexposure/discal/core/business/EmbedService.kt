@@ -195,6 +195,106 @@ class EmbedService(
 
         // set footer
         if (showUpdate) {
+            builder.footer(getEmbedMessage("calendar", "link.footer.update", settings.locale), null)
+                .timestamp(Instant.now())
+        } else builder.footer(getEmbedMessage("calendar", "link.footer.default", settings.locale), null)
+
+        // finish and return
+        return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings.locale), calendar.timezone.id, true)
+            .addField(getEmbedMessage("calendar", "link.field.number", settings.locale), "${calendar.metadata.number}", true)
+            .url(calendar.link)
+            .color(GlobalVal.discalColor)
+            .build()
+    }
+
+    suspend fun calendarWeekOverviewEmbed(calendar: Calendar, events: List<Event>, showUpdate: Boolean): EmbedCreateSpec {
+        val settings = settingsService.getSettings(calendar.metadata.guildId)
+        val builder = defaultEmbedBuilder(settings)
+
+        // This is used to truncate how many events are displayed to prevent going over the 6000 character count limit
+        var calculatedEmbedCharacterLength = 0
+
+        // Get events sorted and grouped
+        val groupedEvents = events.groupByDate(filterEmptyDates = false) // We want to display the days of the week with no events
+
+        //Handle optional fields
+        if (calendar.name.isNotBlank()) {
+            builder.title(calendar.name.toMarkdown().embedTitleSafe())
+            calculatedEmbedCharacterLength += calendar.name.toMarkdown().embedTitleSafe().length
+        }
+        if (calendar.description.isNotBlank()) {
+            builder.description(calendar.description.toMarkdown().embedDescriptionSafe())
+            calculatedEmbedCharacterLength += calendar.description.toMarkdown().embedDescriptionSafe().length
+        }
+
+        // Show events
+        val today = Instant.now().atZone(calendar.timezone).truncatedTo(ChronoUnit.DAYS)
+
+        for (i in 0..6) {
+            val dateToDisplay = today.plusDays(i.toLong())
+            val events = groupedEvents[dateToDisplay].orEmpty()
+
+            val title = dateToDisplay.toInstant().humanReadableDate(calendar.timezone, settings.interfaceStyle.timeFormat, longDay = true)
+
+            // sort events
+            val sortedEvents = events.sortedBy { it.start }
+
+            val content = StringBuilder()
+
+            sortedEvents.forEach {
+                // Start event
+                content.append("```\n")
+
+                // determine time length
+                val timeDisplayLen = ("${it.start.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} -" +
+                    " ${it.end.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} ").length
+
+                // Displaying time
+                if (it.isAllDay()) {
+                    content.append(getCommonMsg("generic.time.allDay", settings.locale).padCenter(timeDisplayLen))
+                        .append("| ")
+                } else {
+                    // Add start text
+                    var str = if (it.start.isBefore(dateToDisplay.toInstant())) {
+                        "${getCommonMsg("generic.time.continued", settings.locale)} - "
+                    } else {
+                        "${it.start.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} - "
+                    }
+                    // Add end text
+                    str += if (it.end.isAfter(dateToDisplay.toInstant().plus(1, ChronoUnit.DAYS))) {
+                        getCommonMsg("generic.time.continued", settings.locale)
+                    } else {
+                        "${it.end.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} "
+                    }
+                    content.append(str.padCenter(timeDisplayLen))
+                        .append("| ")
+                }
+                // Display name or ID if not set
+                if (it.name.isNotBlank()) content.append(it.name)
+                else content.append(getEmbedMessage("calendar", "link.field.id", settings.locale)).append(" ${it.id}")
+                content.append("\n")
+                if (it.location.isNotBlank()) content.append("    Location: ")
+                    .append(it.location.embedFieldSafe())
+                    .append("\n")
+
+                // Finish event
+                content.append("```\n")
+            }
+            if (content.isBlank()) {
+                content.append("```\n")
+                    .append("[ No Upcoming Scheduled Events ]")
+                    .append("\n```")
+            }
+
+            calculatedEmbedCharacterLength += title.length + content.toString().embedFieldSafe().length
+
+            // max embed length is 6000 characters, we are going to go a bit under that in just for extra safety
+            if (content.isNotBlank() && calculatedEmbedCharacterLength <= 5750)
+                builder.addField(title, content.toString().embedFieldSafe(), false)
+        }
+
+        // set footer
+        if (showUpdate) {
             val lastUpdate = Instant.now().asDiscordTimestamp(DiscordTimestampFormat.RELATIVE_TIME)
             builder.footer(getEmbedMessage("calendar", "link.footer.update", settings.locale, lastUpdate), null)
                 .timestamp(Instant.now())
@@ -282,6 +382,192 @@ class EmbedService(
     //////////////////////////
     ////// Event Embeds //////
     //////////////////////////
+    suspend fun nextUpcomingEventEmbed(event: Event?, rsvp: Rsvp?, settings: GuildSettings, includeRsvp: Boolean, showUpdate: Boolean): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .color(event?.color?.asColor() ?: GlobalVal.discalColor)
+            .title(getEmbedMessage("event", "upcoming.title", settings.locale))
+
+        // Add footer info
+        if (showUpdate) {
+            builder.footer(getEmbedMessage("event", "upcoming.footer", settings.locale), null)
+                .timestamp(Instant.now())
+        }
+
+        // If event is null, turn this into a stub
+        if (event == null) {
+            builder.description(getEmbedMessage("event", "upcoming.description.no-event", settings.locale))
+
+            return builder
+                .color(GlobalVal.discalColor)
+                .build()
+        }
+
+        // Handle adding name and description + info about this event
+        val descriptionBuilder = StringBuilder()
+        if (event.name.isNotBlank()) descriptionBuilder.append(event.name.toMarkdown()).append("\n\n")
+        if (event.description.isNotBlank()) descriptionBuilder.append(event.description.toMarkdown())
+
+        if (descriptionBuilder.isNotBlank()) builder.description(descriptionBuilder.toString().embedDescriptionSafe())
+
+
+        builder.addField(
+            getEmbedMessage("event", "upcoming.field.start", settings.locale),
+            event.start.asDiscordTimestamp(LONG_DATETIME),
+            true)
+        builder.addField(
+            getEmbedMessage("event", "upcoming.field.end", settings.locale),
+            event.end.asDiscordTimestamp(LONG_DATETIME),
+            true
+        )
+
+        if (event.location.isNotBlank()) builder.addField(
+            getEmbedMessage("event", "upcoming.field.location", settings.locale),
+            event.location.toMarkdown().embedFieldSafe(),
+            false
+        )
+
+        if (event.image.isNotEmpty()) builder.image(event.image)
+
+        // Add RSVP info
+        if (includeRsvp && rsvp != null) {
+            val waitlistDisplayLimit = Config.EMBED_RSVP_WAITLIST_DISPLAY_LENGTH.getInt()
+
+            val goingOnTime = rsvp.goingOnTime.map {
+                discordClient.getUserById(it).data.awaitSingle()
+            }.joinToString(", ") {
+                it.globalName().orElse(it.username())
+            }.ifEmpty { "N/a" }
+
+            val late = rsvp.goingLate.map {
+                discordClient.getUserById(it).data.awaitSingle()
+            }.joinToString(", ") {
+                it.globalName().orElse(it.username())
+            }.ifEmpty { "N/a" }
+
+            val waitList = if (rsvp.waitlist.size > waitlistDisplayLimit) {
+                rsvp.waitlist.map {
+                    discordClient.getUserById(it).data.awaitSingle()
+                }.joinToString(", ") {
+                    it.globalName().orElse(it.username())
+                }.plus("+${rsvp.waitlist.size - waitlistDisplayLimit} more")
+            } else {
+                rsvp.waitlist.map {
+                    discordClient.getUserById(it).data.awaitSingle()
+                }.joinToString(", ") {
+                    it.globalName().orElse(it.username())
+                }
+            }
+
+            val limitValue = if (rsvp.limit < 0) {
+                getEmbedMessage("event", "upcoming.field.limit.value", settings.locale, "${rsvp.getCurrentCount()}")
+            } else "${rsvp.getCurrentCount()}/${rsvp.limit}"
+
+            builder.addField(getEmbedMessage("event", "upcoming.field.onTime", settings.locale), goingOnTime, false)
+                .addField(getEmbedMessage("event", "upcoming.field.late", settings.locale), late, false)
+
+            if (waitList.isNotEmpty()) builder.addField(getEmbedMessage("event", "upcoming.field.waitList", settings.locale), waitList, false)
+            if (rsvp.limit > 0) builder.addField(getEmbedMessage("event", "upcoming.field.limit", settings.locale), limitValue, true)
+        }
+
+        return builder.build()
+    }
+
+    suspend fun ongoingEventsEmbed(calendar: Calendar, events: List<Event>, settings: GuildSettings, showUpdate: Boolean): EmbedCreateSpec {
+        val builder = defaultEmbedBuilder(settings)
+            .title(getEmbedMessage("event", "ongoing.title", settings.locale))
+
+        // Add footer info
+        if (showUpdate) {
+            builder.footer(getEmbedMessage("event", "ongoing.footer", settings.locale), null)
+                .timestamp(Instant.now())
+        }
+
+        // If no events, turn this into a stub
+        if (events.isEmpty()) {
+            builder.description(getEmbedMessage("event", "ongoing.description.no-events", settings.locale))
+
+            return builder.url(calendar.link)
+                .color(GlobalVal.discalColor)
+                .build()
+        }
+
+        // This is used to truncate how many days/events are displayed to prevent going over the 6000 character count limit
+        var calculatedEmbedCharacterLength = 0
+
+        val groupedEvents = events.groupByDate()
+
+        // Truncate dates to 24 due to discord enforcing the field limit
+        val truncatedEvents = mutableMapOf<ZonedDateTime, List<Event>>()
+        for (event in groupedEvents) {
+            if (truncatedEvents.size < 24) {
+                truncatedEvents[event.key] = event.value
+            } else break
+        }
+
+        // Show events
+        truncatedEvents.forEach { date ->
+            val title = date.key.toInstant().humanReadableDate(calendar.timezone, settings.interfaceStyle.timeFormat, longDay = true)
+
+            // sort events
+            val sortedEvents = date.value.sortedBy { it.start }
+
+            val content = StringBuilder()
+
+            sortedEvents.forEach {
+                // Start event
+                content.append("```\n")
+
+                // determine time length
+                val timeDisplayLen = ("${it.start.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} -" +
+                        " ${it.end.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} ").length
+
+                // Displaying time
+                if (it.isAllDay()) {
+                    content.append(getCommonMsg("generic.time.allDay", settings.locale).padCenter(timeDisplayLen))
+                        .append("| ")
+                } else {
+                    // Add start text
+                    var str = if (it.start.isBefore(date.key.toInstant())) {
+                        "${getCommonMsg("generic.time.continued", settings.locale)} - "
+                    } else {
+                        "${it.start.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} - "
+                    }
+                    // Add end text
+                    str += if (it.end.isAfter(date.key.toInstant().plus(1, ChronoUnit.DAYS))) {
+                        getCommonMsg("generic.time.continued", settings.locale)
+                    } else {
+                        "${it.end.humanReadableTime(it.timezone, settings.interfaceStyle.timeFormat)} "
+                    }
+                    content.append(str.padCenter(timeDisplayLen))
+                        .append("| ")
+                }
+                // Display name or ID if not set
+                if (it.name.isNotBlank()) content.append(it.name)
+                else content.append(getEmbedMessage("calendar", "link.field.id", settings.locale)).append(" ${it.id}")
+                content.append("\n")
+                if (it.location.isNotBlank()) content.append("    Location: ")
+                    .append(it.location.embedFieldSafe())
+                    .append("\n")
+
+                // Finish event
+                content.append("```\n")
+            }
+            calculatedEmbedCharacterLength += title.length + content.toString().embedFieldSafe().length
+
+            // max embed length is 6000 characters, we are going to go a bit under that in just for extra safety
+            if (content.isNotBlank() && calculatedEmbedCharacterLength <= 5750)
+                builder.addField(title, content.toString().embedFieldSafe(), false)
+        }
+
+        // finish and return
+        return builder.addField(getEmbedMessage("calendar", "link.field.timezone", settings.locale), calendar.timezone.id, true)
+            .addField(getEmbedMessage("calendar", "link.field.number", settings.locale), "${calendar.metadata.number}", true)
+            .url(calendar.link)
+            .color(GlobalVal.discalColor)
+            .build()
+    }
+
+
     suspend fun fullEventEmbed(event: Event, settings: GuildSettings): EmbedCreateSpec {
         val builder = defaultEmbedBuilder(settings)
             .footer(getEmbedMessage("event", "full.footer", settings.locale, event.id), null)
@@ -400,7 +686,7 @@ class EmbedService(
 
         if (wizard.entity.recurrence != null) builder.addField(
             getEmbedMessage("event", "wizard.field.recurrence", settings.locale),
-            wizard.entity.recurrence.toHumanReadable(),
+            wizard.entity.recurrence.asHumanReadable(),
             true
         ) else if (wizard.editing && wizard.entity.id != null && wizard.entity.id.contains("_")) builder.addField(
             getEmbedMessage("event", "wizard.field.recurrence", settings.locale),
@@ -437,6 +723,14 @@ class EmbedService(
             }
 
         }
+        // Check if event recurs on day of week but scheduled on different day of week
+        if (wizard.entity.start != null && wizard.entity.recurrence != null && wizard.entity.recurrence.byDay.isNotEmpty()) {
+            val eventOnDay = wizard.entity.start.atZone(wizard.entity.timezone).dayOfWeek
+            if (!wizard.entity.recurrence.byDay.map(EventRecurrence.Day::dayOfWeek).contains(eventOnDay)) {
+                warnings.add(getEmbedMessage("event", "warning.wizard.recurrence.onDifferentDay", settings.locale, eventOnDay.name, wizard.entity.recurrence.byDay.joinToString(",") { it.dayOfWeek.name }, eventOnDay.name))
+            }
+        }
+        // Check if announcements paused
         if (settings.pauseAnnouncementsUntil != null && settings.pauseAnnouncementsUntil.isAfter(Instant.now())) {
             warnings.add(getEmbedMessage("event", "warning.wizard.announcementsPaused", settings.locale))
         }

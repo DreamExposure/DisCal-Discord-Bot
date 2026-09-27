@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.core.spring
 
 import kotlinx.serialization.SerializationException
-import kotlinx.serialization.encodeToString
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
@@ -9,7 +8,7 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.rest.RestError
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.beans.TypeMismatchException
-import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler
+import org.springframework.boot.webflux.error.ErrorWebExceptionHandler
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType

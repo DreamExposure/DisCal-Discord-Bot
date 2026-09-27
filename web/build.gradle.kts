@@ -50,7 +50,7 @@ jib {
         tags = mutableSetOf("latest", buildVersion)
     }
 
-    val baseImage: String by properties
+    val baseImage = providers.gradleProperty("baseImage").get()
     from.image = baseImage
 }
 
@@ -58,6 +58,7 @@ jib {
 
 tasks {
     this.register<Exec>("npm") {
+        description = "npm install"
         var npm = "npm"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
             npm = "npm.cmd"
@@ -68,6 +69,7 @@ tasks {
     }
 
     this.register<Exec>("cleanWeb") {
+        description = "gulp clean:all"
         dependsOn("npm")
         var gulp = "gulp"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -77,6 +79,7 @@ tasks {
     }
 
     this.register<Exec>("compileCSS") {
+        description = "gulp build"
         dependsOn("npm")
         var gulp = "gulp"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {
@@ -87,6 +90,7 @@ tasks {
     }
 
     this.register<Exec>("compileTypescript") {
+        description = "webpack"
         dependsOn("npm")
         var webpack = "webpack"
         if (Os.isFamily(Os.FAMILY_WINDOWS)) {

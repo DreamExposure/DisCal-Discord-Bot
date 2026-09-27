@@ -2,13 +2,13 @@ package org.dreamexposure.discal
 
 import org.dreamexposure.discal.core.config.Config
 import org.springframework.boot.autoconfigure.SpringBootApplication
-import org.springframework.boot.autoconfigure.session.SessionAutoConfiguration
+import org.springframework.boot.webflux.autoconfigure.WebSessionIdResolverAutoConfiguration
 import java.lang.management.ManagementFactory
 import java.time.Duration
 import java.util.*
 import kotlin.math.roundToInt
 
-@SpringBootApplication(exclude = [SessionAutoConfiguration::class])
+@SpringBootApplication(exclude = [WebSessionIdResolverAutoConfiguration::class])
 class Application {
     companion object {
         val instanceId: UUID = UUID.randomUUID()

@@ -1,8 +1,8 @@
 package org.dreamexposure.discal.web.config
 
 import org.dreamexposure.discal.core.utils.GlobalVal
+import org.springframework.boot.web.error.ErrorPage
 import org.springframework.boot.web.server.ConfigurableWebServerFactory
-import org.springframework.boot.web.server.ErrorPage
 import org.springframework.boot.web.server.WebServerFactoryCustomizer
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
@@ -23,7 +23,6 @@ import org.thymeleaf.spring6.ISpringWebFluxTemplateEngine
 import org.thymeleaf.spring6.SpringWebFluxTemplateEngine
 import org.thymeleaf.spring6.templateresolver.SpringResourceTemplateResolver
 import org.thymeleaf.spring6.view.reactive.ThymeleafReactiveViewResolver
-
 import org.thymeleaf.templatemode.TemplateMode
 
 @Configuration
@@ -37,11 +36,11 @@ class WebFluxConfig : WebServerFactoryCustomizer<ConfigurableWebServerFactory>,
         ctx = context
     }
 
-    override fun customize(factory: ConfigurableWebServerFactory?) {
-        factory?.addErrorPages(
-                ErrorPage(HttpStatus.BAD_REQUEST, "/400"),
-                ErrorPage(HttpStatus.NOT_FOUND, "/404"),
-                ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500"),
+    override fun customize(factory: ConfigurableWebServerFactory) {
+        factory.addErrorPages(
+            ErrorPage(HttpStatus.BAD_REQUEST, "/400"),
+            ErrorPage(HttpStatus.NOT_FOUND, "/404"),
+            ErrorPage(HttpStatus.INTERNAL_SERVER_ERROR, "/500"),
         )
     }
 

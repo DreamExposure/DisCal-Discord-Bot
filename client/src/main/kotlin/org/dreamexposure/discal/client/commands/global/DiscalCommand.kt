@@ -1,7 +1,6 @@
 package org.dreamexposure.discal.client.commands.global
 
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
-import discord4j.core.`object`.entity.Message
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.AnnouncementService
@@ -20,14 +19,14 @@ class DiscalCommand(
     override val hasSubcommands = false
     override val ephemeral = false
 
-    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings): Message {
+    override suspend fun handle(event: ChatInputInteractionEvent, settings: GuildSettings) {
         val announcementCount = announcementService.getAnnouncementCount()
         val calendarCount = calendarService.getCalendarCount()
         val guildCount = event.client.guilds.count().awaitSingle()
 
         val embed = embedService.discalInfoEmbed(settings, guildCount, calendarCount, announcementCount)
 
-        return event.createFollowup()
+        event.createFollowup()
             .withEmbeds(embed)
             .withEphemeral(ephemeral)
             .awaitSingle()

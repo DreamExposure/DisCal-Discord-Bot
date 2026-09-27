@@ -25,7 +25,7 @@ class AnnouncementCronJob(
     private val interval = Config.TIMING_ANNOUNCEMENT_TASK_RUN_INTERVAL_MINUTES.getLong().asMinutes()
     private val maxDifference = interval
 
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         Flux.interval(interval)
             .onBackpressureDrop()
             .flatMap { doAction() }

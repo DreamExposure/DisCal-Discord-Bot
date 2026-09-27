@@ -179,7 +179,7 @@ class DiscordAccountHandler : ApplicationRunner {
                 .onErrorReturn("internal_error")
     }
 
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         Flux.interval(Duration.ofMinutes(30))
             .map { removeTimedOutAccounts() }
             .subscribe()

@@ -40,8 +40,8 @@ data class EventV2Model(
         isParent = !event.id.contains("_"),
         color = event.color.name,
         recur = event.recur,
-        recurrence = event.recurrence,
-        rrule = event.recurrence.toRRule(),
+        recurrence = Recurrence.fromRRule(event.recurrence.asRRule()),
+        rrule = event.recurrence.asRRule(),
         image = event.image,
     )
 }

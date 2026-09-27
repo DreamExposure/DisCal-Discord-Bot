@@ -1,3 +1,4 @@
+
 import org.gradle.api.tasks.wrapper.Wrapper.DistributionType.ALL
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -19,7 +20,7 @@ plugins {
 }
 
 buildscript {
-    val kotlinPoetVersion: String by properties
+    val kotlinPoetVersion = providers.gradleProperty("kotlinPoetVersion").get()
     dependencies {
         classpath("com.squareup:kotlinpoet:$kotlinPoetVersion")
     }
@@ -28,7 +29,7 @@ buildscript {
 allprojects {
     //Project props
     group = "org.dreamexposure.discal"
-    version = "4.2.9"
+    version = "4.2.10"
     description = "DisCal"
 
     //Plugins
@@ -38,22 +39,23 @@ allprojects {
 
     // Versions --- found in gradle.properties
     // Discord
-    val discord4jVersion: String by properties
-    val discord4jStoresVersion: String by properties
-    val discordWebhookVersion: String by properties
+    val discord4jVersion = providers.gradleProperty("discord4jVersion").get()
+    val discord4jStoresVersion = providers.gradleProperty("discord4jStoresVersion").get()
+    val discordWebhookVersion = providers.gradleProperty("discordWebhookVersion").get()
     // Serialization
-    val kotlinxSerializationJsonVersion: String by properties
-    val orgJsonVersion: String by properties
+    val kotlinxSerializationJsonVersion = providers.gradleProperty("kotlinxSerializationJsonVersion").get()
+    val orgJsonVersion = providers.gradleProperty("orgJsonVersion").get()
+    val okioVersion = providers.gradleProperty("okioVersion").get()
     // Observability
-    val logbackContribVersion: String by properties
+    val logbackContribVersion = providers.gradleProperty("logbackContribVersion").get()
     // Google libs
-    val googleApiClientVersion: String by properties
-    val googleServicesCalendarVersion: String by properties
-    val googleOauthClientVersion: String by properties
+    val googleApiClientVersion = providers.gradleProperty("googleApiClientVersion").get()
+    val googleServicesCalendarVersion = providers.gradleProperty("googleServicesCalendarVersion").get()
+    val googleOauthClientVersion = providers.gradleProperty("googleOauthClientVersion").get()
     // Various libs
-    val okhttpVersion: String by properties
-    val copyDownVersion: String by properties
-    val jsoupVersion: String by properties
+    val okhttpVersion = providers.gradleProperty("okhttpVersion").get()
+    val copyDownVersion = providers.gradleProperty("copyDownVersion").get()
+    val jsoupVersion = providers.gradleProperty("jsoupVersion").get()
 
     repositories {
         mavenCentral()
@@ -78,6 +80,8 @@ allprojects {
         implementation("club.minnced:discord-webhooks:$discordWebhookVersion") {
             // Due to vulnerability in older versions: https://github.com/advisories/GHSA-rm7j-f5g5-27vv
             exclude(group = "org.json", module = "json")
+            // Due to vulnerability in older versions: https://www.mend.io/vulnerability-database/CVE-2023-3635
+            exclude(group = "com.squareup.okio", module = "okio")
         }
 
         // Spring
@@ -91,12 +95,15 @@ allprojects {
         // Database
         implementation("io.asyncer:r2dbc-mysql")
         implementation("com.mysql:mysql-connector-j")
+        implementation("org.mariadb:r2dbc-mariadb")
+        implementation("org.mariadb.jdbc:mariadb-java-client")
 
         // Serialization
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationJsonVersion")
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
         implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
         implementation("org.json:json:$orgJsonVersion")
+        implementation("com.squareup.okio:okio:${okioVersion}")
 
         // Observability
         implementation("ch.qos.logback.contrib:logback-json-classic:$logbackContribVersion")
@@ -139,8 +146,14 @@ subprojects {
     tasks {
         withType<KotlinCompile> {
             compilerOptions {
-                freeCompilerArgs.set(listOf("-Xjsr305=strict"))
+                freeCompilerArgs.set(listOf("-Xjsr305=strict", "-Xannotation-default-target=param-property"))
                 jvmTarget.set(JvmTarget.fromTarget(java.targetCompatibility.majorVersion))
+            }
+        }
+
+        withType<AbstractTestTask> {
+            configureEach {
+                failOnNoDiscoveredTests = false
             }
         }
     }
@@ -149,7 +162,7 @@ subprojects {
 tasks {
     wrapper {
         distributionType = ALL
-        gradleVersion = "8.14.2"
+        gradleVersion = "9.8.0"
     }
 
     bootJar {

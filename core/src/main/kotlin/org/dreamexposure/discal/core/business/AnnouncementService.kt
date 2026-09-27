@@ -2,7 +2,7 @@ package org.dreamexposure.discal.core.business
 
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
-import discord4j.core.`object`.component.LayoutComponent
+import discord4j.core.`object`.component.TopLevelMessageComponent
 import discord4j.discordjson.json.MessageCreateRequest
 import discord4j.rest.http.client.ClientException
 import kotlinx.coroutines.reactor.awaitSingle
@@ -93,9 +93,9 @@ class AnnouncementService(
 
     suspend fun getAllAnnouncements(guildId: Snowflake, type: Announcement.Type? = null, modifier: Announcement.Modifier? = null, returnDisabled: Boolean = true): List<Announcement> {
         return getAllAnnouncements(guildId)
-            .filter { if (type == null) true else it.type == type }
-            .filter { if (modifier == null) true else it.modifier == modifier }
-            .filter { if (returnDisabled) true else it.enabled }
+            .filter { type == null || it.type == type }
+            .filter { modifier == null || it.modifier == modifier }
+            .filter { returnDisabled || it.enabled }
     }
 
     suspend fun getAnnouncement(guildId: Snowflake, id: String): Announcement? {
@@ -180,7 +180,7 @@ class AnnouncementService(
             val message = channel.createMessage(MessageCreateRequest.builder()
                 .content(announcement.subscribers.buildMentions().messageContentSafe())
                 .addEmbed(embed.asRequest())
-                .addAllComponents(componentService.getEventRsvpComponents(event, settings).map(LayoutComponent::getData))
+                .addAllComponents(componentService.getEventRsvpComponents(event, settings).map(TopLevelMessageComponent::getData))
                 .build()
             ).awaitSingle()
 
@@ -248,6 +248,7 @@ class AnnouncementService(
                 val event = calendarService.getEvent(guildId, announcement.calendarNumber, announcement.eventId!!) ?: return@forEach
                 if (isInRange(announcement, event, maxDifference)) {
                     sendAnnouncement(announcement, event, settings)
+                    return@forEach // Short circuit
                 }
             }
 

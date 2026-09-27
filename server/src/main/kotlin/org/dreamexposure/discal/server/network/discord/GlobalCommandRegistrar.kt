@@ -17,7 +17,7 @@ class GlobalCommandRegistrar(
     private val objectMapper: ObjectMapper,
 ) : ApplicationRunner {
 
-    override fun run(args: ApplicationArguments?) {
+    override fun run(args: ApplicationArguments) {
         val matcher = PathMatchingResourcePatternResolver()
         val applicationService = restClient.applicationService
         val applicationId = restClient.applicationId.block()!!
