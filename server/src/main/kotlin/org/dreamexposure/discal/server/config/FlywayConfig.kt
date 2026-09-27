@@ -26,8 +26,6 @@ class FlywayConfig(
     private val placeholderPrefix: String,
     @Value($$"${spring.flyway.baseline-on-migrate}")
     private val baselineOnMigrate: Boolean,
-    @Value($$"${spring.flyway.clean-on-validation-error}")
-    private val cleanOnValidationError: Boolean,
 ) {
 
     @Bean(initMethod = "migrate")
@@ -38,7 +36,7 @@ class FlywayConfig(
             .table(schemaHistoryTable)
             .placeholders(mapOf("prefix" to placeholderPrefix))
             .baselineOnMigrate(baselineOnMigrate)
-            .cleanOnValidationError(cleanOnValidationError)
+            .cleanDisabled(true)
             .executeInTransaction(true)
             .load()
     }
