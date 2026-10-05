@@ -15,7 +15,7 @@ data class ApiKey(
         val scopes: List<Scope>,
 ) {
     constructor(data: ApiData): this(
-        userId = Snowflake.of(data.apiKey),
+        userId = Snowflake.of(data.userId),
         key = data.apiKey,
         blocked = data.blocked,
         timeIssued = data.timeIssued.asInstantMilli(),
