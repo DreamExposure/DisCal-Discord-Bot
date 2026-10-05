@@ -6,12 +6,14 @@ import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.business.api.CamApiWrapper
 import org.dreamexposure.discal.core.extensions.spring.writeJsonString
+import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.model.discal.cam.SecurityValidateV1Request
 import org.dreamexposure.discal.core.`object`.rest.ErrorResponse
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.method.HandlerMethod
+import org.springframework.web.reactive.HandlerMapping
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping
 import org.springframework.web.server.ServerWebExchange
 import org.springframework.web.server.WebFilter
@@ -61,6 +63,11 @@ class SecurityWebFilter(
             ).awaitFirstOrNull()
             return
         }
+
+        // TODO: Grab guild ID from request URL to check guild-level authorization here maybe? its worth trying, would make a much cleaner impl than current design
+        val pathVariables = exchange.getAttribute<Map<String, String>>(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
+        val guildId = pathVariables?.get("guildId")
+        LOGGER.debug("On SecurityWebFilter guildId as String from path variable from request attributes: $guildId")
 
         // Use CAM to validate token
         val requestBody = SecurityValidateV1Request(authHeader, authAnnotation.schemas.toList(), authAnnotation.scopes.toList())
