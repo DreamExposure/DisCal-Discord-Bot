@@ -13,6 +13,8 @@ class SnowflakeMapper: SimpleModule() {
     init {
         addSerializer(SnowflakeSerializer())
         addDeserializer(Snowflake::class.java, SnowflakeDeserializer())
+        addSerializer(NullableSnowflakeSerializer())
+        addDeserializer<Snowflake?>(Snowflake::class.java, NullableSnowflakeDeserializer())
     }
 
     class SnowflakeSerializer : StdSerializer<Snowflake>(Snowflake::class.java) {
@@ -25,6 +27,19 @@ class SnowflakeMapper: SimpleModule() {
         override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): Snowflake {
             val raw = p?.valueAsString
             return if (raw != null) Snowflake.of(raw) else throw IllegalStateException()
+        }
+    }
+
+    class NullableSnowflakeSerializer : StdSerializer<Snowflake?>(Snowflake::class.java) {
+        override fun serialize(value: Snowflake?, gen: JsonGenerator?, provider: SerializerProvider?) {
+            if (value == null) gen?.writeNull()  else gen?.writeString(value.asString())
+        }
+    }
+
+    class NullableSnowflakeDeserializer: StdDeserializer<Snowflake?>(Snowflake::class.java) {
+        override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): Snowflake? {
+            val raw = p?.valueAsString
+            return if (raw != null) Snowflake.of(raw) else null
         }
     }
 }
