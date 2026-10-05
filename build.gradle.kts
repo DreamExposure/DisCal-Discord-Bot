@@ -146,7 +146,7 @@ subprojects {
     tasks {
         withType<KotlinCompile> {
             compilerOptions {
-                freeCompilerArgs.set(listOf("-Xjsr305=strict", "-Xannotation-default-target=param-property"))
+                freeCompilerArgs.set(listOf("-Xjsr305=strict"))
                 jvmTarget.set(JvmTarget.fromTarget(java.targetCompatibility.majorVersion))
             }
         }
