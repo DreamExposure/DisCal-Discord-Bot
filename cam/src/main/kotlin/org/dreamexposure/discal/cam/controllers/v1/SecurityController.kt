@@ -2,6 +2,7 @@ package org.dreamexposure.discal.cam.controllers.v1
 
 import org.dreamexposure.discal.cam.business.SecurityService
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
+import org.dreamexposure.discal.core.extensions.asSnowflake
 import org.dreamexposure.discal.core.`object`.new.model.discal.cam.SecurityValidateV1Request
 import org.dreamexposure.discal.core.`object`.new.model.discal.cam.SecurityValidateV1Response
 import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
@@ -26,7 +27,7 @@ class SecurityController(
             request.schemas,
             request.scopes,
             request.accessLevel,
-            request.guildId
+            request.guildId?.toLong()?.asSnowflake()
         )
 
         return SecurityValidateV1Response(result.first == HttpStatus.OK, result.first.value(), result.second)

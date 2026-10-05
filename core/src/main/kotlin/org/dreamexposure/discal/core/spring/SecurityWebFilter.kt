@@ -5,7 +5,6 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.business.api.CamApiWrapper
-import org.dreamexposure.discal.core.extensions.asSnowflake
 import org.dreamexposure.discal.core.extensions.spring.writeJsonString
 import org.dreamexposure.discal.core.`object`.new.model.discal.cam.SecurityValidateV1Request
 import org.dreamexposure.discal.core.`object`.rest.ErrorResponse
@@ -65,7 +64,7 @@ class SecurityWebFilter(
         }
 
         val pathVariables = exchange.getAttribute<Map<String, String>>(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
-        val guildId = pathVariables?.get("guildId")?.toLong()?.asSnowflake()
+        val guildId = pathVariables?.get("guildId")
 
         // Use CAM to validate token
         val requestBody = SecurityValidateV1Request(authHeader, authAnnotation.schemas.toList(), authAnnotation.scopes.toList(), authAnnotation.accessLevel, guildId)
