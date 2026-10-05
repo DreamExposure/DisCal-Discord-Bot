@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.business
 import discord4j.common.util.Snowflake
 import discord4j.core.DiscordClient
 import discord4j.discordjson.json.RoleData
+import discord4j.rest.http.client.ClientException
 import discord4j.rest.util.Permission
 import discord4j.rest.util.PermissionSet
 import kotlinx.coroutines.reactor.awaitSingle
@@ -10,6 +11,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
+import reactor.core.publisher.Mono
 import java.util.function.Predicate
 import kotlin.jvm.optionals.getOrDefault
 
@@ -22,7 +24,9 @@ class PermissionService(
         get() = beanFactory.getBean<DiscordClient>()
 
     suspend fun hasAccessToGuild(guildId: Snowflake, memberId: Snowflake): Boolean {
-        val memberData = discordClient.getMemberById(guildId, memberId).data.awaitSingleOrNull()
+        val memberData = discordClient.getMemberById(guildId, memberId).data
+            .onErrorResume(ClientException.isStatusCode(403, 404)) { Mono.empty() }
+            .awaitSingleOrNull()
 
         return memberData != null && !memberData.pending().toOptional().getOrDefault(false)
     }
