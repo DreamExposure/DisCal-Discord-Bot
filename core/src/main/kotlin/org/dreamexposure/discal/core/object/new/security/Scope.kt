@@ -29,8 +29,29 @@ enum class Scope {
     companion object {
         fun defaultWebsiteLoginScopes() = listOf(
             OAUTH2_DISCORD,
+            CALENDAR_READ,
+            CALENDAR_WRITE,
+            CALENDAR_EVENT_READ,
+            CALENDAR_EVENT_WRITE,
+            GUILD_WEB_READ,
+            GUILD_WEB_WRITE,
+            GUILD_SETTINGS_READ,
+            GUILD_SETTINGS_WRITE,
+            EVENT_RSVP_READ,
+            EVENT_RSVP_WRITE,
+            ANNOUNCEMENT_READ,
+            ANNOUNCEMENT_WRITE,
         )
 
-        fun defaultBasicAppScopes() = listOf<Scope>()
+        fun defaultBasicAppScopes() = listOf(
+            CALENDAR_READ,
+            CALENDAR_WRITE,
+            CALENDAR_EVENT_READ,
+            CALENDAR_EVENT_WRITE,
+            EVENT_RSVP_READ,
+            EVENT_RSVP_WRITE,
+            ANNOUNCEMENT_READ,
+            ANNOUNCEMENT_WRITE,
+        )
     }
 }
