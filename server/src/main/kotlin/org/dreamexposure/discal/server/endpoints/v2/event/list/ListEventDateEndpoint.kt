@@ -9,6 +9,7 @@ import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.new.model.discal.v2.EventListV2Model
 import org.dreamexposure.discal.core.`object`.new.model.discal.v2.EventV2Model
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
@@ -31,7 +32,7 @@ class ListEventDateEndpoint(
     private val objectMapper: ObjectMapper
 ) {
     @PostMapping("/date", produces = ["application/json"])
-    @SecurityRequirement(disableSecurity = true, scopes = [])
+    @SecurityRequirement(disableSecurity = true, scopes = [], accessLevel = AccessLevel.PUBLIC)
     fun listByMonth(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

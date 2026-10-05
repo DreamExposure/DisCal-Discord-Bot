@@ -5,6 +5,7 @@ import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.dreamexposure.discal.core.`object`.new.model.discal.CalendarV3Model
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.springframework.web.bind.annotation.*
 
@@ -13,31 +14,29 @@ import org.springframework.web.bind.annotation.*
 class CalendarController(
     private val calendarService: CalendarService,
 ) {
-    // TODO: Need a way to check if authenticated user has access to the guild...
-
     // TODO: Create calendar endpoint???
 
-    @SecurityRequirement(scopes = [Scope.CALENDAR_READ])
+    @SecurityRequirement(scopes = [Scope.CALENDAR_READ], accessLevel = AccessLevel.GUILD_MEMBERS)
     @GetMapping(produces = ["application/json"])
     suspend fun getAllCalendars(@PathVariable guildId: Snowflake): List<CalendarV3Model> {
         return calendarService.getAllCalendars(guildId).map(::CalendarV3Model)
     }
 
-    @SecurityRequirement(scopes = [Scope.CALENDAR_READ])
+    @SecurityRequirement(scopes = [Scope.CALENDAR_READ], accessLevel = AccessLevel.GUILD_MEMBERS)
     @GetMapping("/{calendarNumber}")
     suspend fun getCalendar(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int): CalendarV3Model? {
         val calendar = calendarService.getCalendar(guildId, calendarNumber) ?: return null
         return CalendarV3Model(calendar)
     }
 
-    @SecurityRequirement(scopes = [Scope.CALENDAR_WRITE])
+    @SecurityRequirement(scopes = [Scope.CALENDAR_WRITE],  accessLevel = AccessLevel.ELEVATED_MEMBERS)
     @PatchMapping("/{calendarNumber}", produces = ["application/json"], consumes = ["application/json"])
     suspend fun updateCalendar(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @RequestBody spec: Calendar.UpdateSpec): CalendarV3Model {
         val calendar = calendarService.updateCalendar(guildId, calendarNumber, spec)
         return CalendarV3Model(calendar)
     }
 
-    @SecurityRequirement(scopes = [Scope.CALENDAR_WRITE])
+    @SecurityRequirement(scopes = [Scope.CALENDAR_WRITE], accessLevel = AccessLevel.ELEVATED_MEMBERS)
     @DeleteMapping("/{calendarNumber}")
     suspend fun deleteCalendar(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int) {
         calendarService.deleteCalendar(guildId, calendarNumber)

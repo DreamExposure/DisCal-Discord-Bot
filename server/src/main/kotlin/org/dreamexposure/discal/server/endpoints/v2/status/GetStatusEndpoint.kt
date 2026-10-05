@@ -7,6 +7,7 @@ import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.network.discal.BotInstanceData
 import org.dreamexposure.discal.core.`object`.network.discal.InstanceData
 import org.dreamexposure.discal.core.`object`.network.discal.NetworkData
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.business.NetworkStatusService
 import org.dreamexposure.discal.server.utils.Authentication
@@ -27,7 +28,7 @@ class GetStatusEndpoint(
 ) {
 
     @PostMapping("/get", produces = ["application/json"])
-    @SecurityRequirement(disableSecurity = true, scopes = [])
+    @SecurityRequirement(disableSecurity = true, scopes = [], accessLevel = AccessLevel.PUBLIC)
     fun getStatus(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

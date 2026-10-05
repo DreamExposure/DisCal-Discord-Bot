@@ -5,6 +5,7 @@ import discord4j.core.DiscordClient
 import discord4j.discordjson.json.CurrentMemberModifyData
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
@@ -25,7 +26,7 @@ class UpdateWebGuildEndpoint(
     private val authentication: Authentication,
 ) {
     @PostMapping(value = ["/update"], produces = ["application/json"])
-    @SecurityRequirement(disableSecurity = true, scopes = [])
+    @SecurityRequirement(disableSecurity = true, scopes = [], accessLevel = AccessLevel.PUBLIC)
     fun updateGuild(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

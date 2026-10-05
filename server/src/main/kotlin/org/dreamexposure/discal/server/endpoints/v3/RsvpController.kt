@@ -4,6 +4,7 @@ import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.business.RsvpService
 import org.dreamexposure.discal.core.`object`.new.Rsvp
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.springframework.web.bind.annotation.*
 
@@ -14,14 +15,14 @@ class RsvpController(
 ) {
     // TODO: Need way to check if authenticated user has access to the guild...
 
-    @SecurityRequirement(scopes = [Scope.EVENT_RSVP_READ])
+    @SecurityRequirement(scopes = [Scope.EVENT_RSVP_READ], accessLevel = AccessLevel.GUILD_MEMBERS)
     @GetMapping(produces = ["application/json"])
     suspend fun getRsvp(@PathVariable guildId: Snowflake, @PathVariable eventId: String): Rsvp {
         return rsvpService.getRsvp(guildId, eventId)
     }
 
 
-    @SecurityRequirement(scopes = [Scope.EVENT_RSVP_WRITE])
+    @SecurityRequirement(scopes = [Scope.EVENT_RSVP_WRITE], accessLevel = AccessLevel.PRIVILEGED_MEMBERS)
     @PatchMapping(produces = ["application/json"], consumes = ["application/json"])
     suspend fun patchRsvp(@PathVariable guildId: Snowflake, @PathVariable eventId: String, @RequestBody rsvp: Rsvp): Rsvp {
         return rsvpService.updateRsvp(rsvp)

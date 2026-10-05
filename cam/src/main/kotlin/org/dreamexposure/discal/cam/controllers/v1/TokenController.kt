@@ -5,6 +5,7 @@ import org.dreamexposure.discal.cam.managers.CalendarAuthManager
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.`object`.new.model.discal.cam.TokenV1Model
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.`object`.new.security.Scope.CALENDAR_TOKEN_READ
 import org.dreamexposure.discal.core.`object`.new.security.TokenType.INTERNAL
 import org.springframework.web.bind.annotation.GetMapping
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 class TokenController(
     private val calendarAuthManager: CalendarAuthManager,
 ) {
-    @SecurityRequirement(schemas = [INTERNAL], scopes = [CALENDAR_TOKEN_READ])
+    @SecurityRequirement(schemas = [INTERNAL], scopes = [CALENDAR_TOKEN_READ], accessLevel = AccessLevel.PUBLIC)
     @GetMapping(produces = ["application/json"])
     suspend fun getToken(@RequestParam host: CalendarHost, @RequestParam id: Int, @RequestParam guild: Snowflake?): TokenV1Model? {
         return calendarAuthManager.getCredentialData(host, id, guild)

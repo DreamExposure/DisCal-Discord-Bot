@@ -7,6 +7,7 @@ import org.dreamexposure.discal.core.enums.announcement.AnnouncementStyle
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.GuildSettings
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.`object`.web.WebCalendar
 import org.dreamexposure.discal.core.`object`.web.WebGuild
 import org.dreamexposure.discal.core.`object`.web.WebRole
@@ -32,7 +33,7 @@ class GetWebGuildEndpoint(
     private val authentication: Authentication,
 ) {
     @PostMapping(value = ["/get"], produces = ["application/json"])
-    @SecurityRequirement(disableSecurity = true, scopes = [])
+    @SecurityRequirement(disableSecurity = true, scopes = [], accessLevel = AccessLevel.PUBLIC)
     fun getSettings(swe: ServerWebExchange, response: ServerHttpResponse, @RequestBody rBody: String): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->
             if (!authState.success) {

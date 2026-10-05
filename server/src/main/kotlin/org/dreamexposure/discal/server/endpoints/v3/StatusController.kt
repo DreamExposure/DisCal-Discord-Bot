@@ -3,6 +3,7 @@ package org.dreamexposure.discal.server.endpoints.v3
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.`object`.new.model.discal.HeartbeatV3RequestModel
 import org.dreamexposure.discal.core.`object`.new.model.discal.NetworkDataV3Model
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.`object`.new.security.Scope.INTERNAL_HEARTBEAT
 import org.dreamexposure.discal.core.`object`.new.security.TokenType.INTERNAL
 import org.dreamexposure.discal.core.`object`.rest.GenericResponse
@@ -15,11 +16,11 @@ class StatusController(
     private val networkStatusService: NetworkStatusService,
 ) {
 
-    @SecurityRequirement(disableSecurity = true, scopes = [])
+    @SecurityRequirement(disableSecurity = true, scopes = [], accessLevel = AccessLevel.PUBLIC)
     @GetMapping(produces = ["application/json"])
     suspend fun get(): NetworkDataV3Model = networkStatusService.getNetworkStatus()
 
-    @SecurityRequirement(schemas = [INTERNAL], scopes = [INTERNAL_HEARTBEAT])
+    @SecurityRequirement(schemas = [INTERNAL], scopes = [INTERNAL_HEARTBEAT], accessLevel = AccessLevel.PUBLIC)
     @PostMapping("/heartbeat", produces = ["application/json"])
     suspend fun post(@RequestBody body: HeartbeatV3RequestModel): GenericResponse {
         when (body.type) {

@@ -2,6 +2,7 @@ package org.dreamexposure.discal.server.endpoints.v2.account
 
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.logger.LOGGER
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.dreamexposure.discal.server.utils.Authentication
 import org.dreamexposure.discal.server.utils.responseMessage
@@ -18,7 +19,7 @@ import reactor.core.publisher.Mono
 class LogoutEndpoint(
     private val authentication: Authentication,
 ) {
-    @SecurityRequirement(disableSecurity = true, scopes = [])
+    @SecurityRequirement(disableSecurity = true, scopes = [], accessLevel = AccessLevel.PUBLIC)
     @GetMapping("/logout", produces = ["application/json"])
     fun logoutOfAccount(swe: ServerWebExchange, response: ServerHttpResponse): Mono<String> {
         return authentication.authenticate(swe).flatMap { authState ->

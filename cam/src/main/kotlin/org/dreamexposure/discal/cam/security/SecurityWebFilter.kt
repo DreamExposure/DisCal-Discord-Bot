@@ -5,8 +5,8 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.cam.business.SecurityService
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
+import org.dreamexposure.discal.core.extensions.asSnowflake
 import org.dreamexposure.discal.core.extensions.spring.writeJsonString
-import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.rest.ErrorResponse
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -63,17 +63,17 @@ class SecurityWebFilter(
             return
         }
 
-        // TODO: Grab guild ID from request URL to check guild-level authorization here maybe? its worth trying, would make a much cleaner impl than current design
         val pathVariables = exchange.getAttribute<Map<String, String>>(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
-        val guildId = pathVariables?.get("guildId")
-        LOGGER.debug("On SecurityWebFilter guildId as String from path variable from request attributes: $guildId")
+        val guildId = pathVariables?.get("guildId")?.toLong()?.asSnowflake()
 
 
 
         val result = securityService.authenticateAndAuthorizeToken(
             authHeader,
             authAnnotation.schemas.toList(),
-            authAnnotation.scopes.toList()
+            authAnnotation.scopes.toList(),
+            authAnnotation.accessLevel,
+            guildId,
         )
         if (result.first != HttpStatus.OK) {
             exchange.response.statusCode = result.first

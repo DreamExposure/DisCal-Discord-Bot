@@ -1,9 +1,12 @@
 package org.dreamexposure.discal.cam.business
 
+import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.business.ApiKeyService
+import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.business.SessionService
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.extensions.isExpiredTtl
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.dreamexposure.discal.core.`object`.new.security.TokenType
 import org.springframework.http.HttpStatus
@@ -13,13 +16,16 @@ import org.springframework.stereotype.Component
 class SecurityService(
     private val sessionService: SessionService,
     private val apiKeyService: ApiKeyService,
+    private val permissionService: PermissionService,
 ) {
-    suspend fun authenticateAndAuthorizeToken(token: String, schemas: List<TokenType>, scopes: List<Scope>): Pair<HttpStatus, String> {
+    suspend fun authenticateAndAuthorizeToken(token: String, schemas: List<TokenType>, scopes: List<Scope>, accessLevel: AccessLevel, guildId: Snowflake?): Pair<HttpStatus, String> {
         if (!authenticateToken(token)) return Pair(HttpStatus.UNAUTHORIZED, "Unauthenticated")
 
         if (!validateTokenSchema(token, schemas)) return Pair(HttpStatus.UNAUTHORIZED, "Unsupported schema")
 
         if (!authorizeToken(token, scopes)) return Pair(HttpStatus.FORBIDDEN, "Access denied")
+
+        if (!authorizeOnAccessLevel(token, accessLevel, guildId)) return Pair(HttpStatus.FORBIDDEN, "Access to resource denied")
 
         return Pair(HttpStatus.OK, "Authorized")
     }
@@ -59,6 +65,21 @@ class SecurityService(
         return scopes.containsAll(requiredScopes)
     }
 
+    suspend fun authorizeOnAccessLevel(token: String, accessLevel: AccessLevel, guildId: Snowflake?): Boolean {
+        if (getSchema(token) == TokenType.INTERNAL) return true // bot has access to everything, cannot get here unless already authed, no need to double-check auth
+        if (guildId == null) return true // No guildId in request, access level for guilds not relevant
+        if (accessLevel == AccessLevel.PUBLIC) return true // Public resource regardless of guild
+
+        val userId = getUserFromToken(token) ?: return false // User needs to exist
+        val hasAccessToGuild = permissionService.hasAccessToGuild(guildId, userId)
+
+        return when (accessLevel) {
+            AccessLevel.GUILD_MEMBERS -> hasAccessToGuild
+            AccessLevel.PRIVILEGED_MEMBERS -> hasAccessToGuild && permissionService.hasControlRole(guildId, userId)
+            AccessLevel.ELEVATED_MEMBERS -> hasAccessToGuild && permissionService.hasElevatedPermissions(guildId, userId)
+        }
+    }
+
 
     // Authentication based on token type
     private suspend fun authenticateUserToken(token: String): Boolean {
@@ -95,6 +116,17 @@ class SecurityService(
             token.startsWith(TokenType.APP.schema) -> TokenType.APP
             token.startsWith(TokenType.INTERNAL.schema) -> TokenType.INTERNAL
             else -> TokenType.NONE
+        }
+    }
+
+    private suspend fun getUserFromToken(token: String): Snowflake? {
+        val schema = getSchema(token)
+        val tokenStr = token.removePrefix(schema.schema)
+
+        return when (schema) {
+            TokenType.BEARER -> sessionService.getSession(tokenStr)?.user
+            TokenType.APP -> apiKeyService.getKey(tokenStr)?.userId
+            else -> null
         }
     }
 }

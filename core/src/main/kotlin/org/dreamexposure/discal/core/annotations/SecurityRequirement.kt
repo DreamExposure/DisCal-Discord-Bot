@@ -1,5 +1,6 @@
 package org.dreamexposure.discal.core.annotations
 
+import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.dreamexposure.discal.core.`object`.new.security.TokenType
 
@@ -8,5 +9,6 @@ import org.dreamexposure.discal.core.`object`.new.security.TokenType
 annotation class SecurityRequirement(
         val schemas: Array<TokenType> = [], // Default to allowing any token kind
         val scopes: Array<Scope>,
+        val accessLevel: AccessLevel,
         val disableSecurity: Boolean = false,
 )

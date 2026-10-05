@@ -6,10 +6,12 @@ import discord4j.discordjson.json.RoleData
 import discord4j.rest.util.Permission
 import discord4j.rest.util.PermissionSet
 import kotlinx.coroutines.reactor.awaitSingle
+import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.getBean
 import org.springframework.stereotype.Component
 import java.util.function.Predicate
+import kotlin.jvm.optionals.getOrDefault
 
 @Component
 class PermissionService(
@@ -18,6 +20,12 @@ class PermissionService(
 ) {
     private val discordClient
         get() = beanFactory.getBean<DiscordClient>()
+
+    suspend fun hasAccessToGuild(guildId: Snowflake, memberId: Snowflake): Boolean {
+        val memberData = discordClient.getMemberById(guildId, memberId).data.awaitSingleOrNull()
+
+        return memberData != null && !memberData.pending().toOptional().getOrDefault(false)
+    }
 
     suspend fun hasControlRole(guildId: Snowflake, memberId: Snowflake): Boolean {
         val settings = settingsService.getSettings(guildId)
