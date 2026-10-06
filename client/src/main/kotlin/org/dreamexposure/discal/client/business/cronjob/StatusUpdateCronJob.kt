@@ -35,9 +35,9 @@ class StatusUpdateCronJob(
         "/discal for info & help",
         "Trans rights are human rights",
         "Version {version}",
+        "Made by real humans, for real humans",
         "{calendar_count} calendars managed!",
-        "Now has interactions!",
-        "Delay, Deny, Defend",
+        "Delay, Deny, Depose",
         "Proudly written in Kotlin using Discord4J",
         "Free Palestine!",
         "https://discalbot.com",
@@ -46,7 +46,7 @@ class StatusUpdateCronJob(
         "Slava Ukraini!",
         "Support DisCal on Patreon",
         "{announcement_count} announcements running!",
-        "Now the real improvements begin"
+        "No human is illegal. Chinga la Migra!"
     )
 
     override fun run(args: ApplicationArguments) {
