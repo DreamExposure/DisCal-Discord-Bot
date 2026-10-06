@@ -58,6 +58,7 @@ class GoogleCalendarProviderService(
             guildId = guildId,
             number = spec.number,
             host = CalendarMetadata.Host.GOOGLE,
+            privacy = spec.privacy,
             id = response.entity.id,
             address = response.entity.id,
             external = false,

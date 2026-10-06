@@ -19,6 +19,7 @@ interface CalendarMetadataRepository : R2dbcRepository<CalendarMetadataData, Lon
     @Query("""
         UPDATE calendars
         SET host = :host,
+            privacy = :privacy,
             calendar_id = :calendarId,
             calendar_address = :calendarAddress,
             external = :external,
@@ -33,6 +34,7 @@ interface CalendarMetadataRepository : R2dbcRepository<CalendarMetadataData, Lon
         guildId: Long,
         calendarNumber: Int,
         host: String,
+        privacy: String,
         calendarId: String,
         calendarAddress: String,
         external: Boolean,

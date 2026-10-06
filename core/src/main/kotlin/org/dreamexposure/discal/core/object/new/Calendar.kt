@@ -23,11 +23,13 @@ data class Calendar(
         val name: String,
         val description: String?,
         val timezone: ZoneId,
+        val privacy: CalendarMetadata.Privacy,
     )
 
     data class UpdateSpec(
         val name: String?,
         val description: String?,
         val timezone: ZoneId?,
+        val privacy: CalendarMetadata.Privacy?,
     )
 }

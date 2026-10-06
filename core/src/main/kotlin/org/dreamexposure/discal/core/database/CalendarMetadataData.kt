@@ -7,6 +7,7 @@ data class CalendarMetadataData(
     val guildId: Long,
     val calendarNumber: Int,
     val host: String,
+    val privacy: String,
     val calendarId: String,
     val calendarAddress: String,
     val external: Boolean,

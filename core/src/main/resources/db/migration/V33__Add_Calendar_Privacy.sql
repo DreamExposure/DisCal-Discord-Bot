@@ -1,0 +1,3 @@
+ALTER TABLE calendars
+    ADD COLUMN privacy VARCHAR(255) NOT NULL DEFAULT 'PUBLIC'
+        AFTER host;

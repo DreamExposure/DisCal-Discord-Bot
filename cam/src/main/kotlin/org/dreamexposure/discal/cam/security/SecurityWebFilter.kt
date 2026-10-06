@@ -65,6 +65,7 @@ class SecurityWebFilter(
 
         val pathVariables = exchange.getAttribute<Map<String, String>>(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
         val guildId = pathVariables?.get("guildId")?.toLong()?.asSnowflake()
+        val calendarNumber = pathVariables?.get("calendarNumber")?.toInt()
 
 
 
@@ -74,6 +75,7 @@ class SecurityWebFilter(
             authAnnotation.scopes.toList(),
             authAnnotation.accessLevel,
             guildId,
+            calendarNumber
         )
         if (result.first != HttpStatus.OK) {
             exchange.response.statusCode = result.first

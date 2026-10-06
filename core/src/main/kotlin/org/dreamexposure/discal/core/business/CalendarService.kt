@@ -74,6 +74,7 @@ class   CalendarService(
             guildId = calendar.guildId.asLong(),
             calendarNumber = calendar.number,
             host = calendar.host.name,
+            privacy = calendar.privacy.name,
             calendarId = calendar.id,
             calendarAddress = calendar.address,
             external = calendar.external,
@@ -90,7 +91,7 @@ class   CalendarService(
         return calendar
     }
 
-    suspend fun updateCalendarMetadata(calendar: CalendarMetadata) {
+    suspend fun updateCalendarMetadata(calendar: CalendarMetadata, updateFullCalendarCache: Boolean = true) {
         val aes = AESEncryption(calendar.secrets.privateKey)
         val encryptedRefreshToken = aes.encrypt(calendar.secrets.refreshToken).awaitSingle()
         val encryptedAccessToken = aes.encrypt(calendar.secrets.accessToken).awaitSingle()
@@ -99,6 +100,7 @@ class   CalendarService(
             guildId = calendar.guildId.asLong(),
             calendarNumber = calendar.number,
             host = calendar.host.name,
+            privacy = calendar.privacy.name,
             calendarId = calendar.id,
             calendarAddress = calendar.address,
             external = calendar.external,
@@ -116,8 +118,11 @@ class   CalendarService(
             calendarMetadataCache.put(key = calendar.guildId,value = (newList + calendar).toTypedArray())
         }
 
-        val cachedFullCalendar = calendarCache.get(calendar.guildId, calendar.number)
-        if (cachedFullCalendar != null) calendarCache.put(calendar.guildId, calendar.number, cachedFullCalendar.copy(metadata = calendar))
+        // Allow calling method to take care of updating full calendar cache to reduce cache puts if full calendar is getting updated anyway
+        if (updateFullCalendarCache) {
+            val cachedFullCalendar = calendarCache.get(calendar.guildId, calendar.number)
+            if (cachedFullCalendar != null) calendarCache.put(calendar.guildId, calendar.number, cachedFullCalendar.copy(metadata = calendar))
+        }
     }
 
     suspend fun getNextCalendarNumber(guildId: Snowflake): Int = getAllCalendarMetadata(guildId).size + 1
@@ -158,9 +163,16 @@ class   CalendarService(
     suspend fun updateCalendar(guildId: Snowflake, number: Int, spec: Calendar.UpdateSpec): Calendar {
         val metadata = getCalendarMetadata(guildId, number) ?: throw NotFoundException("Cannot update a calendar that does not exist")
 
+        // Handle any metadata changes outside host-specific update logic
+        var newMetadata = metadata
+        spec.privacy?.let { newMetadata = metadata.copy(privacy = it) }
+
+
         val calendar = calendarProviders
-            .first { it.host == metadata.host }
-            .updateCalendar(guildId, metadata, spec)
+            .first { it.host == newMetadata.host }
+            .updateCalendar(guildId, newMetadata, spec)
+
+        updateCalendarMetadata(calendar.metadata, updateFullCalendarCache = false) //Reduce a dupe-cache put since we are doing it below
 
         calendarCache.put(guildId, calendar.metadata.number, calendar)
 

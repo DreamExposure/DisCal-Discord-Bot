@@ -20,20 +20,20 @@ class EventController(
         return calendarService.createEvent(guildId, calendarNumber, spec)
     }
 
-    @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_READ], accessLevel = AccessLevel.GUILD_MEMBERS)
+    @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_READ], accessLevel = AccessLevel.DEFER_TO_CALENDAR_PRIVACY)
     @GetMapping("/{eventId}", produces = ["application/json"])
     suspend fun getEvent(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @PathVariable eventId: String): Event? {
         return calendarService.getEvent(guildId, calendarNumber, eventId)
     }
 
 
-    @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_READ], accessLevel = AccessLevel.GUILD_MEMBERS)
+    @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_READ], accessLevel = AccessLevel.DEFER_TO_CALENDAR_PRIVACY)
     @GetMapping("/range")
     suspend fun getEventsInRange(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @RequestParam start: Instant, @RequestParam end: Instant): List<Event> {
         return calendarService.getEventsInTimeRange(guildId, calendarNumber, start, end)
     }
 
-    @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_READ], accessLevel = AccessLevel.GUILD_MEMBERS)
+    @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_READ], accessLevel = AccessLevel.DEFER_TO_CALENDAR_PRIVACY)
     @GetMapping("/ongoing", produces = ["application/json"])
     suspend fun getOngoingEvents(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int): List<Event> {
         return calendarService.getOngoingEvents(guildId, calendarNumber)

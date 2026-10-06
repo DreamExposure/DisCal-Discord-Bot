@@ -2,10 +2,12 @@ package org.dreamexposure.discal.cam.business
 
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.business.ApiKeyService
+import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.PermissionService
 import org.dreamexposure.discal.core.business.SessionService
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.extensions.isExpiredTtl
+import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
 import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.dreamexposure.discal.core.`object`.new.security.TokenType
@@ -17,15 +19,16 @@ class SecurityService(
     private val sessionService: SessionService,
     private val apiKeyService: ApiKeyService,
     private val permissionService: PermissionService,
+    private val calendarService: CalendarService,
 ) {
-    suspend fun authenticateAndAuthorizeToken(token: String, schemas: List<TokenType>, scopes: List<Scope>, accessLevel: AccessLevel, guildId: Snowflake?): Pair<HttpStatus, String> {
+    suspend fun authenticateAndAuthorizeToken(token: String, schemas: List<TokenType>, scopes: List<Scope>, accessLevel: AccessLevel, guildId: Snowflake?, calNumber: Int?): Pair<HttpStatus, String> {
         if (!authenticateToken(token)) return Pair(HttpStatus.UNAUTHORIZED, "Unauthenticated")
 
         if (!validateTokenSchema(token, schemas)) return Pair(HttpStatus.UNAUTHORIZED, "Unsupported schema")
 
         if (!authorizeToken(token, scopes)) return Pair(HttpStatus.FORBIDDEN, "Access denied")
 
-        if (!authorizeOnAccessLevel(token, accessLevel, guildId)) return Pair(HttpStatus.FORBIDDEN, "Access to resource denied")
+        if (!authorizeOnAccessLevel(token, accessLevel, guildId, calNumber)) return Pair(HttpStatus.FORBIDDEN, "Access to resource denied")
 
         return Pair(HttpStatus.OK, "Authorized")
     }
@@ -65,7 +68,7 @@ class SecurityService(
         return scopes.containsAll(requiredScopes)
     }
 
-    suspend fun authorizeOnAccessLevel(token: String, accessLevel: AccessLevel, guildId: Snowflake?): Boolean {
+    suspend fun authorizeOnAccessLevel(token: String, accessLevel: AccessLevel, guildId: Snowflake?, calNumber: Int?): Boolean {
         if (getSchema(token) == TokenType.INTERNAL) return true // bot has access to everything, cannot get here unless already authed, no need to double-check auth
         if (guildId == null) return true // No guildId in request, access level for guilds not relevant
         if (accessLevel == AccessLevel.PUBLIC) return true // Public resource regardless of guild
@@ -75,6 +78,15 @@ class SecurityService(
 
         return when (accessLevel) {
             AccessLevel.GUILD_MEMBERS -> hasAccessToGuild
+            AccessLevel.DEFER_TO_CALENDAR_PRIVACY -> {
+                if (calNumber == null) return false // Calendar needs to be provided in the request, otherwise what does this defer to?
+                val calendarMetadata = calendarService.getCalendarMetadata(guildId, calNumber) ?: return false // calendar must exist
+
+                when(calendarMetadata.privacy) {
+                    CalendarMetadata.Privacy.PUBLIC -> true
+                    CalendarMetadata.Privacy.GUILD_MEMBERS_ONLY -> hasAccessToGuild
+                }
+            }
             AccessLevel.PRIVILEGED_MEMBERS -> hasAccessToGuild && permissionService.hasControlRole(guildId, userId)
             AccessLevel.ELEVATED_MEMBERS -> hasAccessToGuild && permissionService.hasElevatedPermissions(guildId, userId)
         }

@@ -22,7 +22,7 @@ class CalendarController(
         return calendarService.getAllCalendars(guildId).map(::CalendarV3Model)
     }
 
-    @SecurityRequirement(scopes = [Scope.CALENDAR_READ], accessLevel = AccessLevel.GUILD_MEMBERS)
+    @SecurityRequirement(scopes = [Scope.CALENDAR_READ], accessLevel = AccessLevel.DEFER_TO_CALENDAR_PRIVACY)
     @GetMapping("/{calendarNumber}")
     suspend fun getCalendar(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int): CalendarV3Model? {
         val calendar = calendarService.getCalendar(guildId, calendarNumber) ?: return null

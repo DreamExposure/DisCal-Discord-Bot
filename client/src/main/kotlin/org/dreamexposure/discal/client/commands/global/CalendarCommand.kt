@@ -41,6 +41,7 @@ class CalendarCommand(
             "name" -> name(event, settings)
             "description" -> description(event, settings)
             "timezone" -> timezone(event, settings)
+            "privacy" -> privacy(event, settings)
             "review" -> review(event, settings)
             "confirm" -> confirm(event, settings)
             "cancel" -> cancel(event, settings)
@@ -124,6 +125,11 @@ class CalendarCommand(
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(CalendarMetadata.Host::valueOf)
             .orElse(CalendarMetadata.Host.GOOGLE)
+        val privacy = event.options[0].getOption("privacy")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(CalendarMetadata.Privacy::valueOf)
+            .orElse(CalendarMetadata.Privacy.PUBLIC)
 
         // Validate permissions
         val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
@@ -162,6 +168,7 @@ class CalendarCommand(
                     guildId = settings.guildId,
                     number = calendarService.getNextCalendarNumber(settings.guildId),
                     host = host,
+                    privacy = privacy,
                     id = "NOT_YET_GENERATED",
                     address = "NOT_YET_GENERATED",
                     external = false,
@@ -302,6 +309,41 @@ class CalendarCommand(
             .awaitSingle()
     }
 
+    private suspend fun privacy(event: ChatInputInteractionEvent, settings: GuildSettings) {
+        val privacy = event.options[0].getOption("privacy")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .map(CalendarMetadata.Privacy::valueOf)
+            .get()
+
+        // Validate permissions
+        val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
+        if (!hasElevatedPerms) {
+            event.createFollowup(getCommonMsg("error.perms.elevated", settings.locale))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+            return
+        }
+
+        // Check if wizard not started
+        val existingWizard = calendarService.getCalendarWizard(settings.guildId, event.interaction.user.id)
+        if (existingWizard == null) {
+            event.createFollowup(getMessage("error.wizard.notStarted", settings))
+                .withEphemeral(ephemeral)
+                .awaitSingle()
+            return
+        }
+
+        val alteredWizard = existingWizard.copy(entity = existingWizard.entity.copy(metadata = existingWizard.entity.metadata.copy(privacy = privacy)))
+        calendarService.putCalendarWizard(alteredWizard)
+
+        event.createFollowup(getMessage("privacy.success", settings))
+            .withEphemeral(ephemeral)
+            .withEmbeds(embedService.calendarWizardEmbed(alteredWizard, settings))
+            .withComponents(*componentService.getWizardComponents(alteredWizard, settings))
+            .awaitSingle()
+    }
+
     private suspend fun review(event: ChatInputInteractionEvent, settings: GuildSettings) {
         // Validate permissions
         val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
@@ -356,6 +398,7 @@ class CalendarCommand(
                     name = existingWizard.entity.name,
                     description = existingWizard.entity.description,
                     timezone = existingWizard.entity.timezone,
+                    privacy = existingWizard.entity.metadata.privacy,
                 )
             ) else calendarService.createCalendar(
                 settings.guildId,
@@ -365,6 +408,7 @@ class CalendarCommand(
                     name = existingWizard.entity.name,
                     description = existingWizard.entity.description,
                     timezone = existingWizard.entity.timezone,
+                    privacy = existingWizard.entity.metadata.privacy,
                 )
             )
             calendarService.cancelCalendarWizard(settings.guildId, calendar.metadata.number)

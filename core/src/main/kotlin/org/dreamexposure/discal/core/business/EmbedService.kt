@@ -368,6 +368,10 @@ class EmbedService(
                 getEmbedMessage("calendar", "wizard.field.host", settings.locale),
                 wizard.entity.metadata.host.name,
                 true
+            ).addField(
+                getEmbedMessage("calendar", "wizard.field.privacy", settings.locale),
+                wizard.entity.metadata.privacy.name,
+                false
             )
 
         if (wizard.editing) builder.addField(

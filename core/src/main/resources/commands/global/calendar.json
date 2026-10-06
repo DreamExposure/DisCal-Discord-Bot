@@ -66,6 +66,22 @@
               "value": "GOOGLE"
             }
           ]
+        },
+        {
+          "name": "privacy",
+          "type": 1,
+          "description": "How visible the calendar is to the public, defaults to public",
+          "required": false,
+          "choices": [
+            {
+              "name": "Public",
+              "value": "PUBLIC"
+            },
+            {
+              "name": "Guild Members Only",
+              "value": "GUILD_MEMBERS_ONLY"
+            }
+          ]
         }
       ]
     },

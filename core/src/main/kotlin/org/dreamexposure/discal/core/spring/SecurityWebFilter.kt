@@ -65,9 +65,11 @@ class SecurityWebFilter(
 
         val pathVariables = exchange.getAttribute<Map<String, String>>(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
         val guildId = pathVariables?.get("guildId")
+        val calendarNumber = pathVariables?.get("calendarNumber")?.toInt()
+
 
         // Use CAM to validate token
-        val requestBody = SecurityValidateV1Request(authHeader, authAnnotation.schemas.toList(), authAnnotation.scopes.toList(), authAnnotation.accessLevel, guildId)
+        val requestBody = SecurityValidateV1Request(authHeader, authAnnotation.schemas.toList(), authAnnotation.scopes.toList(), authAnnotation.accessLevel, guildId, calendarNumber)
 
         val response = camApiWrapper.validateToken(requestBody)
 

@@ -15,6 +15,7 @@ data class CalendarMetadata(
     val guildId: Snowflake,
     val number: Int,
     val host: Host,
+    val privacy: Privacy,
     val id: String,
     val address: String,
     val external: Boolean,
@@ -38,6 +39,7 @@ data class CalendarMetadata(
                 guildId = data.guildId.asSnowflake(),
                 number = data.calendarNumber,
                 host = Host.valueOf(data.host),
+                privacy = Privacy.valueOf(data.privacy),
                 id = data.calendarId,
                 address = data.calendarAddress,
                 external = data.external,
@@ -65,5 +67,10 @@ data class CalendarMetadata(
 
     enum class Host {
         GOOGLE,
+    }
+
+    enum class Privacy {
+        PUBLIC,
+        GUILD_MEMBERS_ONLY,
     }
 }

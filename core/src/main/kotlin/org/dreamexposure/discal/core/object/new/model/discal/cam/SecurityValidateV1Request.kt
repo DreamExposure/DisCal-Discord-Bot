@@ -10,4 +10,5 @@ data class SecurityValidateV1Request(
     val scopes: List<Scope>,
     val accessLevel: AccessLevel,
     val guildId: String?,
+    val calendarNumber: Int?,
 )

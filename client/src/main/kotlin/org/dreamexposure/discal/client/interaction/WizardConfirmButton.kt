@@ -61,6 +61,7 @@ class WizardConfirmButton(
                     name = existingWizard.entity.name,
                     description = existingWizard.entity.description,
                     timezone = existingWizard.entity.timezone,
+                    privacy = existingWizard.entity.metadata.privacy,
                 )
             ) else calendarService.createCalendar(
                 settings.guildId,
@@ -70,6 +71,7 @@ class WizardConfirmButton(
                     name = existingWizard.entity.name,
                     description = existingWizard.entity.description,
                     timezone = existingWizard.entity.timezone,
+                    privacy = existingWizard.entity.metadata.privacy,
                 )
             )
             calendarService.cancelCalendarWizard(settings.guildId, calendar.metadata.number)
