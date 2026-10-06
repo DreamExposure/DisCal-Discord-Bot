@@ -73,8 +73,8 @@ class SecurityService(
         if (guildId == null) return true // No guildId in request, access level for guilds not relevant
         if (accessLevel == AccessLevel.PUBLIC) return true // Public resource regardless of guild
 
-        val userId = getUserFromToken(token) ?: return false // User needs to exist
-        val hasAccessToGuild = permissionService.hasAccessToGuild(guildId, userId)
+        val userId = getUserFromToken(token)
+        val hasAccessToGuild = userId != null && permissionService.hasAccessToGuild(guildId, userId)
 
         return when (accessLevel) {
             AccessLevel.GUILD_MEMBERS -> hasAccessToGuild
