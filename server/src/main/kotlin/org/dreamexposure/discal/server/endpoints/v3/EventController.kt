@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*
 import java.time.Instant
 
 @RestController
-@RequestMapping("/v3/guilds{guildId}/calendars/{calendarNumber}/events")
+@RequestMapping("/v3/guilds/{guildId}/calendars/{calendarNumber}/events")
 class EventController(
     private val calendarService: CalendarService,
 ) {
