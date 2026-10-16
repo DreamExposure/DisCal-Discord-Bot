@@ -4,7 +4,6 @@ import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.business.ApiKeyService
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.PermissionService
-import org.dreamexposure.discal.core.business.SessionService
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.extensions.isExpiredTtl
 import org.dreamexposure.discal.core.`object`.new.CalendarMetadata

@@ -3,7 +3,7 @@ package org.dreamexposure.discal.cam.managers
 import org.dreamexposure.discal.cam.business.OauthStateService
 import org.dreamexposure.discal.cam.discord.DiscordOauthHandler
 import org.dreamexposure.discal.cam.json.discal.TokenResponse
-import org.dreamexposure.discal.core.business.SessionService
+import org.dreamexposure.discal.cam.business.SessionService
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.`object`.WebSession

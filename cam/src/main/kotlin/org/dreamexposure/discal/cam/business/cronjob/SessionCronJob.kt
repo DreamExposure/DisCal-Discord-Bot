@@ -1,7 +1,7 @@
 package org.dreamexposure.discal.cam.business.cronjob
 
 import kotlinx.coroutines.reactor.mono
-import org.dreamexposure.discal.core.business.SessionService
+import org.dreamexposure.discal.cam.business.SessionService
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.utils.GlobalVal
 import org.springframework.boot.ApplicationArguments
