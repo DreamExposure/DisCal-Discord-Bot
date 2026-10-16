@@ -24,6 +24,7 @@ class CacheConfig {
     private val calendarTokenTtl = Config.CACHE_TTL_CALENDAR_TOKEN_MINUTES.getLong().asMinutes()
     private val eventTtl = Config.CACHE_TTL_EVENTS_MINUTES.getLong().asMinutes()
     private val networkStatusTtl = Config.CACHE_TTL_NETWORK_STATUS_MINUTES.getLong().asMinutes()
+    private val temporaryTokenTtl = Config.CACHE_TTL_TEMPORARY_TOKEN_MINUTES.getLong().asMinutes()
 
 
     // Redis caching
@@ -105,6 +106,12 @@ class CacheConfig {
     fun networkStatusRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): NetworkStatusCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "NetworkStatus", networkStatusTtl)
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun temporaryTokenRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): TemporaryTokenCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "TemporaryToken", temporaryTokenTtl)
+
 
     // In-memory fallback caching
     @Bean
@@ -148,4 +155,7 @@ class CacheConfig {
 
     @Bean
     fun networkStatusFallbackCache(): NetworkStatusCache = JdkCacheRepository(networkStatusTtl)
+
+    @Bean
+    fun temporaryTokenFallbackCache(): TemporaryTokenCache = JdkCacheRepository(temporaryTokenTtl)
 }

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component
 @Component
 class SecurityService(
     private val sessionService: SessionService,
+    private val temporaryTokenService: TemporaryTokenService,
     private val apiKeyService: ApiKeyService,
     private val permissionService: PermissionService,
     private val calendarService: CalendarService,
@@ -39,6 +40,7 @@ class SecurityService(
         return when (schema) {
             TokenType.BEARER -> authenticateUserToken(tokenStr)
             TokenType.APP -> authenticateAppToken(tokenStr)
+            TokenType.TEMPORARY -> authenticateTempToken(tokenStr)
             TokenType.INTERNAL -> authenticateInternalToken(tokenStr)
             else -> false
         }
@@ -60,6 +62,7 @@ class SecurityService(
         val scopes = when (schema) {
             TokenType.BEARER -> getScopesForUserToken(tokenStr)
             TokenType.APP -> getScopesForAppToken(tokenStr)
+            TokenType.TEMPORARY -> getScopesForTempToken(tokenStr)
             TokenType.INTERNAL -> getScopesForInternalToken()
             else -> return false
         }
@@ -71,6 +74,12 @@ class SecurityService(
         if (getSchema(token) == TokenType.INTERNAL) return true // bot has access to everything, cannot get here unless already authed, no need to double-check auth
         if (guildId == null) return true // No guildId in request, access level for guilds not relevant
         if (accessLevel == AccessLevel.PUBLIC) return true // Public resource regardless of guild
+
+        // Temp tokens are limited to specific guild, enforce that
+        if (getSchema(token) == TokenType.TEMPORARY) {
+            val guildForToken = getGuildIdFromToken(token)
+            if (guildForToken != guildId) return false
+        }
 
         val userId = getUserFromToken(token)
         val hasAccessToGuild = userId != null && permissionService.hasAccessToGuild(guildId, userId)
@@ -105,6 +114,12 @@ class SecurityService(
         return !key.blocked
     }
 
+    private suspend fun authenticateTempToken(token: String): Boolean {
+        val key = temporaryTokenService.getToken(token) ?: return false
+
+        return !key.expiresAt.isExpiredTtl()
+    }
+
     private fun authenticateInternalToken(token: String): Boolean {
         return Config.SECRET_DISCAL_API_KEY.getString() == token
     }
@@ -118,6 +133,10 @@ class SecurityService(
         return apiKeyService.getKey(token)?.scopes ?: emptyList()
     }
 
+    private suspend fun getScopesForTempToken(token: String): List<Scope> {
+        return temporaryTokenService.getToken(token)?.scopes ?: emptyList()
+    }
+
     private fun getScopesForInternalToken(): List<Scope> = Scope.entries.toList()
 
     // Various other stuff
@@ -125,6 +144,7 @@ class SecurityService(
         return when {
             token.startsWith(TokenType.BEARER.schema) -> TokenType.BEARER
             token.startsWith(TokenType.APP.schema) -> TokenType.APP
+            token.startsWith(TokenType.TEMPORARY.schema) -> TokenType.TEMPORARY
             token.startsWith(TokenType.INTERNAL.schema) -> TokenType.INTERNAL
             else -> TokenType.NONE
         }
@@ -137,6 +157,16 @@ class SecurityService(
         return when (schema) {
             TokenType.BEARER -> sessionService.getSession(tokenStr)?.user
             TokenType.APP -> apiKeyService.getKey(tokenStr)?.userId
+            else -> null
+        }
+    }
+
+    private suspend fun getGuildIdFromToken(token: String): Snowflake? {
+        val schema = getSchema(token)
+        val tokenStr = token.removePrefix(schema.schema)
+
+        return when (schema) {
+            TokenType.TEMPORARY -> temporaryTokenService.getToken(tokenStr)?.guildId
             else -> null
         }
     }
