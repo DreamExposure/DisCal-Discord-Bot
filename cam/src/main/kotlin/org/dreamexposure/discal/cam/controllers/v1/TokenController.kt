@@ -7,7 +7,6 @@ import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.`object`.new.model.discal.cam.TokenV1Model
 import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
-import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.dreamexposure.discal.core.`object`.new.security.Scope.CALENDAR_TOKEN_READ
 import org.dreamexposure.discal.core.`object`.new.security.TemporaryToken
 import org.dreamexposure.discal.core.`object`.new.security.TokenType.INTERNAL
@@ -28,7 +27,7 @@ class TokenController(
         return calendarAuthManager.getCredentialData(host, id, guild)
     }
 
-    @SecurityRequirement(schemas = [INTERNAL], scopes = [Scope.INTERNAL_GENERATE_TEMP_TOKEN], accessLevel = AccessLevel.PUBLIC)
+    @SecurityRequirement(disableSecurity = false, scopes = [], accessLevel = AccessLevel.PUBLIC)
     @GetMapping("/calendar-embed", produces = ["application/json"])
     suspend fun generateTempTokenForCalendarEmbed(@RequestParam guildId: Snowflake): TemporaryToken {
         return temporaryTokenService.createTokenForCalendarEmbedViewing(guildId)
