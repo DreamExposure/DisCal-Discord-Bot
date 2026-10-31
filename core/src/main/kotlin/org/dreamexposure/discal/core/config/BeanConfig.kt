@@ -1,20 +1,15 @@
 package org.dreamexposure.discal.core.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
-import discord4j.common.JacksonResources
 import io.micrometer.core.instrument.binder.okhttp3.OkHttpObservationInterceptor
 import io.micrometer.observation.ObservationRegistry
 import okhttp3.OkHttpClient
-import org.dreamexposure.discal.core.serializers.SnowflakeMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Primary
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping
 
 @Configuration
 class BeanConfig {
+    /*
     @Bean
     @Primary
     fun objectMapper(): ObjectMapper {
@@ -24,6 +19,7 @@ class BeanConfig {
             .registerModule(JavaTimeModule())
             .registerModule(SnowflakeMapper())
     }
+     */
 
     @Bean
     fun handlerMapping(): RequestMappingHandlerMapping {
