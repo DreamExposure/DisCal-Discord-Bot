@@ -1,4 +1,4 @@
-package org.dreamexposure.discal.server.config
+package org.dreamexposure.discal.cam.config
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
 
 @Configuration
-class BeanConfig {
+class BeanieConfig {
     @Bean
     @Primary
     fun objectMapper(): ObjectMapper {
