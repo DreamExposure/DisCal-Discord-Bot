@@ -27,7 +27,7 @@ class TokenController(
         return calendarAuthManager.getCredentialData(host, id, guild)
     }
 
-    @SecurityRequirement(disableSecurity = false, scopes = [], accessLevel = AccessLevel.PUBLIC)
+    @SecurityRequirement(disableSecurity = true, scopes = [], accessLevel = AccessLevel.PUBLIC)
     @GetMapping("/calendar-embed", produces = ["application/json"])
     suspend fun generateTempTokenForCalendarEmbed(@RequestParam guildId: Snowflake): TemporaryToken {
         return temporaryTokenService.createTokenForCalendarEmbedViewing(guildId)
