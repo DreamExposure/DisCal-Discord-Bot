@@ -1,16 +1,23 @@
 package org.dreamexposure.discal.core.`object`.new
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.database.GuildSettingsData
 import org.dreamexposure.discal.core.enums.time.TimeFormat
 import org.dreamexposure.discal.core.extensions.asLocale
 import org.dreamexposure.discal.core.extensions.asSnowflake
+import org.dreamexposure.discal.core.serializers.SnowflakeMapper
 import java.time.Instant
 import java.util.*
 
 data class GuildSettings(
+    @JsonSerialize(using = SnowflakeMapper.SnowflakeSerializer::class)
+    @JsonDeserialize(using = SnowflakeMapper.SnowflakeDeserializer::class)
     val guildId: Snowflake,
 
+    @JsonSerialize(using = SnowflakeMapper.SnowflakeSerializer::class)
+    @JsonDeserialize(using = SnowflakeMapper.SnowflakeDeserializer::class)
     val controlRole: Snowflake? = null,
     val patronGuild: Boolean = false,
     val devGuild: Boolean = false,

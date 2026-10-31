@@ -1,20 +1,27 @@
 package org.dreamexposure.discal.core.`object`.new
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.crypto.KeyGenerator
 import org.dreamexposure.discal.core.database.AnnouncementData
 import org.dreamexposure.discal.core.enums.event.EventColor
 import org.dreamexposure.discal.core.extensions.asSnowflake
 import org.dreamexposure.discal.core.extensions.asStringListFromDatabase
+import org.dreamexposure.discal.core.serializers.SnowflakeMapper
 import java.time.Duration
 
 data class Announcement(
     val id: String = KeyGenerator.generateAnnouncementId(),
+    @JsonSerialize(using = SnowflakeMapper.SnowflakeSerializer::class)
+    @JsonDeserialize(using = SnowflakeMapper.SnowflakeDeserializer::class)
     val guildId: Snowflake,
     val calendarNumber: Int = 1,
 
     val type: Type = Type.UNIVERSAL,
     val modifier: Modifier = Modifier.BEFORE,
+    @JsonSerialize(using = SnowflakeMapper.SnowflakeSerializer::class)
+    @JsonDeserialize(using = SnowflakeMapper.SnowflakeDeserializer::class)
     val channelId: Snowflake,
 
 
