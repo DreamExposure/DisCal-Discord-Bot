@@ -1,10 +1,7 @@
 package org.dreamexposure.discal.core.`object`.new
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.enums.event.EventColor
-import org.dreamexposure.discal.core.serializers.SnowflakeMapper
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -12,8 +9,6 @@ import java.time.temporal.ChronoUnit
 
 data class Event(
     val id: String,
-    @JsonSerialize(using = SnowflakeMapper.SnowflakeSerializer::class)
-    @JsonDeserialize(using = SnowflakeMapper.SnowflakeDeserializer::class)
     val guildId: Snowflake,
     val calendarNumber: Int,
     val name: String,

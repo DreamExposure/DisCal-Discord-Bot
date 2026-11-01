@@ -1,17 +1,12 @@
 package org.dreamexposure.discal.core.`object`.new.model.discal
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.`object`.new.Calendar
 import org.dreamexposure.discal.core.`object`.new.CalendarMetadata
-import org.dreamexposure.discal.core.serializers.SnowflakeMapper
 import java.time.ZoneId
 
 data class CalendarV3Model(
     val number: Int,
-    @JsonSerialize(using = SnowflakeMapper.SnowflakeSerializer::class)
-    @JsonDeserialize(using = SnowflakeMapper.SnowflakeDeserializer::class)
     val guildId: Snowflake,
 
     val name: String,

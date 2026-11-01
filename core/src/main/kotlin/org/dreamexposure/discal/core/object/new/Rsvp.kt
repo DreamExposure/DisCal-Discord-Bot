@@ -1,18 +1,13 @@
 package org.dreamexposure.discal.core.`object`.new
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.database.RsvpData
 import org.dreamexposure.discal.core.extensions.asInstantMilli
 import org.dreamexposure.discal.core.extensions.asSnowflake
 import org.dreamexposure.discal.core.extensions.asStringListFromDatabase
-import org.dreamexposure.discal.core.serializers.SnowflakeMapper
 import java.time.Instant
 
 data class Rsvp(
-    @JsonSerialize(using = SnowflakeMapper.SnowflakeSerializer::class)
-    @JsonDeserialize(using = SnowflakeMapper.SnowflakeDeserializer::class)
     val guildId: Snowflake,
     val eventId: String,
     val calendarNumber: Int = 1,
@@ -26,8 +21,6 @@ data class Rsvp(
     val waitlist: List<Snowflake> = listOf(),
 
     val limit: Int = -1,
-    @JsonSerialize(using = SnowflakeMapper.SnowflakeSerializer::class)
-    @JsonDeserialize(using = SnowflakeMapper.SnowflakeDeserializer::class)
     val role: Snowflake? = null,
 ) {
 
