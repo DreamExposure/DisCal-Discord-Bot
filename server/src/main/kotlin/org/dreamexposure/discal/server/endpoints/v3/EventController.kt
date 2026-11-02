@@ -4,6 +4,8 @@ import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.`object`.new.Event
+import org.dreamexposure.discal.core.`object`.new.asEventV3Model
+import org.dreamexposure.discal.core.`object`.new.model.discal.EventV3Model
 import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
 import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.springframework.web.bind.annotation.*
@@ -16,33 +18,33 @@ class EventController(
 ) {
     @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_WRITE], accessLevel = AccessLevel.PRIVILEGED_MEMBERS)
     @PostMapping(produces = ["application/json"], consumes = ["application/json"])
-    suspend fun createEvent(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @RequestBody spec: Event.CreateSpec): Event {
-        return calendarService.createEvent(guildId, calendarNumber, spec)
+    suspend fun createEvent(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @RequestBody spec: Event.CreateSpec): EventV3Model {
+        return calendarService.createEvent(guildId, calendarNumber, spec).asEventV3Model()
     }
 
     @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_READ], accessLevel = AccessLevel.DEFER_TO_CALENDAR_PRIVACY)
     @GetMapping("/{eventId}", produces = ["application/json"])
-    suspend fun getEvent(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @PathVariable eventId: String): Event? {
-        return calendarService.getEvent(guildId, calendarNumber, eventId)
+    suspend fun getEvent(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @PathVariable eventId: String): EventV3Model? {
+        return calendarService.getEvent(guildId, calendarNumber, eventId)?.asEventV3Model()
     }
 
 
     @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_READ], accessLevel = AccessLevel.DEFER_TO_CALENDAR_PRIVACY)
     @GetMapping("/range")
-    suspend fun getEventsInRange(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @RequestParam start: Instant, @RequestParam end: Instant): List<Event> {
-        return calendarService.getEventsInTimeRange(guildId, calendarNumber, start, end)
+    suspend fun getEventsInRange(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @RequestParam start: Instant, @RequestParam end: Instant): List<EventV3Model> {
+        return calendarService.getEventsInTimeRange(guildId, calendarNumber, start, end).map(Event::asEventV3Model)
     }
 
     @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_READ], accessLevel = AccessLevel.DEFER_TO_CALENDAR_PRIVACY)
     @GetMapping("/ongoing", produces = ["application/json"])
-    suspend fun getOngoingEvents(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int): List<Event> {
-        return calendarService.getOngoingEvents(guildId, calendarNumber)
+    suspend fun getOngoingEvents(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int): List<EventV3Model> {
+        return calendarService.getOngoingEvents(guildId, calendarNumber).map(Event::asEventV3Model)
     }
 
     @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_WRITE], accessLevel = AccessLevel.PRIVILEGED_MEMBERS)
     @PatchMapping("/{eventId}", consumes = ["application/json"], produces = ["application/json"])
-    suspend fun updateEvent(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @PathVariable eventId: String, @RequestBody spec: Event.UpdateSpec): Event {
-        return calendarService.updateEvent(guildId, calendarNumber, spec.copy(id = eventId)) // Makes sure event id is in spec
+    suspend fun updateEvent(@PathVariable guildId: Snowflake, @PathVariable calendarNumber: Int, @PathVariable eventId: String, @RequestBody spec: Event.UpdateSpec): EventV3Model {
+        return calendarService.updateEvent(guildId, calendarNumber, spec.copy(id = eventId)).asEventV3Model() // Makes sure event id is in spec
     }
 
     @SecurityRequirement(scopes = [Scope.CALENDAR_EVENT_WRITE], accessLevel = AccessLevel.PRIVILEGED_MEMBERS)

@@ -2,6 +2,7 @@ package org.dreamexposure.discal.core.`object`.new
 
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.enums.event.EventColor
+import org.dreamexposure.discal.core.`object`.new.model.discal.EventV3Model
 import java.time.Duration
 import java.time.Instant
 import java.time.ZoneId
@@ -97,3 +98,4 @@ data class Event(
     )
 }
 
+fun Event.asEventV3Model() = EventV3Model(this)
