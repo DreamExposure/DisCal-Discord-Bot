@@ -142,10 +142,10 @@ class SecurityService(
     // Various other stuff
     private fun getSchema(token: String): TokenType {
         return when {
-            token.startsWith(TokenType.BEARER.schema) -> TokenType.BEARER
-            token.startsWith(TokenType.APP.schema) -> TokenType.APP
-            token.startsWith(TokenType.TEMPORARY.schema) -> TokenType.TEMPORARY
-            token.startsWith(TokenType.INTERNAL.schema) -> TokenType.INTERNAL
+            token.startsWith(TokenType.BEARER.schema, ignoreCase = true) -> TokenType.BEARER
+            token.startsWith(TokenType.APP.schema, ignoreCase = true) -> TokenType.APP
+            token.startsWith(TokenType.TEMPORARY.schema, ignoreCase = true) -> TokenType.TEMPORARY
+            token.startsWith(TokenType.INTERNAL.schema, ignoreCase = true) -> TokenType.INTERNAL
             else -> TokenType.NONE
         }
     }
