@@ -207,6 +207,7 @@ class GoogleCalendarProviderService(
             calendarNumber = calendar.metadata.number,
             eventEnd = spec.end,
             imageLink = spec.image.orEmpty(),
+            imageAlt = spec.imageAlt.orEmpty(),
         ))
 
         return mapGoogleEventToDisCalEvent(calendar, response.entity, metadata)
@@ -256,6 +257,7 @@ class GoogleCalendarProviderService(
             calendarNumber = calendar.metadata.number,
             eventEnd = spec.end,
             imageLink = spec.image.orEmpty(),
+            imageAlt = spec.imageAlt.orEmpty(),
         )
         eventMetadataService.upsertEventMetadata(metadata)
 
@@ -319,6 +321,7 @@ class GoogleCalendarProviderService(
             recur = !baseEvent.recurrence.isNullOrEmpty(),
             recurrence = if (baseEvent.recurrence.isNullOrEmpty()) EventRecurrence() else EventRecurrence.fromRRule(baseEvent.recurrence[0]),
             image = metadata.imageLink,
+            imageAlt = metadata.imageAlt,
             timezone = calendar.timezone,
         )
     }

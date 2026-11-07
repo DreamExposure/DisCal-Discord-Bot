@@ -22,6 +22,7 @@ data class Event(
     val recur: Boolean,
     val recurrence: EventRecurrence,
     val image: String,
+    val imageAlt: String,
     val timezone: ZoneId,
 ) {
     // Some helpful functions
@@ -69,6 +70,7 @@ data class Event(
         val recur: Boolean,
         val recurrence: EventRecurrence?,
         val image: String?,
+        val imageAlt: String?,
         val timezone: ZoneId,
     )
 
@@ -80,6 +82,7 @@ data class Event(
         val color: EventColor,
         val location: String?,
         val image: String?,
+        val imageAlt: String?,
         val recur: Boolean,
         val recurrence: EventRecurrence?,
     )
@@ -93,6 +96,7 @@ data class Event(
         val color: EventColor,
         val location: String?,
         val image: String?,
+        val imageAlt: String?,
         val recur: Boolean?,
         val recurrence: EventRecurrence?,
     )

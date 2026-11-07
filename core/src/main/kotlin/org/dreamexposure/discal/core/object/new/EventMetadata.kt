@@ -11,6 +11,7 @@ data class EventMetadata(
     val calendarNumber: Int,
     val eventEnd: Instant,
     val imageLink: String,
+    val imageAlt: String,
 ) {
     constructor(data: EventMetadataData): this(
         id = data.eventId,
@@ -18,6 +19,7 @@ data class EventMetadata(
         calendarNumber = data.calendarNumber,
         eventEnd = Instant.ofEpochMilli(data.eventEnd),
         imageLink = data.imageLink,
+        imageAlt = data.imageAlt
     )
 
     constructor(id: String, guildId: Snowflake, calendarNumber: Int): this(
@@ -26,5 +28,6 @@ data class EventMetadata(
         calendarNumber = calendarNumber,
         eventEnd = Instant.now(),
         imageLink = "",
+        imageAlt = "",
     )
 }

@@ -9,4 +9,5 @@ data class EventMetadataData(
     val calendarNumber: Int,
     val eventEnd: Long,
     val imageLink: String,
+    val imageAlt: String,
 )

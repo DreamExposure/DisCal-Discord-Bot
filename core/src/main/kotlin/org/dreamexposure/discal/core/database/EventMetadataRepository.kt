@@ -16,7 +16,8 @@ interface EventMetadataRepository : R2dbcRepository<EventMetadataData, Long> {
         UPDATE events
         SET calendar_number = :calendarNumber,
             event_end = :eventEnd,
-            image_link = :imageLink
+            image_link = :imageLink,
+            image_alt = :imageAlt
         WHERE guild_id = :guildId AND event_id = :eventId
     """)
     fun updateByGuildIdAndEventId(
@@ -25,6 +26,7 @@ interface EventMetadataRepository : R2dbcRepository<EventMetadataData, Long> {
         calendarNumber: Int,
         eventEnd: Long,
         imageLink: String,
+        imageAlt: String,
     ): Mono<Long>
 
     fun deleteByGuildIdAndEventId(guildId: Long, eventId: String): Mono<Void>

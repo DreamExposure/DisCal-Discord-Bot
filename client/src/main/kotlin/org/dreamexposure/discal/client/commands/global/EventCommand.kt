@@ -17,6 +17,7 @@ import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import java.time.*
 import java.time.temporal.ChronoUnit
+import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
 
 @Suppress("DuplicatedCode")
@@ -40,12 +41,12 @@ class EventCommand(
                 val shouldRecur = event.options[0].getOption("recur")
                     .flatMap(ApplicationCommandInteractionOption::getValue)
                     .map(ApplicationCommandInteractionOptionValue::asBoolean)
-                    .orElse(true)
+                    .getOrDefault(true)
                 val frequency = event.options[0].getOption("frequency")
                     .flatMap(ApplicationCommandInteractionOption::getValue)
                     .map(ApplicationCommandInteractionOptionValue::asString)
                     .map(EventRecurrence.Frequency::valueOf)
-                    .orElse(EventRecurrence.Frequency.WEEKLY)
+                    .getOrDefault(EventRecurrence.Frequency.WEEKLY)
 
                 if (!shouldRecur) true
                 else (frequency != EventRecurrence.Frequency.WEEKLY)
@@ -110,7 +111,7 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .filter { !it.equals("N/a") || !it.equals("None") }
-            .orElse("")
+            .getOrDefault("")
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
@@ -144,7 +145,7 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .filter { !it.equals("N/a") || !it.equals("None") }
-            .orElse("")
+            .getOrDefault("")
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
@@ -197,13 +198,13 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(0)
+            .getOrDefault(0)
         val minute = event.options[0].getOption("minute")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .map { it.coerceAtLeast(0).coerceAtMost(59) }
-            .orElse(0)
+            .getOrDefault(0)
         val duration = event.options[0].getOption("duration")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -211,7 +212,7 @@ class EventCommand(
         val keepDuration = event.options[0].getOption("keep-duration")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
-            .orElse(settings.eventKeepDuration)
+            .getOrDefault(settings.eventKeepDuration)
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
@@ -304,17 +305,17 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(0)
+            .getOrDefault(0)
         val minute = event.options[0].getOption("minute")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
             .map { it.coerceAtLeast(0).coerceAtMost(59) }
-            .orElse(0)
+            .getOrDefault(0)
         val keepDuration = event.options[0].getOption("keep-duration")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
-            .orElse(settings.eventKeepDuration)
+            .getOrDefault(settings.eventKeepDuration)
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
@@ -428,7 +429,7 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .filter { !it.equals("N/a") || !it.equals("None") }
-            .orElse("")
+            .getOrDefault("")
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
@@ -462,6 +463,10 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .get()
+        val imageAlt = event.options[0].getOption("alt")
+            .flatMap(ApplicationCommandInteractionOption::getValue)
+            .map(ApplicationCommandInteractionOptionValue::asString)
+            .getOrDefault("")
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
@@ -491,7 +496,7 @@ class EventCommand(
             return
         }
 
-        val alteredWizard = existingWizard.copy(entity = existingWizard.entity.copy(image = image))
+        val alteredWizard = existingWizard.copy(entity = existingWizard.entity.copy(image = image, imageAlt = imageAlt))
         calendarService.putEventWizard(alteredWizard)
 
         event.createFollowup(getMessage("image.success", settings))
@@ -505,17 +510,17 @@ class EventCommand(
         val shouldRecur = event.options[0].getOption("recur")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
-            .orElse(true)
+            .getOrDefault(true)
         val frequency = event.options[0].getOption("frequency")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(EventRecurrence.Frequency::valueOf)
-            .orElse(EventRecurrence.Frequency.WEEKLY)
+            .getOrDefault(EventRecurrence.Frequency.WEEKLY)
         val interval = event.options[0].getOption("interval")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(1)
+            .getOrDefault(1)
         val count = event.options[0].getOption("count")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
@@ -587,6 +592,7 @@ class EventCommand(
                     .withEphemeral(ephemeral)
                     .awaitSingle()
             }
+            null -> throw IllegalStateException("Somehow frequency is null???")
         }
     }
 
@@ -657,6 +663,7 @@ class EventCommand(
                     color = existingWizard.entity.color,
                     location = existingWizard.entity.location,
                     image = existingWizard.entity.image,
+                    imageAlt = existingWizard.entity.imageAlt,
                     recur = existingWizard.entity.recur,
                     recurrence = existingWizard.entity.recurrence,
                 )
@@ -671,6 +678,7 @@ class EventCommand(
                     color = existingWizard.entity.color,
                     location = existingWizard.entity.location,
                     image = existingWizard.entity.image,
+                    imageAlt = existingWizard.entity.imageAlt,
                     recur = existingWizard.entity.recur,
                     recurrence = existingWizard.entity.recurrence,
                 )
@@ -735,7 +743,7 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(1)
+            .getOrDefault(1)
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
@@ -792,6 +800,7 @@ class EventCommand(
                 recur = existingEvent.recur,
                 recurrence = if (existingEvent.recur) existingEvent.recurrence else null,
                 image = existingEvent.image,
+                imageAlt = existingEvent.imageAlt,
                 timezone = existingEvent.timezone,
             )
         )
@@ -813,12 +822,12 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(1)
+            .getOrDefault(1)
         val targetCalendarNumber = event.options[0].getOption("target")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(calendarNumber)
+            .getOrDefault(calendarNumber)
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)
@@ -878,6 +887,7 @@ class EventCommand(
                 recur = existingEvent.recur,
                 recurrence = if (existingEvent.recur) existingEvent.recurrence else null,
                 image = existingEvent.image,
+                imageAlt = existingEvent.imageAlt,
                 timezone = targetCalendar.timezone,
             )
         )
@@ -900,7 +910,7 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(1)
+            .getOrDefault(1)
 
         val calendarEvent = calendarService.getEvent(settings.guildId, calendarNumber, eventId)
         if (calendarEvent != null) {
@@ -928,7 +938,7 @@ class EventCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(1)
+            .getOrDefault(1)
 
         // Validate permissions
         val hasControlRole = permissionService.hasControlRole(settings.guildId, event.interaction.user.id)

@@ -96,6 +96,7 @@ class EventCreateModal(
                 recur = false,
                 recurrence = null,
                 image = null,
+                imageAlt = null,
                 timezone = calendar.timezone,
             )
         )

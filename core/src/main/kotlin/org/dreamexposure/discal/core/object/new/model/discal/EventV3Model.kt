@@ -22,6 +22,7 @@ data class EventV3Model(
     val recurrence: EventRecurrence,
     val rrule: String,
     val image: String,
+    val imageAlt: String,
     val timezone: ZoneId,
 
     val isOngoing: Boolean,
@@ -45,6 +46,7 @@ data class EventV3Model(
         recurrence = event.recurrence,
         rrule = event.recurrence.asRRule(),
         image = event.image,
+        imageAlt = event.imageAlt,
         timezone = event.timezone,
 
         isOngoing = event.isOngoing(),

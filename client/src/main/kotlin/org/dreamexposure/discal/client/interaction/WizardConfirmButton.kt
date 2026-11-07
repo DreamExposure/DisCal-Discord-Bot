@@ -1,6 +1,9 @@
 package org.dreamexposure.discal.client.interaction
 
 import discord4j.core.event.domain.interaction.ButtonInteractionEvent
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.business.*
@@ -86,6 +89,9 @@ class WizardConfirmButton(
                 .awaitSingle()
 
         } catch (ex: Exception) {
+            if (ex is CancellationException) {
+                currentCoroutineContext().ensureActive()
+            }
             LOGGER.error("Failed to create calendar via confirm button interaction", ex)
 
             val message = if (existingWizard.editing) getCmdMessage("calendar", "confirm.failure.edit", settings.locale)
@@ -140,6 +146,7 @@ class WizardConfirmButton(
                     color = existingWizard.entity.color,
                     location = existingWizard.entity.location,
                     image = existingWizard.entity.image,
+                    imageAlt = existingWizard.entity.imageAlt,
                     recur = existingWizard.entity.recur,
                     recurrence = existingWizard.entity.recurrence,
                 )
@@ -154,6 +161,7 @@ class WizardConfirmButton(
                     color = existingWizard.entity.color,
                     location = existingWizard.entity.location,
                     image = existingWizard.entity.image,
+                    imageAlt = existingWizard.entity.imageAlt,
                     recur = existingWizard.entity.recur,
                     recurrence = existingWizard.entity.recurrence,
                 )

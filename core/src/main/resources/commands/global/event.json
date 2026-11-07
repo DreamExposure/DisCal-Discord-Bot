@@ -524,6 +524,13 @@
           "type": 3,
           "description": "The URL for the image",
           "required": true
+        },
+        {
+          "name": "alt",
+          "type": 3,
+          "description": "A description of the image for screen readers",
+          "max_length": 2000,
+          "required": false
         }
       ]
     },

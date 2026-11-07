@@ -51,6 +51,7 @@ class EventMetadataService(
             calendarNumber = event.calendarNumber,
             eventEnd = event.eventEnd.toEpochMilli(),
             imageLink = event.imageLink,
+            imageAlt = event.imageAlt,
         )).map(::EventMetadata).awaitSingle()
     }
 
@@ -62,7 +63,8 @@ class EventMetadataService(
             eventId = computedId,
             calendarNumber = event.calendarNumber,
             eventEnd = event.eventEnd.toEpochMilli(),
-            imageLink = event.imageLink
+            imageLink = event.imageLink,
+            imageAlt = event.imageAlt,
         ).awaitSingleOrNull()
     }
 
