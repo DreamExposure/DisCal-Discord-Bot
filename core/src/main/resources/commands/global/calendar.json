@@ -129,6 +129,30 @@
       ]
     },
     {
+      "name": "privacy",
+      "type": 1,
+      "description": "Sets how visible the calendar is to the public",
+      "required": false,
+      "options": [
+        {
+          "name": "privacy",
+          "type": 3,
+          "description": "How visible the calendar is to the public, defaults to public",
+          "required": false,
+          "choices": [
+            {
+              "name": "Public",
+              "value": "PUBLIC"
+            },
+            {
+              "name": "Guild Members Only",
+              "value": "GUILD_MEMBERS_ONLY"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "review",
       "type": 1,
       "description": "Displays the properties of the calendar in the wizard",

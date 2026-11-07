@@ -3,6 +3,9 @@ package org.dreamexposure.discal.client.commands.global
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent
 import discord4j.core.`object`.command.ApplicationCommandInteractionOption
 import discord4j.core.`object`.command.ApplicationCommandInteractionOptionValue
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.reactor.awaitSingle
 import org.dreamexposure.discal.client.commands.SlashCommand
 import org.dreamexposure.discal.core.business.CalendarService
@@ -20,6 +23,7 @@ import org.dreamexposure.discal.core.utils.getCommonMsg
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.ZoneId
+import kotlin.jvm.optionals.getOrDefault
 
 @Component
 class CalendarCommand(
@@ -55,12 +59,12 @@ class CalendarCommand(
         val showOverview = event.options[0].getOption("overview")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asBoolean)
-            .orElse(true)
+            .getOrDefault(true)
         val calendarNumber = event.options[0].getOption("calendar")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(1)
+            .getOrDefault(1)
 
         val calendar = calendarService.getCalendar(settings.guildId, calendarNumber)
         if (calendar == null) {
@@ -114,22 +118,22 @@ class CalendarCommand(
         val description = event.options[0].getOption("description")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
-            .orElse("")
+            .getOrDefault("")
         val timezone = event.options[0].getOption("timezone")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
-            .orElse("UTC")
+            .getOrDefault("UTC")
             .toZoneId() ?: ZoneId.of("UTC")
         val host = event.options[0].getOption("host")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(CalendarMetadata.Host::valueOf)
-            .orElse(CalendarMetadata.Host.GOOGLE)
+            .getOrDefault(CalendarMetadata.Host.GOOGLE)
         val privacy = event.options[0].getOption("privacy")
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asString)
             .map(CalendarMetadata.Privacy::valueOf)
-            .orElse(CalendarMetadata.Privacy.PUBLIC)
+            .getOrDefault(CalendarMetadata.Privacy.PUBLIC)
 
         // Validate permissions
         val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
@@ -423,6 +427,9 @@ class CalendarCommand(
                 .awaitSingle()
 
         } catch (ex: Exception) {
+            if (ex is CancellationException) {
+                currentCoroutineContext().ensureActive()
+            }
             LOGGER.error("Failed to create calendar via command interaction", ex)
 
             val message = if (existingWizard.editing) getMessage("confirm.failure.edit", settings)
@@ -458,7 +465,7 @@ class CalendarCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(1)
+            .getOrDefault(1)
 
         // Validate permissions
         val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
@@ -480,7 +487,7 @@ class CalendarCommand(
             .flatMap(ApplicationCommandInteractionOption::getValue)
             .map(ApplicationCommandInteractionOptionValue::asLong)
             .map(Long::toInt)
-            .orElse(1)
+            .getOrDefault(1)
 
         // Validate permissions
         val hasElevatedPerms = permissionService.hasElevatedPermissions(settings.guildId, event.interaction.user.id)
