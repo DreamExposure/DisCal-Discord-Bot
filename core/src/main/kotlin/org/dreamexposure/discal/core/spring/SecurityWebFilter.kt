@@ -28,11 +28,11 @@ class SecurityWebFilter(
 ) : WebFilter {
     override fun filter(exchange: ServerWebExchange, chain: WebFilterChain): Mono<Void> {
         return mono {
-            doSecurityFilter(exchange, chain)
+            doSecurityFilter(exchange)
         }.then(chain.filter(exchange))
     }
 
-    suspend fun doSecurityFilter(exchange: ServerWebExchange, chain: WebFilterChain) {
+    suspend fun doSecurityFilter(exchange: ServerWebExchange) {
         val handlerMethod = handlerMapping.getHandler(exchange)
             .cast(HandlerMethod::class.java)
             .onErrorResume { Mono.empty() }
@@ -64,12 +64,29 @@ class SecurityWebFilter(
         }
 
         val pathVariables = exchange.getAttribute<Map<String, String>>(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
-        val guildId = pathVariables?.get("guildId")
-        val calendarNumber = pathVariables?.get("calendarNumber")?.toInt()
+        val guildId = try {
+            pathVariables?.get("guildId")?.toLong()
+        } catch (_: NumberFormatException) {
+            exchange.response.statusCode = HttpStatus.BAD_REQUEST
+            exchange.response.writeJsonString(
+                objectMapper.writeValueAsString(ErrorResponse("Guild Id is not a valid Snowflake"))
+            ).awaitFirstOrNull()
+            return
+        }
+        val calendarNumber = try {
+            pathVariables?.get("calendarNumber")?.toInt()
+        } catch (_: NumberFormatException) {
+            exchange.response.statusCode = HttpStatus.BAD_REQUEST
+            exchange.response.writeJsonString(
+                objectMapper.writeValueAsString(ErrorResponse("calendarNumber is not a valid integer"))
+            ).awaitFirstOrNull()
+            return
+        }
+
 
 
         // Use CAM to validate token
-        val requestBody = SecurityValidateV1Request(authHeader, authAnnotation.schemas.toList(), authAnnotation.scopes.toList(), authAnnotation.accessLevel, guildId, calendarNumber)
+        val requestBody = SecurityValidateV1Request(authHeader, authAnnotation.schemas.toList(), authAnnotation.scopes.toList(), authAnnotation.accessLevel, guildId?.toString(), calendarNumber)
 
         val response = camApiWrapper.validateToken(requestBody)
 
