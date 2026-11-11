@@ -23,6 +23,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import kotlin.jvm.optionals.getOrDefault
 
 @Component
 class EmbedService(
@@ -146,6 +147,7 @@ class EmbedService(
             val sortedEvents = date.value.sortedBy { it.start }
 
             val content = StringBuilder()
+            val displayedLocation = mutableMapOf<String, Boolean>()
 
             sortedEvents.forEach {
                 // Start event
@@ -179,9 +181,13 @@ class EmbedService(
                 if (it.name.isNotBlank()) content.append(it.name)
                 else content.append(getEmbedMessage("calendar", "link.field.id", settings.locale)).append(" ${it.id}")
                 content.append("\n")
-                if (it.location.isNotBlank()) content.append("    Location: ")
-                    .append(it.location.embedFieldSafe())
-                    .append("\n")
+                if (it.location.isNotBlank() && !displayedLocation.getOrDefault(it.id.split("_")[0], false)) {
+                    displayedLocation.putIfAbsent(it.id.split("_")[0], true)
+
+                    content.append("    Location: ")
+                        .append(it.location.embedFieldSafe())
+                        .append("\n")
+                }
 
                 // Finish event
                 content.append("```\n")
@@ -240,6 +246,7 @@ class EmbedService(
             val sortedEvents = events.sortedBy { it.start }
 
             val content = StringBuilder()
+            val displayedLocation = mutableMapOf<String, Boolean>()
 
             sortedEvents.forEach {
                 // Start event
@@ -273,10 +280,13 @@ class EmbedService(
                 if (it.name.isNotBlank()) content.append(it.name)
                 else content.append(getEmbedMessage("calendar", "link.field.id", settings.locale)).append(" ${it.id}")
                 content.append("\n")
-                if (it.location.isNotBlank()) content.append("    Location: ")
-                    .append(it.location.embedFieldSafe())
-                    .append("\n")
+                if (it.location.isNotBlank() && !displayedLocation.getOrDefault(it.id.split("_")[0], false)) {
+                    displayedLocation.putIfAbsent(it.id.split("_")[0], true)
 
+                    content.append("    Location: ")
+                        .append(it.location.embedFieldSafe())
+                        .append("\n")
+                }
                 // Finish event
                 content.append("```\n")
             }
@@ -439,26 +449,26 @@ class EmbedService(
             val goingOnTime = rsvp.goingOnTime.map {
                 discordClient.getUserById(it).data.awaitSingle()
             }.joinToString(", ") {
-                it.globalName().orElse(it.username())
+                it.globalName().getOrDefault(it.username())
             }.ifEmpty { "N/a" }
 
             val late = rsvp.goingLate.map {
                 discordClient.getUserById(it).data.awaitSingle()
             }.joinToString(", ") {
-                it.globalName().orElse(it.username())
+                it.globalName().getOrDefault(it.username())
             }.ifEmpty { "N/a" }
 
             val waitList = if (rsvp.waitlist.size > waitlistDisplayLimit) {
                 rsvp.waitlist.map {
                     discordClient.getUserById(it).data.awaitSingle()
                 }.joinToString(", ") {
-                    it.globalName().orElse(it.username())
+                    it.globalName().getOrDefault(it.username())
                 }.plus("+${rsvp.waitlist.size - waitlistDisplayLimit} more")
             } else {
                 rsvp.waitlist.map {
                     discordClient.getUserById(it).data.awaitSingle()
                 }.joinToString(", ") {
-                    it.globalName().orElse(it.username())
+                    it.globalName().getOrDefault(it.username())
                 }
             }
 
@@ -794,38 +804,38 @@ class EmbedService(
         val goingOnTime = rsvp.goingOnTime.map {
             discordClient.getUserById(it).data.awaitSingle()
         }.joinToString(", ") {
-            it.globalName().orElse(it.username())
+            it.globalName().getOrDefault(it.username())
         }.ifEmpty { "N/a" }
 
         val late = rsvp.goingLate.map {
             discordClient.getUserById(it).data.awaitSingle()
         }.joinToString(", ") {
-            it.globalName().orElse(it.username())
+            it.globalName().getOrDefault(it.username())
         }.ifEmpty { "N/a" }
 
         val undecided = rsvp.undecided.map {
             discordClient.getUserById(it).data.awaitSingle()
         }.joinToString(", ") {
-            it.globalName().orElse(it.username())
+            it.globalName().getOrDefault(it.username())
         }.ifEmpty { "N/a" }
 
         val notGoing = rsvp.notGoing.map {
             discordClient.getUserById(it).data.awaitSingle()
         }.joinToString(", ") {
-            it.globalName().orElse(it.username())
+            it.globalName().getOrDefault(it.username())
         }.ifEmpty { "N/a" }
 
         val waitList = if (rsvp.waitlist.size > waitlistDisplayLimit) {
             rsvp.waitlist.map {
                 discordClient.getUserById(it).data.awaitSingle()
             }.joinToString(", ") {
-                it.globalName().orElse(it.username())
+                it.globalName().getOrDefault(it.username())
             }.plus("+${rsvp.waitlist.size - waitlistDisplayLimit} more")
         } else {
             rsvp.waitlist.map {
                 discordClient.getUserById(it).data.awaitSingle()
             }.joinToString(", ") {
-                it.globalName().orElse(it.username())
+                it.globalName().getOrDefault(it.username())
             }.ifEmpty { "N/a" }
         }
 
