@@ -140,6 +140,7 @@ class EmbedService(
         }
 
         // Show events
+        val displayedLocation = mutableMapOf<String, Boolean>()
         truncatedEvents.forEach { date ->
             val title = date.key.toInstant().humanReadableDate(calendar.timezone, settings.interfaceStyle.timeFormat, longDay = true)
 
@@ -147,7 +148,6 @@ class EmbedService(
             val sortedEvents = date.value.sortedBy { it.start }
 
             val content = StringBuilder()
-            val displayedLocation = mutableMapOf<String, Boolean>()
 
             sortedEvents.forEach {
                 // Start event
@@ -236,6 +236,7 @@ class EmbedService(
         // Show events
         val today = Instant.now().atZone(calendar.timezone).truncatedTo(ChronoUnit.DAYS)
 
+        val displayedLocation = mutableMapOf<String, Boolean>()
         for (i in 0..6) {
             val dateToDisplay = today.plusDays(i.toLong())
             val events = groupedEvents[dateToDisplay].orEmpty()
@@ -246,7 +247,6 @@ class EmbedService(
             val sortedEvents = events.sortedBy { it.start }
 
             val content = StringBuilder()
-            val displayedLocation = mutableMapOf<String, Boolean>()
 
             sortedEvents.forEach {
                 // Start event
