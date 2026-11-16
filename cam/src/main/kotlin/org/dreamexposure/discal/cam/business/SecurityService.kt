@@ -21,14 +21,14 @@ class SecurityService(
     private val permissionService: PermissionService,
     private val calendarService: CalendarService,
 ) {
-    suspend fun authenticateAndAuthorizeToken(token: String, schemas: List<TokenType>, scopes: List<Scope>, accessLevel: AccessLevel, guildId: Snowflake?, calNumber: Int?): Pair<HttpStatus, String> {
+    suspend fun authenticateAndAuthorizeToken(token: String, schemas: List<TokenType>, scopes: List<Scope>, accessLevel: AccessLevel, guildId: Snowflake?, calNumber: Int?, userId: Snowflake?): Pair<HttpStatus, String> {
         if (!authenticateToken(token)) return Pair(HttpStatus.UNAUTHORIZED, "Unauthenticated")
 
         if (!validateTokenSchema(token, schemas)) return Pair(HttpStatus.UNAUTHORIZED, "Unsupported schema")
 
         if (!authorizeToken(token, scopes)) return Pair(HttpStatus.FORBIDDEN, "Access denied")
 
-        if (!authorizeOnAccessLevel(token, accessLevel, guildId, calNumber)) return Pair(HttpStatus.FORBIDDEN, "Access to resource denied")
+        if (!authorizeOnAccessLevel(token, accessLevel, guildId, calNumber, userId)) return Pair(HttpStatus.FORBIDDEN, "Access to resource denied")
 
         return Pair(HttpStatus.OK, "Authorized")
     }
@@ -70,10 +70,23 @@ class SecurityService(
         return scopes.containsAll(requiredScopes)
     }
 
-    suspend fun authorizeOnAccessLevel(token: String, accessLevel: AccessLevel, guildId: Snowflake?, calNumber: Int?): Boolean {
+    suspend fun authorizeOnAccessLevel(token: String, accessLevel: AccessLevel, guildId: Snowflake?, calNumber: Int?, userId: Snowflake?): Boolean {
+        // Handle some basic cases
         if (getSchema(token) == TokenType.INTERNAL) return true // bot has access to everything, cannot get here unless already authed, no need to double-check auth
-        if (guildId == null) return true // No guildId in request, access level for guilds not relevant
         if (accessLevel == AccessLevel.PUBLIC) return true // Public resource regardless of guild
+
+        val userOfToken = getUserFromToken(token)
+
+        // Handle user-level access next, as this is most restrictive
+        if (accessLevel == AccessLevel.USER) {
+            return if (userId == null) false // What are we even doing here?
+            else if (userOfToken == null) false // Not a user token, can't determine proper access
+            else if (userOfToken == userId) true // Happy path
+            else false // Makes Kotlin happy
+        }
+
+        // Handle guild-level access next
+        if (guildId == null) return true // No guildId in request, access level for guilds not relevant
 
         // Temp tokens are limited to specific guild, enforce that
         if (getSchema(token) == TokenType.TEMPORARY) {
@@ -81,11 +94,11 @@ class SecurityService(
             if (guildForToken != guildId) return false
         }
 
-        val userId = getUserFromToken(token)
-        val hasAccessToGuild = userId != null && permissionService.hasAccessToGuild(guildId, userId)
+        val hasAccessToGuild = userOfToken != null && permissionService.hasAccessToGuild(guildId, userOfToken)
 
         return when (accessLevel) {
             AccessLevel.GUILD_MEMBERS -> hasAccessToGuild
+            AccessLevel.GUILD_MEMBER_ONLY -> userOfToken == userId && hasAccessToGuild
             AccessLevel.DEFER_TO_CALENDAR_PRIVACY -> {
                 if (calNumber == null) return false // Calendar needs to be provided in the request, otherwise what does this defer to?
                 val calendarMetadata = calendarService.getCalendarMetadata(guildId, calNumber) ?: return false // calendar must exist
@@ -95,8 +108,8 @@ class SecurityService(
                     CalendarMetadata.Privacy.GUILD_MEMBERS_ONLY -> hasAccessToGuild
                 }
             }
-            AccessLevel.PRIVILEGED_MEMBERS -> hasAccessToGuild && permissionService.hasControlRole(guildId, userId)
-            AccessLevel.ELEVATED_MEMBERS -> hasAccessToGuild && permissionService.hasElevatedPermissions(guildId, userId)
+            AccessLevel.PRIVILEGED_MEMBERS -> hasAccessToGuild && permissionService.hasControlRole(guildId, userOfToken)
+            AccessLevel.ELEVATED_MEMBERS -> hasAccessToGuild && permissionService.hasElevatedPermissions(guildId, userOfToken)
         }
     }
 

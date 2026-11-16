@@ -27,8 +27,9 @@ class SecurityController(
             request.schemas,
             request.scopes,
             request.accessLevel,
-            request.guildId?.toLong()?.asSnowflake(),
+            request.guildId,
             request.calendarNumber,
+            request.userId,
         )
 
         return SecurityValidateV1Response(result.first == HttpStatus.OK, result.first.value(), result.second)

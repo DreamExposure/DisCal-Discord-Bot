@@ -82,6 +82,24 @@ class SecurityWebFilter(
             ).awaitFirstOrNull()
             return
         }
+        val userId = try {
+            pathVariables?.get("userId")?.toLong()?.asSnowflake()
+        } catch (_: NumberFormatException) {
+            exchange.response.statusCode = HttpStatus.BAD_REQUEST
+            exchange.response.writeJsonString(
+                objectMapper.writeValueAsString(ErrorResponse("User Id is not a valid Snowflake"))
+            ).awaitFirstOrNull()
+            return
+        }
+        val memberId = try {
+            pathVariables?.get("memberId")?.toLong()?.asSnowflake()
+        } catch (_: NumberFormatException) {
+            exchange.response.statusCode = HttpStatus.BAD_REQUEST
+            exchange.response.writeJsonString(
+                objectMapper.writeValueAsString(ErrorResponse("Member Id is not a valid Snowflake"))
+            ).awaitFirstOrNull()
+            return
+        }
 
 
 
@@ -91,7 +109,8 @@ class SecurityWebFilter(
             authAnnotation.scopes.toList(),
             authAnnotation.accessLevel,
             guildId,
-            calendarNumber
+            calendarNumber,
+            userId ?: memberId,
         )
         if (result.first != HttpStatus.OK) {
             exchange.response.statusCode = result.first

@@ -5,6 +5,7 @@ import kotlinx.coroutines.reactive.awaitFirstOrNull
 import kotlinx.coroutines.reactor.mono
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.business.api.CamApiWrapper
+import org.dreamexposure.discal.core.extensions.asSnowflake
 import org.dreamexposure.discal.core.extensions.spring.writeJsonString
 import org.dreamexposure.discal.core.`object`.new.model.discal.cam.SecurityValidateV1Request
 import org.dreamexposure.discal.core.`object`.rest.ErrorResponse
@@ -65,7 +66,7 @@ class SecurityWebFilter(
 
         val pathVariables = exchange.getAttribute<Map<String, String>>(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
         val guildId = try {
-            pathVariables?.get("guildId")?.toLong()
+            pathVariables?.get("guildId")?.toLong()?.asSnowflake()
         } catch (_: NumberFormatException) {
             exchange.response.statusCode = HttpStatus.BAD_REQUEST
             exchange.response.writeJsonString(
@@ -82,11 +83,37 @@ class SecurityWebFilter(
             ).awaitFirstOrNull()
             return
         }
+        val userId = try {
+            pathVariables?.get("userId")?.toLong()?.asSnowflake()
+        } catch (_: NumberFormatException) {
+            exchange.response.statusCode = HttpStatus.BAD_REQUEST
+            exchange.response.writeJsonString(
+                objectMapper.writeValueAsString(ErrorResponse("User Id is not a valid Snowflake"))
+            ).awaitFirstOrNull()
+            return
+        }
+        val memberId = try {
+            pathVariables?.get("memberId")?.toLong()?.asSnowflake()
+        } catch (_: NumberFormatException) {
+            exchange.response.statusCode = HttpStatus.BAD_REQUEST
+            exchange.response.writeJsonString(
+                objectMapper.writeValueAsString(ErrorResponse("Member Id is not a valid Snowflake"))
+            ).awaitFirstOrNull()
+            return
+        }
 
 
 
         // Use CAM to validate token
-        val requestBody = SecurityValidateV1Request(authHeader, authAnnotation.schemas.toList(), authAnnotation.scopes.toList(), authAnnotation.accessLevel, guildId?.toString(), calendarNumber)
+        val requestBody = SecurityValidateV1Request(
+            authHeader,
+            authAnnotation.schemas.toList(),
+            authAnnotation.scopes.toList(),
+            authAnnotation.accessLevel,
+            guildId,
+            calendarNumber,
+            userId ?: memberId,
+        )
 
         val response = camApiWrapper.validateToken(requestBody)
 
