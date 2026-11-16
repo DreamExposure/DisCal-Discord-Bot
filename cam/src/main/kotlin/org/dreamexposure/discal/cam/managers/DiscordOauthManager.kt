@@ -1,12 +1,15 @@
 package org.dreamexposure.discal.cam.managers
 
+import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.cam.business.OauthStateService
 import org.dreamexposure.discal.cam.discord.DiscordOauthHandler
 import org.dreamexposure.discal.cam.json.discal.TokenResponse
 import org.dreamexposure.discal.cam.business.SessionService
 import org.dreamexposure.discal.core.config.Config
 import org.dreamexposure.discal.core.crypto.KeyGenerator
+import org.dreamexposure.discal.core.extensions.isExpiredTtl
 import org.dreamexposure.discal.core.`object`.WebSession
+import org.dreamexposure.discal.core.`object`.new.model.discal.cam.TokenV1Model
 import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.dreamexposure.discal.core.utils.GlobalVal.discordApiUrl
 import org.springframework.http.HttpStatus
@@ -59,5 +62,20 @@ class DiscordOauthManager(
         sessionService.removeAndInsertSession(session)
 
         return TokenResponse(session.token, session.expiresAt, authInfo.user)
+    }
+
+    suspend fun getTokenForUser(userId: Snowflake): TokenV1Model? {
+        val session = sessionService.getSessions(userId).getOrNull(0) ?: return null
+
+        if (session.expiresAt.isExpiredTtl()) return null // Session expired
+
+        // TODO: Should add support for refreshing the discord token, tho it shouldn't really be needed since discord
+        //  access tokens last 7 days, which is as long as our sessions last
+
+        return TokenV1Model(
+            accessToken = session.accessToken,
+            validUntil = session.expiresAt,
+        )
+
     }
 }

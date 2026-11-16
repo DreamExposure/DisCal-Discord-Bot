@@ -25,6 +25,7 @@ class CacheConfig {
     private val eventTtl = Config.CACHE_TTL_EVENTS_MINUTES.getLong().asMinutes()
     private val networkStatusTtl = Config.CACHE_TTL_NETWORK_STATUS_MINUTES.getLong().asMinutes()
     private val temporaryTokenTtl = Config.CACHE_TTL_TEMPORARY_TOKEN_MINUTES.getLong().asMinutes()
+    private val partialGuildTtl = Config.CACHE_TTL_PARTIAL_GUILD_MINUTES.getLong().asMinutes()
 
 
     // Redis caching
@@ -112,6 +113,12 @@ class CacheConfig {
     fun temporaryTokenRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): TemporaryTokenCache =
         RedisStringCacheRepository(objectMapper, redisTemplate, "TemporaryToken", temporaryTokenTtl)
 
+    @Bean
+    @Primary
+    @ConditionalOnProperty("bot.cache.redis", havingValue = "true")
+    fun partialGuildRedisCache(objectMapper: ObjectMapper, redisTemplate: ReactiveStringRedisTemplate): PartialGuildModelCache =
+        RedisStringCacheRepository(objectMapper, redisTemplate, "PartialGuilds", partialGuildTtl)
+
 
     // In-memory fallback caching
     @Bean
@@ -158,4 +165,7 @@ class CacheConfig {
 
     @Bean
     fun temporaryTokenFallbackCache(): TemporaryTokenCache = JdkCacheRepository(temporaryTokenTtl)
+
+    @Bean
+    fun partialGuildFallbackCache(): PartialGuildModelCache = JdkCacheRepository(partialGuildTtl)
 }

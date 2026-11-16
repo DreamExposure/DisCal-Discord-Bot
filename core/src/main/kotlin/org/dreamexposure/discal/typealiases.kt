@@ -2,9 +2,9 @@ package org.dreamexposure.discal
 
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.core.cache.CacheRepository
-import org.dreamexposure.discal.core.`object`.WebSession
 import org.dreamexposure.discal.core.`object`.new.*
 import org.dreamexposure.discal.core.`object`.new.model.discal.NetworkDataV3Model
+import org.dreamexposure.discal.core.`object`.new.model.discal.PartialGuildV3Model
 import org.dreamexposure.discal.core.`object`.new.model.discal.cam.TokenV1Model
 import org.dreamexposure.discal.core.`object`.new.security.TemporaryToken
 
@@ -23,5 +23,5 @@ typealias CalendarWizardStateCache = CacheRepository<Snowflake, CalendarWizardSt
 typealias CalendarTokenCache = CacheRepository<Int, TokenV1Model>
 typealias EventCache = CacheRepository<String, Event>
 typealias NetworkStatusCache = CacheRepository<Int, NetworkDataV3Model>
-typealias SessionCache = CacheRepository<String, WebSession>
 typealias TemporaryTokenCache = CacheRepository<String, TemporaryToken>
+typealias PartialGuildModelCache = CacheRepository<Snowflake, Array<PartialGuildV3Model>>

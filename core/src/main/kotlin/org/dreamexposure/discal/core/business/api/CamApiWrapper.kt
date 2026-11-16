@@ -66,4 +66,19 @@ class CamApiWrapper(
 
         return apiWrapperClient.makeRequest(request, TokenV1Model::class.java)
     }
+
+    suspend fun getDiscordToken(userId: Snowflake): ResponseModel<TokenV1Model> {
+        LOGGER.debug("Getting Discord token for user:{}", userId.asLong())
+
+        val url = "$CAM_URL/v1/token/discord".toHttpUrl().newBuilder()
+            .addQueryParameter("user", userId.asString())
+            .build()
+
+        val request = Request.Builder().get()
+            .header("Authorization", AUTH_HEADER)
+            .url(url)
+            .build()
+
+        return apiWrapperClient.makeRequest(request, TokenV1Model::class.java)
+    }
 }

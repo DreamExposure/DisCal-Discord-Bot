@@ -2,7 +2,6 @@ package org.dreamexposure.discal.core.business.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -17,7 +16,6 @@ class ApiWrapperClient(
     private val httpClient: OkHttpClient,
     private val objectMapper: ObjectMapper,
 ) {
-    @OptIn(ExperimentalCoroutinesApi::class)
     internal suspend fun <T> makeRequest(request: Request, valueType: Class<T>): ResponseModel<T> {
         var response: Response? = null
 

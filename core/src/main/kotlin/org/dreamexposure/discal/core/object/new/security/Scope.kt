@@ -8,6 +8,7 @@ enum class Scope {
     CALENDAR_EVENT_READ,
     CALENDAR_EVENT_WRITE,
 
+    GUILD_LIST_READ,
     GUILD_WEB_READ,
     GUILD_WEB_WRITE,
 
@@ -24,6 +25,7 @@ enum class Scope {
 
     INTERNAL_CAM_VALIDATE_TOKEN,
     INTERNAL_GENERATE_TEMP_TOKEN,
+    INTERNAL_DISCORD_TOKEN_READ,
     INTERNAL_HEARTBEAT,
     ;
 
@@ -34,6 +36,7 @@ enum class Scope {
             CALENDAR_WRITE,
             CALENDAR_EVENT_READ,
             CALENDAR_EVENT_WRITE,
+            GUILD_LIST_READ,
             GUILD_WEB_READ,
             GUILD_WEB_WRITE,
             GUILD_SETTINGS_READ,

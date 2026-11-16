@@ -3,10 +3,12 @@ package org.dreamexposure.discal.cam.controllers.v1
 import discord4j.common.util.Snowflake
 import org.dreamexposure.discal.cam.business.TemporaryTokenService
 import org.dreamexposure.discal.cam.managers.CalendarAuthManager
+import org.dreamexposure.discal.cam.managers.DiscordOauthManager
 import org.dreamexposure.discal.core.annotations.SecurityRequirement
 import org.dreamexposure.discal.core.enums.calendar.CalendarHost
 import org.dreamexposure.discal.core.`object`.new.model.discal.cam.TokenV1Model
 import org.dreamexposure.discal.core.`object`.new.security.AccessLevel
+import org.dreamexposure.discal.core.`object`.new.security.Scope
 import org.dreamexposure.discal.core.`object`.new.security.Scope.CALENDAR_TOKEN_READ
 import org.dreamexposure.discal.core.`object`.new.security.TemporaryToken
 import org.dreamexposure.discal.core.`object`.new.security.TokenType.INTERNAL
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 class TokenController(
     private val calendarAuthManager: CalendarAuthManager,
     private val temporaryTokenService: TemporaryTokenService,
+    private val discordOauthManager: DiscordOauthManager,
 ) {
     @SecurityRequirement(schemas = [INTERNAL], scopes = [CALENDAR_TOKEN_READ], accessLevel = AccessLevel.PUBLIC)
     @GetMapping(produces = ["application/json"])
@@ -31,5 +34,11 @@ class TokenController(
     @GetMapping("/calendar-embed", produces = ["application/json"])
     suspend fun generateTempTokenForCalendarEmbed(@RequestParam guildId: Snowflake): TemporaryToken {
         return temporaryTokenService.createTokenForCalendarEmbedViewing(guildId)
+    }
+
+    @SecurityRequirement(schemas = [INTERNAL], scopes = [Scope.INTERNAL_DISCORD_TOKEN_READ], accessLevel = AccessLevel.PUBLIC)
+    @GetMapping("/discord", produces = ["application/json"])
+    suspend fun getDiscordToken(@RequestParam user: Snowflake): TokenV1Model? {
+        return discordOauthManager.getTokenForUser(user)
     }
 }
