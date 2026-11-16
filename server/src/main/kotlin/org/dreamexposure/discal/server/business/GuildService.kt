@@ -13,7 +13,8 @@ import reactor.core.publisher.Mono
 import reactor.core.scheduler.Schedulers
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import discord4j.discordjson.json.PartialGuildData
+import org.dreamexposure.discal.core.`object`.new.model.discord.PartialGuildData
+import kotlin.collections.map
 import kotlin.jvm.optionals.getOrDefault
 import kotlin.jvm.optionals.getOrNull
 
@@ -52,11 +53,11 @@ class GuildService(
             // Map to our partial guild object
             val partialGuilds = discordGuilds.map {
                 PartialGuildV3Model(
-                    id = Snowflake.of(it.id()),
-                    name = it.name(),
-                    iconUrl = if (it.icon().isPresent) "${GlobalVal.discordCdnUrl}/icons/${it.id().asString()}/${it.icon().get()}.png" else null,
-                    isOwner = it.owner().toOptional().getOrDefault(false),
-                    permissions = it.permissions().toOptional().getOrNull()?.toString()
+                    id = it.id,
+                    name = it.name,
+                    iconUrl = if (it.icon.isPresent) "${GlobalVal.discordCdnUrl}/icons/${it.id.asString()}/${it.icon.get()}.png" else null,
+                    isOwner = it.owner.toOptional().getOrDefault(false),
+                    permissions = it.permissions.toOptional().getOrNull()?.toString()
                 )
             }
 
