@@ -7,6 +7,7 @@ import discord4j.common.JacksonResources
 import io.micrometer.core.instrument.binder.okhttp3.OkHttpObservationInterceptor
 import io.micrometer.observation.ObservationRegistry
 import okhttp3.OkHttpClient
+import org.dreamexposure.discal.core.serializers.PermissionSetMapper
 import org.dreamexposure.discal.core.serializers.SnowflakeMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -23,6 +24,7 @@ class BeanConfig {
             .registerKotlinModule()
             .registerModule(JavaTimeModule())
             .registerModule(SnowflakeMapper())
+            .registerModule(PermissionSetMapper())
     }
 
     @Bean

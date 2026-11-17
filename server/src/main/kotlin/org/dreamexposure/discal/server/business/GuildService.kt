@@ -59,7 +59,7 @@ class GuildService(
                     name = it.name,
                     iconUrl = if (it.icon.isPresent) "${GlobalVal.discordCdnUrl}/icons/${it.id.asString()}/${it.icon.get()}.png" else null,
                     isOwner = it.owner.toOptional().getOrDefault(false),
-                    permissions = it.permissions.toOptional().getOrNull()?.toString()
+                    permissions = it.permissions.toOptional().getOrNull()
                 )
             }
 
