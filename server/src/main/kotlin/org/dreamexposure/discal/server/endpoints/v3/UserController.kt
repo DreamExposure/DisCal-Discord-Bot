@@ -9,7 +9,10 @@ import org.dreamexposure.discal.server.business.GuildService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.util.Optional
+import kotlin.jvm.optionals.getOrDefault
 
 @RestController
 @RequestMapping("/v3/users/{userId}")
@@ -18,7 +21,7 @@ class UserController(
 ) {
     @SecurityRequirement(scopes = [Scope.GUILD_LIST_READ], accessLevel = AccessLevel.USER)
     @GetMapping("/guilds", produces = ["application/json"])
-    suspend fun getGuilds(@PathVariable userId: Snowflake): List<PartialGuildV3Model> {
-        return guildService.getGuildsForUser(userId)
+    suspend fun getGuilds(@PathVariable userId: Snowflake, @RequestParam skipCache: Optional<Boolean>): List<PartialGuildV3Model> {
+        return guildService.getGuildsForUser(userId, skipCache.getOrDefault(false))
     }
 }

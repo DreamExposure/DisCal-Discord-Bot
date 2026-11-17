@@ -25,9 +25,11 @@ class GuildService(
     val httpClient: OkHttpClient,
     val objectMapper: ObjectMapper,
 ) {
-    suspend fun getGuildsForUser(userId: Snowflake): List<PartialGuildV3Model> {
-        val cached = partialGuildModelCache.get(key = userId)?.toList()
-        if (cached != null) return cached
+    suspend fun getGuildsForUser(userId: Snowflake, ignoreCache: Boolean = false): List<PartialGuildV3Model> {
+        if (!ignoreCache) {
+            val cached = partialGuildModelCache.get(key = userId)?.toList()
+            if (cached != null) return cached
+        }
 
         // Get user's oauth token, since we cannot do this via the bot api
         val discordTokenResponse = camApiWrapper.getDiscordToken(userId)
