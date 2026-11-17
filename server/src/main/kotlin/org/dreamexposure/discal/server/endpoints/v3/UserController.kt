@@ -21,7 +21,7 @@ class UserController(
 ) {
     @SecurityRequirement(scopes = [Scope.GUILD_LIST_READ], accessLevel = AccessLevel.USER)
     @GetMapping("/guilds", produces = ["application/json"])
-    suspend fun getGuilds(@PathVariable userId: Snowflake, @RequestParam skipCache: Optional<Boolean>): List<PartialGuildV3Model> {
-        return guildService.getGuildsForUser(userId, skipCache.getOrDefault(false))
+    suspend fun getGuilds(@PathVariable userId: Snowflake, @RequestParam elevatedAccessOnly: Optional<Boolean>, @RequestParam skipCache: Optional<Boolean>): List<PartialGuildV3Model> {
+        return guildService.getGuildsForUser(userId, elevatedAccessOnly = elevatedAccessOnly.getOrDefault(false), ignoreCache = skipCache.getOrDefault(false))
     }
 }
