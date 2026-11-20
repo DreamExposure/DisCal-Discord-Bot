@@ -13,4 +13,8 @@ class InviteController {
     @SecurityRequirement(disableSecurity = true, scopes = [], accessLevel = AccessLevel.PUBLIC)
     @GetMapping(produces = ["text/plain"])
     fun get() = Config.URL_INVITE.getString()
+
+    @SecurityRequirement(disableSecurity = true, scopes = [], accessLevel = AccessLevel.PUBLIC)
+    @GetMapping("/support", produces = ["text/plain"])
+    fun getSupportInvite() = Config.URL_SUPPORT.getString()
 }
