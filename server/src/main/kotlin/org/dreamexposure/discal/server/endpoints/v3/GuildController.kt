@@ -9,6 +9,7 @@ import org.dreamexposure.discal.server.business.WebGuildService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -16,10 +17,9 @@ import org.springframework.web.bind.annotation.RestController
 class GuildController(
     private val webGuildService: WebGuildService,
 ) {
-    @SecurityRequirement(scopes = [Scope.GUILD_WEB_READ, Scope.CALENDAR_READ], accessLevel = AccessLevel.GUILD_MEMBERS)
+    @SecurityRequirement(scopes = [Scope.GUILD_WEB_READ, Scope.CALENDAR_READ, Scope.GUILD_SETTINGS_READ], accessLevel = AccessLevel.GUILD_MEMBER_ONLY)
     @GetMapping(produces = ["application/json"])
-    suspend fun getGuild(@PathVariable guildId: Snowflake): WebGuildV3Model {
-        // TODO: Need to extract user from token and make that accessible here. how do???
-        return webGuildService.getWebGuildForUser(guildId, TODO())
+    suspend fun getGuild(@PathVariable guildId: Snowflake, @RequestParam userId: Snowflake): WebGuildV3Model {
+        return webGuildService.getWebGuildForUser(guildId, userId)
     }
 }
