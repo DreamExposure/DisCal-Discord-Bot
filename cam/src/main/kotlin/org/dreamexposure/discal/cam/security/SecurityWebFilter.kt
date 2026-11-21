@@ -64,6 +64,7 @@ class SecurityWebFilter(
         }
 
         val pathVariables = exchange.getAttribute<Map<String, String>>(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE)
+        val requestParams = exchange.request.queryParams
         val guildId = try {
             pathVariables?.get("guildId")?.toLong()?.asSnowflake()
         } catch (_: NumberFormatException) {
@@ -83,7 +84,8 @@ class SecurityWebFilter(
             return
         }
         val userId = try {
-            pathVariables?.get("userId")?.toLong()?.asSnowflake()
+            // get userId from path OR params, preferring path first
+            pathVariables?.get("userId")?.toLong()?.asSnowflake() ?: requestParams.getFirst("userId")?.toLong()?.asSnowflake()
         } catch (_: NumberFormatException) {
             exchange.response.statusCode = HttpStatus.BAD_REQUEST
             exchange.response.writeJsonString(
