@@ -10,6 +10,7 @@ import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.dreamexposure.discal.core.business.CalendarService
 import org.dreamexposure.discal.core.business.GuildSettingsService
 import org.dreamexposure.discal.core.business.PermissionService
+import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
 import org.dreamexposure.discal.core.`object`.new.model.discal.CalendarV3Model
 import org.dreamexposure.discal.core.`object`.new.model.discal.WebGuildV3Model
@@ -34,6 +35,10 @@ class WebGuildService(
                 Mono.error(BotNotInGuildException())
             }.switchIfEmpty(Mono.error(BotNotInGuildException()))
             .awaitSingleOrNull() ?: throw BotNotInGuildException() // Just in case lol
+
+        // make sure the user is in the guild or else we can't populate some of this info
+        if (!permissionService.hasAccessToGuild(guildId, userId)) throw AccessRevokedException()
+
 
         val botNickname = discordClient.getSelfMember(guildId)
             .map(MemberData::nick)

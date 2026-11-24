@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 class GuildController(
     private val webGuildService: WebGuildService,
 ) {
-    @SecurityRequirement(scopes = [Scope.GUILD_WEB_READ, Scope.CALENDAR_READ, Scope.GUILD_SETTINGS_READ], accessLevel = AccessLevel.GUILD_MEMBER_ONLY)
+    @SecurityRequirement(scopes = [Scope.GUILD_WEB_READ, Scope.CALENDAR_READ, Scope.GUILD_SETTINGS_READ], accessLevel = AccessLevel.USER)
     @GetMapping(produces = ["application/json"])
     suspend fun getGuild(@PathVariable guildId: Snowflake, @RequestParam userId: Snowflake): WebGuildV3Model {
         return webGuildService.getWebGuildForUser(guildId, userId)
