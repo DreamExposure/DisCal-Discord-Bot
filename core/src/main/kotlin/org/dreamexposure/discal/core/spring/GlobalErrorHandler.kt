@@ -3,6 +3,7 @@ package org.dreamexposure.discal.core.spring
 import kotlinx.serialization.SerializationException
 import org.dreamexposure.discal.core.exceptions.AccessRevokedException
 import org.dreamexposure.discal.core.exceptions.AuthenticationException
+import org.dreamexposure.discal.core.exceptions.BotNotInGuildException
 import org.dreamexposure.discal.core.exceptions.NotFoundException
 import org.dreamexposure.discal.core.logger.LOGGER
 import org.dreamexposure.discal.core.`object`.rest.RestError
@@ -55,6 +56,7 @@ class GlobalErrorHandler : ErrorWebExceptionHandler {
                 exchange.response.statusCode = HttpStatus.BAD_REQUEST
                 RestError.BAD_REQUEST
             }
+            is BotNotInGuildException,
             is HttpClientErrorException.NotFound,
             is NotFoundException -> {
                 exchange.response.statusCode = HttpStatus.NOT_FOUND
